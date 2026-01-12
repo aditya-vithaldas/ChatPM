@@ -582,8 +582,9 @@
     </div>
 
     <script>
-        const API_BASE = 'http://localhost:5001/api';
-        const AUTH_BASE = 'http://localhost:5001/auth';
+        // Use relative URLs so it works on any domain (localhost or Cloud Run)
+        const API_BASE = '/api';
+        const AUTH_BASE = '/auth';
         let schemaData = null;
         let documentation = {};
         let chartCounter = 0;

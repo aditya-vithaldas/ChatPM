@@ -16,6 +16,11 @@ dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Frontend path - works both locally (../frontend) and in Docker (./frontend)
+const FRONTEND_PATH = process.env.NODE_ENV === 'production'
+  ? path.join(__dirname, 'frontend')
+  : path.join(__dirname, '../frontend');
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -65,7 +70,7 @@ app.use(cors({
 }));
 
 // Serve frontend static files
-app.use(express.static(path.join(__dirname, '../frontend')));
+app.use(express.static(FRONTEND_PATH));
 
 app.use(session({
   secret: process.env.SESSION_SECRET || 'your-secret-key-change-in-production',
@@ -619,7 +624,7 @@ app.get('/health', (req, res) => {
 
 // Serve frontend for root path
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/index.html'));
+  res.sendFile(path.join(FRONTEND_PATH, 'index.html'));
 });
 
 // Start server
