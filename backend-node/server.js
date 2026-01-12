@@ -621,6 +621,45 @@ app.post('/api/documentation', requireAuth, (req, res) => {
   res.json({ success: true });
 });
 
+// Waitlist signup - store emails in SQLite database
+const waitlistDb = new Database('waitlist.db');
+waitlistDb.exec(`
+  CREATE TABLE IF NOT EXISTS waitlist (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email TEXT UNIQUE NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )
+`);
+
+app.post('/api/waitlist', (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ error: 'Email is required' });
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ error: 'Please enter a valid email address' });
+    }
+
+    // Insert email into waitlist
+    const stmt = waitlistDb.prepare('INSERT INTO waitlist (email) VALUES (?)');
+    stmt.run(email);
+
+    console.log(`New waitlist signup: ${email}`);
+    res.json({ success: true, message: 'Successfully added to waitlist!' });
+  } catch (error) {
+    if (error.message.includes('UNIQUE constraint failed')) {
+      return res.json({ success: true, message: 'You\'re already on the list!' });
+    }
+    console.error('Waitlist error:', error);
+    res.status(500).json({ error: 'Failed to add to waitlist. Please try again.' });
+  }
+});
+
 // Health check
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
