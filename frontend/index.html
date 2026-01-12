@@ -1347,7 +1347,8 @@
         }
 
         window.addEventListener('DOMContentLoaded', () => {
-            checkAuth();
+            // Show landing page by default - don't auto-redirect to app
+            showLoginScreen();
         });
         document.getElementById('connection-string').addEventListener('keypress', e => { if (e.key === 'Enter') connectDatabase(); });
 
