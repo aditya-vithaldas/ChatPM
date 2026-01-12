@@ -150,28 +150,48 @@
         .cons-card .theme-keyword { background: rgba(239, 68, 68, 0.2); border-color: rgba(239, 68, 68, 0.4); color: #fca5a5; }
         .cons-card .theme-keyword:hover, .cons-card .theme-keyword.active { background: var(--error); border-color: var(--error); color: white; }
 
-        /* Sentences Panel */
-        .sentences-panel {
-            background: var(--card-bg); border: 1px solid var(--border-color);
-            border-radius: 16px; padding: 24px; margin-top: 24px; display: none;
+        /* Modal Overlay */
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.85); z-index: 1000;
+            align-items: center; justify-content: center; padding: 24px;
         }
-        .sentences-panel.visible { display: block; }
-        .sentences-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-        .sentences-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.1rem; font-weight: 600; }
-        .close-btn {
-            background: none; border: none; color: var(--text-muted); cursor: pointer;
-            font-size: 1.2rem; padding: 4px 8px; border-radius: 6px;
-        }
-        .close-btn:hover { background: rgba(255, 255, 255, 0.1); color: white; }
+        .modal-overlay.visible { display: flex; }
 
-        .sentences-list { display: flex; flex-direction: column; gap: 12px; max-height: 400px; overflow-y: auto; }
-        .sentence-item {
-            padding: 16px; background: rgba(0, 0, 0, 0.2);
-            border-radius: 10px; border-left: 3px solid var(--primary);
+        .modal-content {
+            background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 20px; max-width: 700px; width: 100%; max-height: 80vh;
+            display: flex; flex-direction: column; overflow: hidden;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
         }
-        .sentence-text { color: var(--text-primary); font-size: 0.95rem; line-height: 1.6; }
-        .sentence-text mark { background: rgba(249, 115, 22, 0.3); color: white; padding: 2px 4px; border-radius: 3px; }
-        .sentence-meta { margin-top: 8px; font-size: 0.8rem; color: var(--text-muted); }
+
+        .modal-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 24px 28px; border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .modal-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.25rem; font-weight: 700; color: white; }
+        .modal-subtitle { color: var(--text-secondary); font-size: 0.9rem; margin-top: 4px; }
+        .modal-close {
+            background: rgba(255, 255, 255, 0.1); border: none; color: white; cursor: pointer;
+            width: 36px; height: 36px; border-radius: 10px; font-size: 1.2rem;
+            display: flex; align-items: center; justify-content: center; transition: all 0.2s;
+        }
+        .modal-close:hover { background: rgba(255, 255, 255, 0.2); }
+
+        .modal-body { padding: 24px 28px; overflow-y: auto; flex: 1; }
+
+        .sentences-list { display: flex; flex-direction: column; gap: 16px; }
+        .sentence-item {
+            padding: 20px; background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px; border-left: 4px solid var(--primary);
+        }
+        .sentence-item.pro { border-left-color: var(--success); }
+        .sentence-item.con { border-left-color: var(--error); }
+        .sentence-text { color: var(--text-primary); font-size: 0.95rem; line-height: 1.7; }
+        .sentence-text mark { background: rgba(249, 115, 22, 0.4); color: white; padding: 2px 6px; border-radius: 4px; font-weight: 500; }
+        .sentence-meta { margin-top: 10px; font-size: 0.8rem; color: var(--text-muted); display: flex; align-items: center; gap: 8px; }
+        .sentence-meta::before { content: ''; width: 4px; height: 4px; background: var(--text-muted); border-radius: 50%; }
 
         /* Loading State */
         .loading-overlay {
@@ -260,12 +280,20 @@ Customer support was very helpful."></textarea>
                 </div>
             </div>
 
-            <!-- Sentences Panel -->
-            <div class="sentences-panel" id="sentences-panel">
-                <div class="sentences-header">
-                    <h3 class="sentences-title" id="sentences-title">Sentences containing "keyword"</h3>
-                    <button class="close-btn" onclick="closeSentencesPanel()">✕</button>
+        </div>
+    </div>
+
+    <!-- Reviews Modal Overlay -->
+    <div class="modal-overlay" id="reviews-modal" onclick="closeModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <div>
+                    <h3 class="modal-title" id="modal-title">Reviews mentioning "keyword"</h3>
+                    <p class="modal-subtitle" id="modal-subtitle">5 matching reviews</p>
                 </div>
+                <button class="modal-close" onclick="closeModal()">✕</button>
+            </div>
+            <div class="modal-body">
                 <div class="sentences-list" id="sentences-list"></div>
             </div>
         </div>
@@ -464,7 +492,7 @@ Customer support was very helpful."></textarea>
             }
         }
 
-        // Show sentences for a keyword
+        // Show sentences for a keyword in modal
         function showSentences(keyword, type) {
             // Update active state
             document.querySelectorAll('.theme-keyword').forEach(kw => kw.classList.remove('active'));
@@ -472,36 +500,46 @@ Customer support was very helpful."></textarea>
                 event.target.classList.add('active');
             }
 
-            const panel = document.getElementById('sentences-panel');
-            const title = document.getElementById('sentences-title');
+            const modal = document.getElementById('reviews-modal');
+            const title = document.getElementById('modal-title');
+            const subtitle = document.getElementById('modal-subtitle');
             const list = document.getElementById('sentences-list');
-
-            title.textContent = `Reviews mentioning "${keyword}"`;
 
             // Find sentences containing this keyword
             const keywordData = type === 'pro'
                 ? currentData.pros.find(p => p.keyword === keyword)
                 : currentData.cons.find(c => c.keyword === keyword);
 
+            const sentenceCount = keywordData?.sentences?.length || 0;
+            title.textContent = `Reviews mentioning "${keyword}"`;
+            subtitle.textContent = `${sentenceCount} matching review${sentenceCount !== 1 ? 's' : ''}`;
+
             if (keywordData && keywordData.sentences) {
                 list.innerHTML = keywordData.sentences.map((sentence, i) => `
-                    <div class="sentence-item">
+                    <div class="sentence-item ${type}">
                         <div class="sentence-text">${highlightKeyword(escapeHtml(sentence), keyword)}</div>
-                        <div class="sentence-meta">Review #${i + 1}</div>
+                        <div class="sentence-meta">Review ${i + 1} of ${sentenceCount}</div>
                     </div>
                 `).join('');
             } else {
-                list.innerHTML = '<div class="sentence-item"><div class="sentence-text">No sentences found.</div></div>';
+                list.innerHTML = '<div class="sentence-item"><div class="sentence-text">No matching reviews found.</div></div>';
             }
 
-            panel.classList.add('visible');
-            panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            modal.classList.add('visible');
+            document.body.style.overflow = 'hidden';
         }
 
-        function closeSentencesPanel() {
-            document.getElementById('sentences-panel').classList.remove('visible');
+        function closeModal(event) {
+            if (event && event.target !== event.currentTarget) return;
+            document.getElementById('reviews-modal').classList.remove('visible');
+            document.body.style.overflow = '';
             document.querySelectorAll('.theme-keyword').forEach(kw => kw.classList.remove('active'));
         }
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
 
         function highlightKeyword(text, keyword) {
             const regex = new RegExp(`(${keyword})`, 'gi');

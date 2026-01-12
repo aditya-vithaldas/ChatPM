@@ -688,19 +688,20 @@ Return a JSON object with this exact structure:
 }
 
 CRITICAL RULES FOR SUMMARIES:
-- Write summaries as natural, human-readable sentences that describe specific user sentiment
-- The keyword MUST appear naturally within the sentence
-- GOOD examples:
-  * "People found the interface intuitive and easy to navigate"
-  * "Customers thought the delivery cost was too high"
-  * "Users appreciated the fast customer support response times"
-  * "Many reviewers complained about frequent crashes during checkout"
-  * "The search feature was praised for being accurate and helpful"
-- BAD examples (DO NOT write like this):
+- Write detailed, insightful summaries (2-3 sentences) that describe specific user sentiment with rich context
+- The keyword MUST appear naturally within the summary
+- Include specific details about WHY users feel this way and WHAT specific aspects they mention
+- GOOD examples (detailed and insightful):
+  * "People found the interface intuitive and easy to navigate, particularly praising the clean layout and logical menu structure. First-time users reported being able to accomplish tasks without any tutorials."
+  * "Customers were frustrated by the high delivery costs, especially for smaller orders. Many compared prices unfavorably to competitors and said shipping fees often exceeded the product cost itself."
+  * "Users appreciated the fast customer support response times, with most issues resolved within hours rather than days. The support team was described as knowledgeable and genuinely helpful."
+  * "Many reviewers complained about frequent crashes during checkout, causing them to lose items in their cart. This issue appeared most common on older Android devices and during peak hours."
+- BAD examples (DO NOT write like this - too generic):
   * "Users mentioned interface"
   * "People spoke about delivery"
   * "Customers discussed support"
-- The summary should tell a story about what people think, not just that they mentioned something
+  * "Users found the app good"
+- The summary should tell a detailed story about what people experienced, not just that they mentioned something
 
 Other rules:
 - Extract 5-10 keywords for each category (pros and cons)
@@ -732,49 +733,49 @@ ${reviews.slice(0, 100).map((r, i) => `${i + 1}. ${r}`).join('\n')}`;
     console.log('Using fallback analysis (no AI available or AI failed)');
 
     const positiveTemplates = {
-      'great': 'Customers found the product to be great overall',
-      'love': 'Users love the experience and features offered',
-      'excellent': 'The service received excellent ratings from users',
-      'amazing': 'People were amazed by the quality and performance',
-      'good': 'The overall experience was rated as good by customers',
-      'best': 'Many consider this among the best options available',
-      'helpful': 'Users found the support and features helpful',
-      'easy': 'The product was praised for being easy to use',
-      'fast': 'Customers appreciated the fast performance and delivery',
-      'beautiful': 'The design was described as beautiful by users',
-      'perfect': 'Many reviewers called the experience perfect',
-      'awesome': 'Users thought the product was awesome',
-      'fantastic': 'The service received fantastic feedback',
-      'wonderful': 'Customers had a wonderful experience overall',
-      'nice': 'Users found the product nice and pleasant to use',
-      'friendly': 'The interface and support were described as friendly',
-      'quick': 'Reviewers praised the quick response and service',
-      'simple': 'The product was appreciated for its simple design',
-      'intuitive': 'Users found the interface intuitive and user-friendly',
-      'reliable': 'Customers valued the reliable performance'
+      'great': 'Customers consistently described their experience as great, highlighting the overall quality and value. Many expressed genuine satisfaction and said it exceeded their expectations.',
+      'love': 'Users love the product and express strong emotional attachment to it. They frequently recommend it to friends and family, citing it as a must-have solution.',
+      'excellent': 'The service received excellent ratings across multiple dimensions including quality, reliability, and value. Reviewers often compared it favorably to premium alternatives.',
+      'amazing': 'People were amazed by the quality and performance, with many describing unexpected positive surprises. First impressions were overwhelmingly positive.',
+      'good': 'The overall experience was rated as good by the majority of customers. While not always exceptional, it consistently met expectations and delivered solid value.',
+      'best': 'Many consider this among the best options available in its category. Customers who tried alternatives often returned, citing superior quality and features.',
+      'helpful': 'Users found the support team and documentation genuinely helpful in solving their problems. Response times were quick and solutions were effective.',
+      'easy': 'The product was praised for being easy to use from day one. Even users who described themselves as non-technical were able to get started quickly.',
+      'fast': 'Customers appreciated the fast performance, noting snappy load times and quick responses. Delivery times also exceeded expectations for physical products.',
+      'beautiful': 'The design was described as beautiful by users who appreciated attention to aesthetic details. The visual experience enhanced overall satisfaction significantly.',
+      'perfect': 'Many reviewers called the experience perfect for their specific needs. It solved their problems completely without requiring workarounds or compromises.',
+      'awesome': 'Users thought the product was awesome, frequently using enthusiastic language in their reviews. The excitement was evident across different user segments.',
+      'fantastic': 'The service received fantastic feedback with customers praising multiple aspects simultaneously. The combination of features created a compelling overall package.',
+      'wonderful': 'Customers had a wonderful experience that they were eager to share. Positive word-of-mouth was common, with many reviews mentioning referrals.',
+      'nice': 'Users found the product nice and pleasant to use on a daily basis. The experience was described as smooth and enjoyable without major friction points.',
+      'friendly': 'The interface and support team were described as friendly and approachable. Users felt comfortable reaching out for help and navigating the product.',
+      'quick': 'Reviewers praised the quick turnaround on everything from support responses to feature delivery. Efficiency was a standout characteristic.',
+      'simple': 'The product was appreciated for its simple, uncluttered design philosophy. Complexity was hidden well, making common tasks straightforward.',
+      'intuitive': 'Users found the interface intuitive and were able to accomplish tasks without extensive training. The learning curve was minimal even for advanced features.',
+      'reliable': 'Customers valued the reliable performance and consistency over time. Uptime was excellent and the product worked as expected without surprises.'
     };
 
     const negativeTemplates = {
-      'bad': 'Some users had a bad experience with the product',
-      'terrible': 'A few customers described their experience as terrible',
-      'awful': 'Some reviewers found the service awful',
-      'slow': 'Users complained about slow performance or delivery',
-      'crash': 'Multiple users reported issues with crashes',
-      'bug': 'Customers encountered bugs during their usage',
-      'broken': 'Some features were reported as broken by users',
-      'hate': 'A number of users expressed frustration with the product',
-      'worst': 'Some considered this among the worst experiences',
-      'poor': 'The quality was rated as poor by some customers',
-      'difficult': 'Users found certain aspects difficult to use',
-      'confusing': 'The interface was described as confusing by some',
-      'expensive': 'Many customers thought the pricing was too expensive',
-      'annoying': 'Some features were found annoying by users',
-      'frustrating': 'Users expressed frustration with certain issues',
-      'useless': 'Some features were considered useless by reviewers',
-      'disappointing': 'The experience was disappointing for some users',
-      'horrible': 'A few customers had a horrible experience',
-      'laggy': 'Users reported laggy performance issues',
-      'glitch': 'Some customers encountered glitches during use'
+      'bad': 'Some users had a genuinely bad experience that significantly impacted their satisfaction. Issues ranged from functionality problems to poor customer service interactions.',
+      'terrible': 'A subset of customers described their experience as terrible, citing multiple compounding issues. These reviews often mentioned feeling ignored or let down.',
+      'awful': 'Some reviewers found the service awful and expressed regret about their purchase decision. The negative experience was often unexpected given marketing promises.',
+      'slow': 'Users complained about slow performance that impacted their productivity. Load times, response delays, and processing speeds were common pain points.',
+      'crash': 'Multiple users reported frustrating crashes that interrupted their work and caused data loss. The instability appeared across different devices and scenarios.',
+      'bug': 'Customers encountered bugs that affected core functionality. Some issues persisted across updates, leading to frustration with the development team.',
+      'broken': 'Key features were reported as broken by users who could not complete essential tasks. Workarounds were often required for basic functionality.',
+      'hate': 'A number of users expressed strong negative emotions about their experience. The frustration was deep enough to prompt detailed negative reviews.',
+      'worst': 'Some considered this among the worst experiences in the category. Comparisons to competitors were unfavorable across multiple dimensions.',
+      'poor': 'The quality was rated as poor by customers who expected more given the price point. Value perception was significantly impacted.',
+      'difficult': 'Users found critical tasks difficult to accomplish without extensive trial and error. The learning curve was steeper than anticipated.',
+      'confusing': 'The interface was described as confusing with unclear navigation and labeling. Users struggled to find features and understand workflows.',
+      'expensive': 'Many customers felt the pricing was expensive relative to the value delivered. Cost concerns were amplified when issues arose.',
+      'annoying': 'Specific features and behaviors were found annoying by users during regular use. Small frustrations accumulated into significant dissatisfaction.',
+      'frustrating': 'Users expressed deep frustration with recurring issues that never seemed to get resolved. The emotional toll was evident in review language.',
+      'useless': 'Some features were considered useless and added clutter without providing value. Users questioned why resources were spent on them.',
+      'disappointing': 'The experience was disappointing compared to expectations set by marketing and reviews. The gap between promise and reality was significant.',
+      'horrible': 'A portion of customers had a horrible experience that they felt compelled to warn others about. The negativity was intense and detailed.',
+      'laggy': 'Users reported laggy performance that made the experience feel outdated and unpolished. Responsiveness issues were particularly noticeable.',
+      'glitch': 'Customers encountered visual and functional glitches that undermined confidence in the product. The polish expected at this level was missing.'
     };
 
     const prosMap = {};
