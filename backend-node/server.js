@@ -687,25 +687,31 @@ Return a JSON object with this exact structure:
   ]
 }
 
+CRITICAL RULES FOR KEYWORDS:
+- Keywords must be SPECIFIC PRODUCT/SERVICE ATTRIBUTES, not sentiment words
+- GOOD keywords (specific attributes): "signup flow", "pricing", "customer support", "checkout process", "search feature", "notifications", "loading speed", "onboarding", "payment options", "navigation", "mobile app", "dashboard", "shipping", "returns policy", "account settings"
+- BAD keywords (sentiment words - DO NOT USE): "good", "bad", "love", "hate", "great", "terrible", "amazing", "awful", "excellent", "poor"
+- Keywords should identify WHAT feature or aspect users are talking about, not HOW they feel
+
 CRITICAL RULES FOR SUMMARIES:
 - Write detailed, insightful summaries (2-3 sentences) that describe specific user sentiment with rich context
-- The keyword MUST appear naturally within the summary
+- The keyword (the specific attribute) MUST appear naturally within the summary
 - Include specific details about WHY users feel this way and WHAT specific aspects they mention
 - GOOD examples (detailed and insightful):
-  * "People found the interface intuitive and easy to navigate, particularly praising the clean layout and logical menu structure. First-time users reported being able to accomplish tasks without any tutorials."
-  * "Customers were frustrated by the high delivery costs, especially for smaller orders. Many compared prices unfavorably to competitors and said shipping fees often exceeded the product cost itself."
-  * "Users appreciated the fast customer support response times, with most issues resolved within hours rather than days. The support team was described as knowledgeable and genuinely helpful."
-  * "Many reviewers complained about frequent crashes during checkout, causing them to lose items in their cart. This issue appeared most common on older Android devices and during peak hours."
-- BAD examples (DO NOT write like this - too generic):
+  * "The signup flow was praised for being quick and straightforward, taking less than a minute to complete. Users appreciated not needing to verify email before accessing basic features."
+  * "Customers were frustrated with the pricing structure, finding it confusing and expensive compared to competitors. Hidden fees at checkout were a common complaint."
+  * "The customer support team received high marks for fast response times and knowledgeable agents. Most issues were resolved within hours rather than days."
+  * "The checkout process caused significant frustration due to frequent crashes and lost cart items. Users on mobile devices experienced this more frequently."
+- BAD examples (DO NOT write like this):
   * "Users mentioned interface"
   * "People spoke about delivery"
-  * "Customers discussed support"
-  * "Users found the app good"
-- The summary should tell a detailed story about what people experienced, not just that they mentioned something
+  * "Users love the product"
+  * "The app is great"
+- The summary should tell a detailed story about what people experienced with that specific feature/attribute
 
 Other rules:
 - Extract 5-10 keywords for each category (pros and cons)
-- Keywords should be 1-2 words (e.g., "interface", "support", "crashes", "delivery", "pricing")
+- Keywords should be 1-3 words identifying specific features or attributes (e.g., "signup flow", "customer support", "checkout", "pricing", "mobile app", "search", "notifications")
 - Count how many reviews mention each theme
 - Include the actual review sentences that mention each theme
 - Only return valid JSON, no other text
