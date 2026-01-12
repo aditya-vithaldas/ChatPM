@@ -729,8 +729,53 @@ ${reviews.slice(0, 100).map((r, i) => `${i + 1}. ${r}`).join('\n')}`;
     }
 
     // Basic keyword extraction fallback (without AI)
-    const positiveWords = ['great', 'love', 'excellent', 'amazing', 'good', 'best', 'helpful', 'easy', 'fast', 'beautiful', 'perfect', 'awesome', 'fantastic', 'wonderful', 'nice', 'friendly', 'quick', 'simple', 'intuitive', 'reliable'];
-    const negativeWords = ['bad', 'terrible', 'awful', 'slow', 'crash', 'bug', 'broken', 'hate', 'worst', 'poor', 'difficult', 'confusing', 'expensive', 'annoying', 'frustrating', 'useless', 'disappointing', 'horrible', 'laggy', 'glitch'];
+    console.log('Using fallback analysis (no AI available or AI failed)');
+
+    const positiveTemplates = {
+      'great': 'Customers found the product to be great overall',
+      'love': 'Users love the experience and features offered',
+      'excellent': 'The service received excellent ratings from users',
+      'amazing': 'People were amazed by the quality and performance',
+      'good': 'The overall experience was rated as good by customers',
+      'best': 'Many consider this among the best options available',
+      'helpful': 'Users found the support and features helpful',
+      'easy': 'The product was praised for being easy to use',
+      'fast': 'Customers appreciated the fast performance and delivery',
+      'beautiful': 'The design was described as beautiful by users',
+      'perfect': 'Many reviewers called the experience perfect',
+      'awesome': 'Users thought the product was awesome',
+      'fantastic': 'The service received fantastic feedback',
+      'wonderful': 'Customers had a wonderful experience overall',
+      'nice': 'Users found the product nice and pleasant to use',
+      'friendly': 'The interface and support were described as friendly',
+      'quick': 'Reviewers praised the quick response and service',
+      'simple': 'The product was appreciated for its simple design',
+      'intuitive': 'Users found the interface intuitive and user-friendly',
+      'reliable': 'Customers valued the reliable performance'
+    };
+
+    const negativeTemplates = {
+      'bad': 'Some users had a bad experience with the product',
+      'terrible': 'A few customers described their experience as terrible',
+      'awful': 'Some reviewers found the service awful',
+      'slow': 'Users complained about slow performance or delivery',
+      'crash': 'Multiple users reported issues with crashes',
+      'bug': 'Customers encountered bugs during their usage',
+      'broken': 'Some features were reported as broken by users',
+      'hate': 'A number of users expressed frustration with the product',
+      'worst': 'Some considered this among the worst experiences',
+      'poor': 'The quality was rated as poor by some customers',
+      'difficult': 'Users found certain aspects difficult to use',
+      'confusing': 'The interface was described as confusing by some',
+      'expensive': 'Many customers thought the pricing was too expensive',
+      'annoying': 'Some features were found annoying by users',
+      'frustrating': 'Users expressed frustration with certain issues',
+      'useless': 'Some features were considered useless by reviewers',
+      'disappointing': 'The experience was disappointing for some users',
+      'horrible': 'A few customers had a horrible experience',
+      'laggy': 'Users reported laggy performance issues',
+      'glitch': 'Some customers encountered glitches during use'
+    };
 
     const prosMap = {};
     const consMap = {};
@@ -738,17 +783,17 @@ ${reviews.slice(0, 100).map((r, i) => `${i + 1}. ${r}`).join('\n')}`;
     reviews.forEach(review => {
       const lowerReview = review.toLowerCase();
 
-      positiveWords.forEach(word => {
+      Object.keys(positiveTemplates).forEach(word => {
         if (lowerReview.includes(word)) {
-          if (!prosMap[word]) prosMap[word] = { count: 0, sentences: [] };
+          if (!prosMap[word]) prosMap[word] = { count: 0, sentences: [], summary: positiveTemplates[word] };
           prosMap[word].count++;
           if (prosMap[word].sentences.length < 5) prosMap[word].sentences.push(review);
         }
       });
 
-      negativeWords.forEach(word => {
+      Object.keys(negativeTemplates).forEach(word => {
         if (lowerReview.includes(word)) {
-          if (!consMap[word]) consMap[word] = { count: 0, sentences: [] };
+          if (!consMap[word]) consMap[word] = { count: 0, sentences: [], summary: negativeTemplates[word] };
           consMap[word].count++;
           if (consMap[word].sentences.length < 5) consMap[word].sentences.push(review);
         }
