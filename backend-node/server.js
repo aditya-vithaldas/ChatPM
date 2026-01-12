@@ -660,6 +660,108 @@ app.post('/api/waitlist', (req, res) => {
   }
 });
 
+// Review Analyzer endpoint
+app.post('/api/analyze-reviews', async (req, res) => {
+  try {
+    const { reviews } = req.body;
+
+    if (!reviews || !Array.isArray(reviews) || reviews.length === 0) {
+      return res.status(400).json({ error: 'Reviews array is required' });
+    }
+
+    // Use OpenAI to analyze reviews if available
+    if (openai) {
+      const prompt = `Analyze the following customer reviews and extract key themes.
+
+For each theme, categorize it as either a PRO (positive feedback) or CON (negative feedback).
+Return a JSON object with this exact structure:
+{
+  "pros": [
+    {"keyword": "keyword1", "count": number, "sentences": ["sentence1", "sentence2"]},
+    ...
+  ],
+  "cons": [
+    {"keyword": "keyword1", "count": number, "sentences": ["sentence1", "sentence2"]},
+    ...
+  ]
+}
+
+Rules:
+- Extract 5-10 keywords for each category (pros and cons)
+- Keywords should be 1-3 words describing the theme (e.g., "user interface", "customer support", "crashes")
+- Count how many reviews mention each theme
+- Include the actual sentences/reviews that mention each theme
+- Only return valid JSON, no other text
+
+Reviews to analyze:
+${reviews.slice(0, 100).map((r, i) => `${i + 1}. ${r}`).join('\n')}`;
+
+      try {
+        const response = await openai.chat.completions.create({
+          model: 'gpt-4o-mini',
+          messages: [{ role: 'user', content: prompt }],
+          temperature: 0.3,
+          response_format: { type: 'json_object' }
+        });
+
+        const result = JSON.parse(response.choices[0].message.content);
+        return res.json(result);
+      } catch (aiError) {
+        console.error('OpenAI error:', aiError);
+        // Fall back to basic analysis
+      }
+    }
+
+    // Basic keyword extraction fallback (without AI)
+    const positiveWords = ['great', 'love', 'excellent', 'amazing', 'good', 'best', 'helpful', 'easy', 'fast', 'beautiful', 'perfect', 'awesome', 'fantastic', 'wonderful', 'nice', 'friendly', 'quick', 'simple', 'intuitive', 'reliable'];
+    const negativeWords = ['bad', 'terrible', 'awful', 'slow', 'crash', 'bug', 'broken', 'hate', 'worst', 'poor', 'difficult', 'confusing', 'expensive', 'annoying', 'frustrating', 'useless', 'disappointing', 'horrible', 'laggy', 'glitch'];
+
+    const prosMap = {};
+    const consMap = {};
+
+    reviews.forEach(review => {
+      const lowerReview = review.toLowerCase();
+
+      positiveWords.forEach(word => {
+        if (lowerReview.includes(word)) {
+          if (!prosMap[word]) prosMap[word] = { count: 0, sentences: [] };
+          prosMap[word].count++;
+          if (prosMap[word].sentences.length < 5) prosMap[word].sentences.push(review);
+        }
+      });
+
+      negativeWords.forEach(word => {
+        if (lowerReview.includes(word)) {
+          if (!consMap[word]) consMap[word] = { count: 0, sentences: [] };
+          consMap[word].count++;
+          if (consMap[word].sentences.length < 5) consMap[word].sentences.push(review);
+        }
+      });
+    });
+
+    const pros = Object.entries(prosMap)
+      .map(([keyword, data]) => ({ keyword, ...data }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
+
+    const cons = Object.entries(consMap)
+      .map(([keyword, data]) => ({ keyword, ...data }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
+
+    res.json({ pros, cons });
+
+  } catch (error) {
+    console.error('Review analysis error:', error);
+    res.status(500).json({ error: 'Failed to analyze reviews' });
+  }
+});
+
+// Serve review-analyzer page
+app.get('/review-analyzer', (req, res) => {
+  res.sendFile(path.join(FRONTEND_PATH, 'review-analyzer.html'));
+});
+
 // Health check
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' });

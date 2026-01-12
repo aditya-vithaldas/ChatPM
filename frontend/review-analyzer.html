@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Review Analyzer - DecisionOS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #6366f1; --primary-dark: #4f46e5; --primary-light: #818cf8;
+            --accent: #f97316; --accent-light: #fb923c;
+            --bg-dark: #0f172a; --bg-darker: #020617;
+            --text-primary: #f8fafc; --text-secondary: #94a3b8; --text-muted: #64748b;
+            --success: #22c55e; --error: #ef4444; --warning: #f59e0b;
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 40px 24px; }
+
+        /* Header */
+        .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 48px; }
+        .logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+        .logo-icon {
+            width: 48px; height: 48px;
+            background: linear-gradient(135deg, #f97316 0%, #ec4899 100%);
+            border-radius: 12px; display: flex; align-items: center; justify-content: center;
+            font-size: 24px; box-shadow: 0 4px 16px rgba(249, 115, 22, 0.3);
+        }
+        .logo-text { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.5rem; font-weight: 800; color: white; }
+        .back-link { color: var(--text-secondary); text-decoration: none; font-size: 0.9rem; display: flex; align-items: center; gap: 8px; }
+        .back-link:hover { color: white; }
+
+        /* Page Title */
+        .page-title {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 2.5rem; font-weight: 800; margin-bottom: 12px;
+            background: linear-gradient(135deg, #ffffff 0%, #c7d2fe 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .page-subtitle { color: var(--text-secondary); font-size: 1.1rem; margin-bottom: 40px; }
+
+        /* Input Section */
+        .input-section {
+            background: var(--card-bg); border: 1px solid var(--border-color);
+            border-radius: 20px; padding: 32px; margin-bottom: 32px;
+        }
+        .input-tabs { display: flex; gap: 12px; margin-bottom: 24px; }
+        .tab-btn {
+            padding: 12px 24px; background: transparent; border: 1px solid var(--border-color);
+            border-radius: 10px; color: var(--text-secondary); cursor: pointer;
+            font-size: 0.95rem; font-weight: 500; transition: all 0.2s;
+        }
+        .tab-btn:hover { border-color: var(--primary-light); color: white; }
+        .tab-btn.active { background: var(--primary); border-color: var(--primary); color: white; }
+
+        .input-content { display: none; }
+        .input-content.active { display: block; }
+
+        /* File Upload */
+        .file-upload {
+            border: 2px dashed var(--border-color); border-radius: 16px;
+            padding: 48px; text-align: center; cursor: pointer; transition: all 0.3s;
+        }
+        .file-upload:hover { border-color: var(--primary-light); background: rgba(99, 102, 241, 0.05); }
+        .file-upload.dragover { border-color: var(--primary); background: rgba(99, 102, 241, 0.1); }
+        .file-upload-icon { font-size: 48px; margin-bottom: 16px; }
+        .file-upload-text { color: var(--text-secondary); margin-bottom: 8px; }
+        .file-upload-hint { color: var(--text-muted); font-size: 0.85rem; }
+        .file-input { display: none; }
+        .file-name { margin-top: 16px; color: var(--success); font-weight: 500; }
+
+        /* Textarea */
+        .paste-area {
+            width: 100%; min-height: 200px; padding: 16px;
+            background: rgba(0, 0, 0, 0.2); border: 1px solid var(--border-color);
+            border-radius: 12px; color: white; font-family: inherit; font-size: 0.95rem;
+            resize: vertical;
+        }
+        .paste-area::placeholder { color: var(--text-muted); }
+        .paste-area:focus { outline: none; border-color: var(--primary); }
+        .paste-hint { color: var(--text-muted); font-size: 0.85rem; margin-top: 8px; }
+
+        /* Analyze Button */
+        .analyze-btn {
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            width: 100%; padding: 16px 32px; margin-top: 24px;
+            background: linear-gradient(135deg, #f97316 0%, #ec4899 100%);
+            border: none; border-radius: 12px; color: white;
+            font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1rem; font-weight: 700;
+            cursor: pointer; transition: all 0.3s;
+        }
+        .analyze-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(249, 115, 22, 0.4); }
+        .analyze-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+        .spinner { width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Results Section */
+        .results-section { display: none; }
+        .results-section.visible { display: block; }
+
+        .results-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+        .results-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.5rem; font-weight: 700; }
+        .results-count { color: var(--text-secondary); font-size: 0.9rem; }
+
+        /* Pros/Cons Grid */
+        .pros-cons-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px; }
+        @media (max-width: 768px) { .pros-cons-grid { grid-template-columns: 1fr; } }
+
+        .pros-card, .cons-card {
+            background: var(--card-bg); border: 1px solid var(--border-color);
+            border-radius: 16px; padding: 24px;
+        }
+        .pros-card { border-left: 4px solid var(--success); }
+        .cons-card { border-left: 4px solid var(--error); }
+
+        .card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+        .card-icon { font-size: 24px; }
+        .card-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.2rem; font-weight: 700; }
+        .pros-card .card-title { color: var(--success); }
+        .cons-card .card-title { color: var(--error); }
+
+        /* Keywords */
+        .keywords-list { display: flex; flex-wrap: wrap; gap: 8px; }
+        .keyword-pill {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 8px 16px; background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px;
+            color: var(--text-primary); font-size: 0.85rem; font-weight: 500;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .keyword-pill:hover { background: rgba(255, 255, 255, 0.15); border-color: rgba(255, 255, 255, 0.2); }
+        .keyword-pill.active { background: var(--primary); border-color: var(--primary); }
+        .keyword-count { background: rgba(255, 255, 255, 0.2); padding: 2px 8px; border-radius: 10px; font-size: 0.75rem; }
+
+        /* Sentences Panel */
+        .sentences-panel {
+            background: var(--card-bg); border: 1px solid var(--border-color);
+            border-radius: 16px; padding: 24px; margin-top: 24px; display: none;
+        }
+        .sentences-panel.visible { display: block; }
+        .sentences-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+        .sentences-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.1rem; font-weight: 600; }
+        .close-btn {
+            background: none; border: none; color: var(--text-muted); cursor: pointer;
+            font-size: 1.2rem; padding: 4px 8px; border-radius: 6px;
+        }
+        .close-btn:hover { background: rgba(255, 255, 255, 0.1); color: white; }
+
+        .sentences-list { display: flex; flex-direction: column; gap: 12px; max-height: 400px; overflow-y: auto; }
+        .sentence-item {
+            padding: 16px; background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px; border-left: 3px solid var(--primary);
+        }
+        .sentence-text { color: var(--text-primary); font-size: 0.95rem; line-height: 1.6; }
+        .sentence-text mark { background: rgba(249, 115, 22, 0.3); color: white; padding: 2px 4px; border-radius: 3px; }
+        .sentence-meta { margin-top: 8px; font-size: 0.8rem; color: var(--text-muted); }
+
+        /* Loading State */
+        .loading-overlay {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.7); z-index: 1000;
+            align-items: center; justify-content: center; flex-direction: column; gap: 16px;
+        }
+        .loading-overlay.visible { display: flex; }
+        .loading-text { color: white; font-size: 1.1rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <a href="/" class="logo">
+                <span class="logo-icon">🎯</span>
+                <span class="logo-text">DecisionOS</span>
+            </a>
+            <a href="/" class="back-link">← Back to Home</a>
+        </header>
+
+        <!-- Page Title -->
+        <h1 class="page-title">Review Analyzer</h1>
+        <p class="page-subtitle">Upload customer reviews to discover key themes, pros, and cons with AI-powered analysis.</p>
+
+        <!-- Input Section -->
+        <div class="input-section">
+            <div class="input-tabs">
+                <button class="tab-btn active" onclick="switchTab('upload')">📁 Upload CSV</button>
+                <button class="tab-btn" onclick="switchTab('paste')">📝 Paste Reviews</button>
+            </div>
+
+            <!-- Upload Tab -->
+            <div class="input-content active" id="tab-upload">
+                <div class="file-upload" id="file-upload" onclick="document.getElementById('file-input').click()">
+                    <div class="file-upload-icon">📄</div>
+                    <div class="file-upload-text">Drop your CSV file here or click to browse</div>
+                    <div class="file-upload-hint">Supports CSV with a "review" or "text" column</div>
+                    <input type="file" class="file-input" id="file-input" accept=".csv" onchange="handleFileSelect(event)">
+                    <div class="file-name" id="file-name"></div>
+                </div>
+            </div>
+
+            <!-- Paste Tab -->
+            <div class="input-content" id="tab-paste">
+                <textarea class="paste-area" id="paste-area" placeholder="Paste your reviews here, one per line...
+
+Example:
+Great app, love the interface!
+The app crashes frequently on my phone.
+Customer support was very helpful."></textarea>
+                <div class="paste-hint">Enter one review per line</div>
+            </div>
+
+            <button class="analyze-btn" id="analyze-btn" onclick="analyzeReviews()">
+                <span id="btn-text">🔍 Analyze Reviews</span>
+                <span class="spinner" id="btn-spinner" style="display:none"></span>
+            </button>
+        </div>
+
+        <!-- Results Section -->
+        <div class="results-section" id="results-section">
+            <div class="results-header">
+                <h2 class="results-title">Analysis Results</h2>
+                <span class="results-count" id="results-count"></span>
+            </div>
+
+            <div class="pros-cons-grid">
+                <!-- Pros -->
+                <div class="pros-card">
+                    <div class="card-header">
+                        <span class="card-icon">👍</span>
+                        <h3 class="card-title">Pros</h3>
+                    </div>
+                    <div class="keywords-list" id="pros-keywords"></div>
+                </div>
+
+                <!-- Cons -->
+                <div class="cons-card">
+                    <div class="card-header">
+                        <span class="card-icon">👎</span>
+                        <h3 class="card-title">Cons</h3>
+                    </div>
+                    <div class="keywords-list" id="cons-keywords"></div>
+                </div>
+            </div>
+
+            <!-- Sentences Panel -->
+            <div class="sentences-panel" id="sentences-panel">
+                <div class="sentences-header">
+                    <h3 class="sentences-title" id="sentences-title">Sentences containing "keyword"</h3>
+                    <button class="close-btn" onclick="closeSentencesPanel()">✕</button>
+                </div>
+                <div class="sentences-list" id="sentences-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="spinner" style="width:40px;height:40px;border-width:3px"></div>
+        <div class="loading-text">Analyzing reviews with AI...</div>
+    </div>
+
+    <script>
+        const API_BASE = '/api';
+        let currentData = null;
+        let uploadedFile = null;
+
+        // Tab switching
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.input-content').forEach(content => content.classList.remove('active'));
+
+            document.querySelector(`[onclick="switchTab('${tab}')"]`).classList.add('active');
+            document.getElementById(`tab-${tab}`).classList.add('active');
+        }
+
+        // File handling
+        const fileUpload = document.getElementById('file-upload');
+
+        fileUpload.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fileUpload.classList.add('dragover');
+        });
+
+        fileUpload.addEventListener('dragleave', () => {
+            fileUpload.classList.remove('dragover');
+        });
+
+        fileUpload.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fileUpload.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0 && files[0].name.endsWith('.csv')) {
+                handleFile(files[0]);
+            }
+        });
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) handleFile(file);
+        }
+
+        function handleFile(file) {
+            uploadedFile = file;
+            document.getElementById('file-name').textContent = `Selected: ${file.name}`;
+        }
+
+        // Parse CSV
+        function parseCSV(text) {
+            const lines = text.trim().split('\n');
+            if (lines.length < 2) return [];
+
+            const headers = lines[0].toLowerCase().split(',').map(h => h.trim().replace(/"/g, ''));
+            const reviewCol = headers.findIndex(h => h === 'review' || h === 'text' || h === 'content' || h === 'comment' || h === 'feedback');
+
+            if (reviewCol === -1) {
+                // If no header found, assume single column of reviews
+                return lines.slice(1).map(line => line.trim().replace(/^"|"$/g, '')).filter(r => r.length > 0);
+            }
+
+            const reviews = [];
+            for (let i = 1; i < lines.length; i++) {
+                const values = lines[i].split(',');
+                if (values[reviewCol]) {
+                    reviews.push(values[reviewCol].trim().replace(/^"|"$/g, ''));
+                }
+            }
+            return reviews.filter(r => r.length > 0);
+        }
+
+        // Analyze reviews
+        async function analyzeReviews() {
+            let reviews = [];
+
+            // Get reviews from file or paste area
+            const activeTab = document.querySelector('.input-content.active').id;
+
+            if (activeTab === 'tab-upload') {
+                if (!uploadedFile) {
+                    alert('Please select a CSV file first');
+                    return;
+                }
+                const text = await uploadedFile.text();
+                reviews = parseCSV(text);
+            } else {
+                const text = document.getElementById('paste-area').value.trim();
+                if (!text) {
+                    alert('Please paste some reviews first');
+                    return;
+                }
+                reviews = text.split('\n').map(r => r.trim()).filter(r => r.length > 0);
+            }
+
+            if (reviews.length === 0) {
+                alert('No reviews found. Please check your input.');
+                return;
+            }
+
+            // Show loading
+            const btn = document.getElementById('analyze-btn');
+            const btnText = document.getElementById('btn-text');
+            const spinner = document.getElementById('btn-spinner');
+            const loading = document.getElementById('loading-overlay');
+
+            btn.disabled = true;
+            btnText.style.display = 'none';
+            spinner.style.display = 'inline-block';
+            loading.classList.add('visible');
+
+            try {
+                const response = await fetch(`${API_BASE}/analyze-reviews`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ reviews })
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+
+                currentData = data;
+                displayResults(data, reviews.length);
+
+            } catch (error) {
+                console.error('Analysis error:', error);
+                alert('Failed to analyze reviews. Please try again.');
+            } finally {
+                btn.disabled = false;
+                btnText.style.display = 'inline';
+                spinner.style.display = 'none';
+                loading.classList.remove('visible');
+            }
+        }
+
+        // Display results
+        function displayResults(data, totalReviews) {
+            const resultsSection = document.getElementById('results-section');
+            resultsSection.classList.add('visible');
+
+            document.getElementById('results-count').textContent = `Analyzed ${totalReviews} reviews`;
+
+            // Render pros
+            const prosContainer = document.getElementById('pros-keywords');
+            prosContainer.innerHTML = data.pros.map(item => `
+                <span class="keyword-pill" onclick="showSentences('${escapeHtml(item.keyword)}', 'pro')">
+                    ${escapeHtml(item.keyword)}
+                    <span class="keyword-count">${item.count}</span>
+                </span>
+            `).join('');
+
+            // Render cons
+            const consContainer = document.getElementById('cons-keywords');
+            consContainer.innerHTML = data.cons.map(item => `
+                <span class="keyword-pill" onclick="showSentences('${escapeHtml(item.keyword)}', 'con')">
+                    ${escapeHtml(item.keyword)}
+                    <span class="keyword-count">${item.count}</span>
+                </span>
+            `).join('');
+
+            // Scroll to results
+            resultsSection.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Show sentences for a keyword
+        function showSentences(keyword, type) {
+            // Update active state
+            document.querySelectorAll('.keyword-pill').forEach(pill => pill.classList.remove('active'));
+            event.target.closest('.keyword-pill').classList.add('active');
+
+            const panel = document.getElementById('sentences-panel');
+            const title = document.getElementById('sentences-title');
+            const list = document.getElementById('sentences-list');
+
+            title.textContent = `Reviews mentioning "${keyword}"`;
+
+            // Find sentences containing this keyword
+            const keywordData = type === 'pro'
+                ? currentData.pros.find(p => p.keyword === keyword)
+                : currentData.cons.find(c => c.keyword === keyword);
+
+            if (keywordData && keywordData.sentences) {
+                list.innerHTML = keywordData.sentences.map((sentence, i) => `
+                    <div class="sentence-item">
+                        <div class="sentence-text">${highlightKeyword(escapeHtml(sentence), keyword)}</div>
+                        <div class="sentence-meta">Review #${i + 1}</div>
+                    </div>
+                `).join('');
+            } else {
+                list.innerHTML = '<div class="sentence-item"><div class="sentence-text">No sentences found.</div></div>';
+            }
+
+            panel.classList.add('visible');
+            panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function closeSentencesPanel() {
+            document.getElementById('sentences-panel').classList.remove('visible');
+            document.querySelectorAll('.keyword-pill').forEach(pill => pill.classList.remove('active'));
+        }
+
+        function highlightKeyword(text, keyword) {
+            const regex = new RegExp(`(${keyword})`, 'gi');
+            return text.replace(regex, '<mark>$1</mark>');
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>
