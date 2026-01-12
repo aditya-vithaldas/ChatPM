@@ -129,18 +129,26 @@
         .pros-card .card-title { color: var(--success); }
         .cons-card .card-title { color: var(--error); }
 
-        /* Keywords */
-        .keywords-list { display: flex; flex-wrap: wrap; gap: 8px; }
-        .keyword-pill {
-            display: inline-flex; align-items: center; gap: 6px;
-            padding: 8px 16px; background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px;
-            color: var(--text-primary); font-size: 0.85rem; font-weight: 500;
+        /* Theme Items */
+        .themes-list { display: flex; flex-direction: column; gap: 16px; }
+        .theme-item {
+            padding: 16px; background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px; line-height: 1.6;
+        }
+        .theme-summary { color: var(--text-primary); font-size: 0.95rem; }
+        .theme-keyword {
+            display: inline-block; padding: 2px 10px; margin: 0 2px;
+            background: rgba(99, 102, 241, 0.3); border: 1px solid rgba(99, 102, 241, 0.5);
+            border-radius: 15px; color: #a5b4fc; font-weight: 600;
             cursor: pointer; transition: all 0.2s;
         }
-        .keyword-pill:hover { background: rgba(255, 255, 255, 0.15); border-color: rgba(255, 255, 255, 0.2); }
-        .keyword-pill.active { background: var(--primary); border-color: var(--primary); }
-        .keyword-count { background: rgba(255, 255, 255, 0.2); padding: 2px 8px; border-radius: 10px; font-size: 0.75rem; }
+        .theme-keyword:hover { background: var(--primary); border-color: var(--primary); color: white; }
+        .theme-keyword.active { background: var(--primary); border-color: var(--primary); color: white; }
+        .theme-count { color: var(--text-muted); font-size: 0.8rem; margin-left: 8px; }
+        .pros-card .theme-keyword { background: rgba(34, 197, 94, 0.2); border-color: rgba(34, 197, 94, 0.4); color: #86efac; }
+        .pros-card .theme-keyword:hover, .pros-card .theme-keyword.active { background: var(--success); border-color: var(--success); color: white; }
+        .cons-card .theme-keyword { background: rgba(239, 68, 68, 0.2); border-color: rgba(239, 68, 68, 0.4); color: #fca5a5; }
+        .cons-card .theme-keyword:hover, .cons-card .theme-keyword.active { background: var(--error); border-color: var(--error); color: white; }
 
         /* Sentences Panel */
         .sentences-panel {
@@ -239,7 +247,7 @@ Customer support was very helpful."></textarea>
                         <span class="card-icon">👍</span>
                         <h3 class="card-title">Pros</h3>
                     </div>
-                    <div class="keywords-list" id="pros-keywords"></div>
+                    <div class="themes-list" id="pros-themes"></div>
                 </div>
 
                 <!-- Cons -->
@@ -248,7 +256,7 @@ Customer support was very helpful."></textarea>
                         <span class="card-icon">👎</span>
                         <h3 class="card-title">Cons</h3>
                     </div>
-                    <div class="keywords-list" id="cons-keywords"></div>
+                    <div class="themes-list" id="cons-themes"></div>
                 </div>
             </div>
 
@@ -411,33 +419,58 @@ Customer support was very helpful."></textarea>
 
             document.getElementById('results-count').textContent = `Analyzed ${totalReviews} reviews`;
 
-            // Render pros
-            const prosContainer = document.getElementById('pros-keywords');
-            prosContainer.innerHTML = data.pros.map(item => `
-                <span class="keyword-pill" onclick="showSentences('${escapeHtml(item.keyword)}', 'pro')">
-                    ${escapeHtml(item.keyword)}
-                    <span class="keyword-count">${item.count}</span>
-                </span>
-            `).join('');
+            // Render pros with summary sentences
+            const prosContainer = document.getElementById('pros-themes');
+            prosContainer.innerHTML = data.pros.map(item => {
+                const summary = item.summary || `Users mentioned ${item.keyword}`;
+                const keywordHtml = `<span class="theme-keyword" onclick="showSentences('${escapeHtml(item.keyword)}', 'pro')">${escapeHtml(item.keyword)}</span>`;
+                // Insert clickable keyword into summary if keyword appears in it
+                const summaryWithKeyword = insertKeywordLink(summary, item.keyword, keywordHtml);
+                return `
+                    <div class="theme-item">
+                        <span class="theme-summary">${summaryWithKeyword}</span>
+                        <span class="theme-count">(${item.count} reviews)</span>
+                    </div>
+                `;
+            }).join('');
 
-            // Render cons
-            const consContainer = document.getElementById('cons-keywords');
-            consContainer.innerHTML = data.cons.map(item => `
-                <span class="keyword-pill" onclick="showSentences('${escapeHtml(item.keyword)}', 'con')">
-                    ${escapeHtml(item.keyword)}
-                    <span class="keyword-count">${item.count}</span>
-                </span>
-            `).join('');
+            // Render cons with summary sentences
+            const consContainer = document.getElementById('cons-themes');
+            consContainer.innerHTML = data.cons.map(item => {
+                const summary = item.summary || `Users mentioned ${item.keyword}`;
+                const keywordHtml = `<span class="theme-keyword" onclick="showSentences('${escapeHtml(item.keyword)}', 'con')">${escapeHtml(item.keyword)}</span>`;
+                const summaryWithKeyword = insertKeywordLink(summary, item.keyword, keywordHtml);
+                return `
+                    <div class="theme-item">
+                        <span class="theme-summary">${summaryWithKeyword}</span>
+                        <span class="theme-count">(${item.count} reviews)</span>
+                    </div>
+                `;
+            }).join('');
 
             // Scroll to results
             resultsSection.scrollIntoView({ behavior: 'smooth' });
         }
 
+        // Insert clickable keyword link into summary sentence
+        function insertKeywordLink(summary, keyword, keywordHtml) {
+            const regex = new RegExp(`\\b(${keyword})\\b`, 'gi');
+            if (regex.test(summary)) {
+                // Keyword appears in summary - make it clickable
+                return summary.replace(regex, keywordHtml);
+            } else {
+                // Keyword doesn't appear - append clickable keyword at end
+                return `${summary} ${keywordHtml}`;
+            }
+        }
+
         // Show sentences for a keyword
         function showSentences(keyword, type) {
             // Update active state
-            document.querySelectorAll('.keyword-pill').forEach(pill => pill.classList.remove('active'));
-            event.target.closest('.keyword-pill').classList.add('active');
+            document.querySelectorAll('.theme-keyword').forEach(kw => kw.classList.remove('active'));
+            if (event && event.target) {
+                event.target.classList.add('active');
+            }
 
             const panel = document.getElementById('sentences-panel');
             const title = document.getElementById('sentences-title');
@@ -467,7 +500,7 @@ Customer support was very helpful."></textarea>
 
         function closeSentencesPanel() {
             document.getElementById('sentences-panel').classList.remove('visible');
-            document.querySelectorAll('.keyword-pill').forEach(pill => pill.classList.remove('active'));
+            document.querySelectorAll('.theme-keyword').forEach(kw => kw.classList.remove('active'));
         }
 
         function highlightKeyword(text, keyword) {

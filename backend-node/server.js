@@ -677,20 +677,21 @@ For each theme, categorize it as either a PRO (positive feedback) or CON (negati
 Return a JSON object with this exact structure:
 {
   "pros": [
-    {"keyword": "keyword1", "count": number, "sentences": ["sentence1", "sentence2"]},
+    {"keyword": "keyword1", "summary": "A natural sentence summarizing what users say about this theme", "count": number, "sentences": ["actual review 1", "actual review 2"]},
     ...
   ],
   "cons": [
-    {"keyword": "keyword1", "count": number, "sentences": ["sentence1", "sentence2"]},
+    {"keyword": "keyword1", "summary": "A natural sentence summarizing what users say about this theme", "count": number, "sentences": ["actual review 1", "actual review 2"]},
     ...
   ]
 }
 
 Rules:
 - Extract 5-10 keywords for each category (pros and cons)
-- Keywords should be 1-3 words describing the theme (e.g., "user interface", "customer support", "crashes")
+- Keywords should be 1-2 words describing the theme (e.g., "interface", "support", "crashes", "speed")
+- Write a natural, readable summary sentence for each theme that captures the overall sentiment (e.g., "Users love the clean and intuitive interface" or "Many customers complain about frequent app crashes")
 - Count how many reviews mention each theme
-- Include the actual sentences/reviews that mention each theme
+- Include the actual review sentences that mention each theme
 - Only return valid JSON, no other text
 
 Reviews to analyze:
