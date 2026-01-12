@@ -1,0 +1,1464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Reporter - Chat-Based Data Enquirer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #818cf8;
+            --sidebar-bg: #1e1e2e;
+            --sidebar-hover: #2a2a3e;
+            --sidebar-active: #3b3b4f;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --bg-main: #f1f5f9;
+            --bg-card: #ffffff;
+            --border-color: #e2e8f0;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --info: #3b82f6;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-main);
+            color: #1e293b;
+            line-height: 1.6;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: var(--sidebar-bg);
+            color: var(--text-primary);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            z-index: 100;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 24px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .logo-text {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .logo-subtitle {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 16px 12px;
+            overflow-y: auto;
+        }
+
+        .nav-section {
+            margin-bottom: 24px;
+        }
+
+        .nav-section-title {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            padding: 8px 12px;
+            font-weight: 600;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 4px;
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+
+        .nav-item:hover {
+            background: var(--sidebar-hover);
+            color: var(--text-primary);
+        }
+
+        .nav-item.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .nav-item.disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .nav-item.disabled:hover {
+            background: transparent;
+            color: var(--text-secondary);
+        }
+
+        .nav-icon {
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .nav-text {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .nav-badge {
+            margin-left: auto;
+            background: var(--success);
+            color: white;
+            font-size: 0.65rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .connection-status {
+            padding: 16px 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.85rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--error);
+        }
+
+        .status-dot.connected {
+            background: var(--success);
+            box-shadow: 0 0 8px var(--success);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 260px;
+            min-height: 100vh;
+        }
+
+        .top-bar {
+            background: var(--bg-card);
+            padding: 16px 32px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .page-subtitle {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .top-bar-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .content-area {
+            padding: 32px;
+        }
+
+        /* Panels */
+        .panel {
+            display: none;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .card-description {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: #374151;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            transition: all 0.2s;
+            background: white;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .form-input::placeholder {
+            color: #9ca3af;
+        }
+
+        textarea.form-input {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-input.code {
+            font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+            font-size: 0.9rem;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--bg-main);
+            color: #374151;
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border-color);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #16a34a;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .btn-lg {
+            padding: 14px 28px;
+            font-size: 1rem;
+        }
+
+        /* Status Messages */
+        .alert {
+            padding: 14px 18px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.9rem;
+        }
+
+        .alert-success {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #86efac;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+
+        .alert-info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #93c5fd;
+        }
+
+        .alert-warning {
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fcd34d;
+        }
+
+        /* Connection Examples */
+        .examples-grid {
+            display: grid;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .example-item {
+            background: var(--bg-main);
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.85rem;
+            color: #475569;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .example-item:hover {
+            border-color: var(--primary);
+            background: #ede9fe;
+        }
+
+        .example-label {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+
+        /* Schema Explorer */
+        .table-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .table-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+
+        .table-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .table-header {
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            background: #fafafa;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .table-header:hover {
+            background: #f5f5f5;
+        }
+
+        .table-name {
+            font-weight: 600;
+            color: #1e293b;
+            font-size: 0.95rem;
+        }
+
+        .table-meta {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            display: flex;
+            gap: 16px;
+        }
+
+        .table-content {
+            padding: 20px;
+            display: none;
+            background: white;
+        }
+
+        .table-content.open {
+            display: block;
+        }
+
+        .column-grid {
+            display: grid;
+            gap: 8px;
+        }
+
+        .column-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 14px;
+            background: var(--bg-main);
+            border-radius: 6px;
+        }
+
+        .column-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .column-name {
+            font-weight: 500;
+            color: #1e293b;
+        }
+
+        .badge {
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-pk {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-fk {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .column-type {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-family: 'Monaco', 'Menlo', monospace;
+            background: white;
+            padding: 4px 10px;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+        }
+
+        .fk-link {
+            margin-top: 12px;
+            padding: 12px 16px;
+            background: #eff6ff;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            color: #1e40af;
+        }
+
+        .fk-link strong {
+            color: #1e3a8a;
+        }
+
+        /* Sample Data Table */
+        .data-table-wrapper {
+            overflow-x: auto;
+            margin-top: 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .data-table th {
+            background: var(--primary);
+            color: white;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .data-table tr:hover td {
+            background: #fafafa;
+        }
+
+        .data-table td {
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* Documentation Form */
+        .doc-section {
+            margin-bottom: 24px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .doc-section:last-child {
+            border-bottom: none;
+        }
+
+        .doc-table-name {
+            font-weight: 600;
+            font-size: 1rem;
+            color: #1e293b;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .doc-table-name .icon {
+            width: 32px;
+            height: 32px;
+            background: var(--primary);
+            color: white;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .doc-column-list {
+            display: grid;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .doc-column-item {
+            display: grid;
+            grid-template-columns: 150px 1fr;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .doc-column-name {
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: #374151;
+        }
+
+        .doc-column-name span {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        /* Query Section */
+        .chat-container {
+            height: calc(100vh - 200px);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: var(--bg-main);
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .message {
+            margin-bottom: 16px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .message.user .message-avatar {
+            background: var(--primary);
+            color: white;
+        }
+
+        .message.assistant .message-avatar {
+            background: #e2e8f0;
+            color: #475569;
+        }
+
+        .message-content {
+            max-width: 80%;
+            padding: 14px 18px;
+            border-radius: 16px;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .message.user .message-content {
+            background: var(--primary);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.assistant .message-content {
+            background: white;
+            color: #1e293b;
+            border: 1px solid var(--border-color);
+            border-bottom-left-radius: 4px;
+        }
+
+        .chat-input-area {
+            display: flex;
+            gap: 12px;
+        }
+
+        .chat-input-area .form-input {
+            flex: 1;
+        }
+
+        /* Query Results */
+        .query-results {
+            margin-top: 20px;
+        }
+
+        .sql-display {
+            background: #1e293b;
+            color: #a5f3fc;
+            padding: 16px 20px;
+            border-radius: 10px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.9rem;
+            margin-bottom: 16px;
+            overflow-x: auto;
+        }
+
+        .sql-display pre {
+            margin: 0;
+            white-space: pre-wrap;
+        }
+
+        .sql-label {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .results-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .results-count {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* Loading */
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(99, 102, 241, 0.2);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-overlay {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 40px;
+            color: var(--text-muted);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .empty-state-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <div class="logo-icon">📊</div>
+                <div>
+                    <div class="logo-text">Data Reporter</div>
+                    <div class="logo-subtitle">Chat-Based Enquirer</div>
+                </div>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="nav-section">
+                <div class="nav-section-title">Setup</div>
+                <a class="nav-item active" data-panel="connect" onclick="switchPanel('connect')">
+                    <span class="nav-icon">🔌</span>
+                    <span class="nav-text">Database Connection</span>
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Data Management</div>
+                <a class="nav-item disabled" data-panel="explore" id="nav-explore">
+                    <span class="nav-icon">🔍</span>
+                    <span class="nav-text">Schema Explorer</span>
+                </a>
+                <a class="nav-item disabled" data-panel="document" id="nav-document">
+                    <span class="nav-icon">📝</span>
+                    <span class="nav-text">Documentation</span>
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Query</div>
+                <a class="nav-item disabled" data-panel="query" id="nav-query">
+                    <span class="nav-icon">💬</span>
+                    <span class="nav-text">Ask Questions</span>
+                    <span class="nav-badge" style="display: none;" id="query-badge">Ready</span>
+                </a>
+            </div>
+        </nav>
+
+        <div class="connection-status">
+            <div class="status-indicator">
+                <div class="status-dot" id="status-dot"></div>
+                <span id="status-text">Not connected</span>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="top-bar">
+            <div>
+                <h1 class="page-title" id="page-title">Database Connection</h1>
+                <p class="page-subtitle" id="page-subtitle">Connect to your database to get started</p>
+            </div>
+            <div class="top-bar-actions" id="top-actions"></div>
+        </div>
+
+        <div class="content-area">
+            <!-- Connect Panel -->
+            <div class="panel active" id="panel-connect">
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <h2 class="card-title">Connect to Database</h2>
+                            <p class="card-description">Enter your database connection string to begin exploring your data</p>
+                        </div>
+                    </div>
+
+                    <div id="connect-status"></div>
+
+                    <div class="form-group">
+                        <label class="form-label">Connection String</label>
+                        <input type="text" class="form-input code" id="connection-string"
+                               placeholder="postgresql://user:password@localhost:5432/database">
+                    </div>
+
+                    <button class="btn btn-primary btn-lg" onclick="connectDatabase()">
+                        <span>🔗</span> Connect to Database
+                    </button>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Example Connection Strings</h2>
+                    </div>
+                    <div class="examples-grid">
+                        <div class="example-item" onclick="useExample('postgresql://datareporter:datareporter123@localhost:5432/ecommerce')">
+                            <div class="example-label">PostgreSQL (Docker Sample)</div>
+                            postgresql://datareporter:datareporter123@localhost:5432/ecommerce
+                        </div>
+                        <div class="example-item" onclick="useExample('postgresql://user:password@localhost:5432/mydb')">
+                            <div class="example-label">PostgreSQL</div>
+                            postgresql://user:password@localhost:5432/mydb
+                        </div>
+                        <div class="example-item" onclick="useExample('mysql+pymysql://user:password@localhost:3306/mydb')">
+                            <div class="example-label">MySQL</div>
+                            mysql+pymysql://user:password@localhost:3306/mydb
+                        </div>
+                        <div class="example-item" onclick="useExample('sqlite:///./database/sample.db')">
+                            <div class="example-label">SQLite</div>
+                            sqlite:///./database/sample.db
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Explore Panel -->
+            <div class="panel" id="panel-explore">
+                <div id="explore-status"></div>
+
+                <div class="stats-grid" id="schema-stats" style="display: none;">
+                    <div class="stat-card">
+                        <div class="stat-value" id="stat-tables">0</div>
+                        <div class="stat-label">Tables</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="stat-columns">0</div>
+                        <div class="stat-label">Total Columns</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="stat-rows">0</div>
+                        <div class="stat-label">Total Rows</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Database Schema</h2>
+                        <button class="btn btn-secondary" onclick="loadSchema()">
+                            <span>🔄</span> Refresh
+                        </button>
+                    </div>
+                    <div id="schema-explorer">
+                        <div class="loading-overlay">
+                            <div class="spinner"></div>
+                            Loading schema...
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Document Panel -->
+            <div class="panel" id="panel-document">
+                <div id="doc-status"></div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <h2 class="card-title">Schema Documentation</h2>
+                            <p class="card-description">Add descriptions to help the AI understand your data better</p>
+                        </div>
+                        <button class="btn btn-primary" onclick="saveDocumentation()">
+                            <span>💾</span> Save Documentation
+                        </button>
+                    </div>
+                    <div id="documentation-form"></div>
+                </div>
+            </div>
+
+            <!-- Query Panel -->
+            <div class="panel" id="panel-query">
+                <div class="chat-container">
+                    <div class="chat-messages" id="chat-messages">
+                        <div class="message assistant">
+                            <div class="message-avatar">🤖</div>
+                            <div class="message-content">
+                                Hello! I'm ready to help you query your database. Ask me anything in plain English, like:
+                                <ul style="margin-top: 8px; padding-left: 20px;">
+                                    <li>"Show me all users"</li>
+                                    <li>"How many orders were placed last month?"</li>
+                                    <li>"What are the top 10 products by sales?"</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chat-input-area">
+                        <input type="text" class="form-input" id="question"
+                               placeholder="Ask a question about your data..."
+                               onkeypress="handleQuestionKeypress(event)">
+                        <button class="btn btn-primary" onclick="askQuestion()">
+                            <span>📤</span> Send
+                        </button>
+                    </div>
+                </div>
+
+                <div class="query-results" id="query-results" style="display: none;">
+                    <div class="sql-label">Generated SQL Query</div>
+                    <div class="sql-display">
+                        <pre id="generated-sql"></pre>
+                    </div>
+
+                    <div class="card" style="margin-top: 16px;">
+                        <div class="results-header">
+                            <h3 class="card-title">Results</h3>
+                            <span class="results-count" id="results-count"></span>
+                        </div>
+                        <div class="data-table-wrapper">
+                            <table class="data-table" id="results-table"></table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const API_BASE = 'http://localhost:5000/api';
+        let isConnected = false;
+        let schemaData = null;
+        let documentation = {};
+
+        // Panel switching
+        function switchPanel(panelName) {
+            const navItem = document.querySelector(`[data-panel="${panelName}"]`);
+            if (navItem.classList.contains('disabled')) return;
+
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+            document.getElementById(`panel-${panelName}`).classList.add('active');
+            navItem.classList.add('active');
+
+            // Update page title
+            const titles = {
+                connect: { title: 'Database Connection', subtitle: 'Connect to your database to get started' },
+                explore: { title: 'Schema Explorer', subtitle: 'Browse your database tables and relationships' },
+                document: { title: 'Documentation', subtitle: 'Document your schema for better query generation' },
+                query: { title: 'Ask Questions', subtitle: 'Query your data using natural language' }
+            };
+
+            document.getElementById('page-title').textContent = titles[panelName].title;
+            document.getElementById('page-subtitle').textContent = titles[panelName].subtitle;
+
+            // Load data for panels
+            if (panelName === 'explore' && !schemaData) {
+                loadSchema();
+            }
+            if (panelName === 'document') {
+                renderDocumentationForm();
+            }
+        }
+
+        // Enable navigation items
+        function enableNav(panelName) {
+            const nav = document.getElementById(`nav-${panelName}`);
+            if (nav) {
+                nav.classList.remove('disabled');
+                nav.onclick = () => switchPanel(panelName);
+            }
+        }
+
+        // Update connection status
+        function updateConnectionStatus(connected, message) {
+            isConnected = connected;
+            const dot = document.getElementById('status-dot');
+            const text = document.getElementById('status-text');
+
+            if (connected) {
+                dot.classList.add('connected');
+                text.textContent = message || 'Connected';
+            } else {
+                dot.classList.remove('connected');
+                text.textContent = message || 'Not connected';
+            }
+        }
+
+        // Show status message
+        function showStatus(elementId, type, message) {
+            const el = document.getElementById(elementId);
+            el.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+        }
+
+        function clearStatus(elementId) {
+            document.getElementById(elementId).innerHTML = '';
+        }
+
+        // Use example connection string
+        function useExample(connStr) {
+            document.getElementById('connection-string').value = connStr;
+        }
+
+        // Connect to database
+        async function connectDatabase() {
+            const connectionString = document.getElementById('connection-string').value.trim();
+
+            if (!connectionString) {
+                showStatus('connect-status', 'error', '⚠️ Please enter a connection string');
+                return;
+            }
+
+            showStatus('connect-status', 'info', '<div class="spinner" style="display: inline-block;"></div> Connecting to database...');
+
+            try {
+                const response = await fetch(`${API_BASE}/connect`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ connection_string: connectionString })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showStatus('connect-status', 'success', '✓ Successfully connected to the database!');
+                    updateConnectionStatus(true, 'Connected');
+
+                    // Enable other navigation items
+                    enableNav('explore');
+                    enableNav('document');
+                    enableNav('query');
+                    document.getElementById('query-badge').style.display = 'inline';
+
+                    // Auto-switch to explore
+                    setTimeout(() => switchPanel('explore'), 800);
+                } else {
+                    showStatus('connect-status', 'error', `✗ Connection failed: ${data.error}`);
+                    updateConnectionStatus(false, 'Connection failed');
+                }
+            } catch (error) {
+                showStatus('connect-status', 'error', `✗ Error: ${error.message}`);
+                updateConnectionStatus(false, 'Error');
+            }
+        }
+
+        // Load schema
+        async function loadSchema() {
+            const explorer = document.getElementById('schema-explorer');
+            explorer.innerHTML = '<div class="loading-overlay"><div class="spinner"></div> Loading schema...</div>';
+
+            try {
+                const response = await fetch(`${API_BASE}/explore`);
+                const data = await response.json();
+
+                if (data.success) {
+                    schemaData = data.schema;
+                    renderSchema(schemaData);
+
+                    // Update stats
+                    document.getElementById('schema-stats').style.display = 'grid';
+                    document.getElementById('stat-tables').textContent = Object.keys(schemaData).length;
+
+                    let totalCols = 0, totalRows = 0;
+                    Object.values(schemaData).forEach(t => {
+                        totalCols += t.columns.length;
+                        totalRows += t.row_count || 0;
+                    });
+                    document.getElementById('stat-columns').textContent = totalCols;
+                    document.getElementById('stat-rows').textContent = totalRows.toLocaleString();
+
+                    showStatus('explore-status', 'success', `✓ Found ${Object.keys(schemaData).length} tables`);
+                } else {
+                    showStatus('explore-status', 'error', `Failed: ${data.error}`);
+                }
+            } catch (error) {
+                showStatus('explore-status', 'error', `Error: ${error.message}`);
+            }
+        }
+
+        // Render schema
+        function renderSchema(schema) {
+            const explorer = document.getElementById('schema-explorer');
+            let html = '<div class="table-list">';
+
+            for (const [tableName, tableInfo] of Object.entries(schema)) {
+                html += `
+                    <div class="table-card">
+                        <div class="table-header" onclick="toggleTable('${tableName}')">
+                            <span class="table-name">📋 ${tableName}</span>
+                            <div class="table-meta">
+                                <span>${tableInfo.columns.length} columns</span>
+                                <span>${(tableInfo.row_count || 0).toLocaleString()} rows</span>
+                            </div>
+                        </div>
+                        <div class="table-content" id="table-${tableName}">
+                            <div class="column-grid">
+                                ${tableInfo.columns.map(col => `
+                                    <div class="column-row">
+                                        <div class="column-info">
+                                            <span class="column-name">${col.name}</span>
+                                            ${col.primary_key ? '<span class="badge badge-pk">PK</span>' : ''}
+                                        </div>
+                                        <span class="column-type">${col.type}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            ${tableInfo.foreign_keys.length > 0 ? `
+                                <div class="fk-link">
+                                    <strong>🔗 Relationships:</strong><br>
+                                    ${tableInfo.foreign_keys.map(fk =>
+                                        `${fk.constrained_columns.join(', ')} → ${fk.referred_table}(${fk.referred_columns.join(', ')})`
+                                    ).join('<br>')}
+                                </div>
+                            ` : ''}
+                            ${tableInfo.sample_data && tableInfo.sample_data.length > 0 ? `
+                                <h4 style="margin-top: 20px; margin-bottom: 12px; color: #374151;">Sample Data</h4>
+                                <div class="data-table-wrapper">
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>${Object.keys(tableInfo.sample_data[0]).map(k => `<th>${k}</th>`).join('')}</tr>
+                                        </thead>
+                                        <tbody>
+                                            ${tableInfo.sample_data.map(row => `
+                                                <tr>${Object.values(row).map(v => `<td title="${v || ''}">${v || '-'}</td>`).join('')}</tr>
+                                            `).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }
+
+            html += '</div>';
+            explorer.innerHTML = html;
+        }
+
+        function toggleTable(tableName) {
+            const content = document.getElementById(`table-${tableName}`);
+            content.classList.toggle('open');
+        }
+
+        // Render documentation form
+        function renderDocumentationForm() {
+            if (!schemaData) return;
+
+            const form = document.getElementById('documentation-form');
+            let html = '';
+
+            for (const [tableName, tableInfo] of Object.entries(schemaData)) {
+                const tableDoc = documentation[tableName] || {};
+
+                html += `
+                    <div class="doc-section">
+                        <div class="doc-table-name">
+                            <span class="icon">📋</span>
+                            ${tableName}
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Table Description</label>
+                            <input type="text" class="form-input"
+                                   placeholder="What does this table store?"
+                                   value="${tableDoc.description || ''}"
+                                   onchange="updateDoc('${tableName}', null, this.value)">
+                        </div>
+                        <div class="doc-column-list">
+                            ${tableInfo.columns.map(col => `
+                                <div class="doc-column-item">
+                                    <div class="doc-column-name">
+                                        ${col.name}
+                                        <span>${col.type}</span>
+                                    </div>
+                                    <input type="text" class="form-input"
+                                           placeholder="Description..."
+                                           value="${(tableDoc.columns || {})[col.name] || ''}"
+                                           onchange="updateDoc('${tableName}', '${col.name}', this.value)">
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            form.innerHTML = html;
+        }
+
+        function updateDoc(tableName, columnName, value) {
+            if (!documentation[tableName]) {
+                documentation[tableName] = { description: '', columns: {} };
+            }
+
+            if (columnName) {
+                documentation[tableName].columns[columnName] = value;
+            } else {
+                documentation[tableName].description = value;
+            }
+        }
+
+        async function saveDocumentation() {
+            showStatus('doc-status', 'info', 'Saving documentation...');
+
+            try {
+                const response = await fetch(`${API_BASE}/documentation`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ documentation })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showStatus('doc-status', 'success', '✓ Documentation saved successfully!');
+                } else {
+                    showStatus('doc-status', 'error', `Failed: ${data.error}`);
+                }
+            } catch (error) {
+                showStatus('doc-status', 'error', `Error: ${error.message}`);
+            }
+        }
+
+        // Query functions
+        function handleQuestionKeypress(e) {
+            if (e.key === 'Enter') {
+                askQuestion();
+            }
+        }
+
+        async function askQuestion() {
+            const question = document.getElementById('question').value.trim();
+            if (!question) return;
+
+            addMessage('user', question);
+            document.getElementById('question').value = '';
+            document.getElementById('query-results').style.display = 'none';
+
+            try {
+                // Generate query
+                const genResponse = await fetch(`${API_BASE}/generate-query`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ question })
+                });
+
+                const genData = await genResponse.json();
+
+                if (!genData.success) {
+                    addMessage('assistant', `Sorry, I couldn't generate a query: ${genData.error}`);
+                    return;
+                }
+
+                const generatedQuery = genData.query;
+
+                // Execute query
+                const execResponse = await fetch(`${API_BASE}/query`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query: generatedQuery })
+                });
+
+                const execData = await execResponse.json();
+
+                if (execData.success) {
+                    addMessage('assistant', `Here's what I found for your question:`);
+
+                    document.getElementById('generated-sql').textContent = generatedQuery;
+                    document.getElementById('results-count').textContent = `${execData.row_count} rows`;
+
+                    renderResultsTable(execData.columns, execData.data);
+                    document.getElementById('query-results').style.display = 'block';
+                } else {
+                    addMessage('assistant', `Query failed: ${execData.error}\n\nGenerated SQL: ${generatedQuery}`);
+                }
+            } catch (error) {
+                addMessage('assistant', `Error: ${error.message}`);
+            }
+        }
+
+        function addMessage(type, content) {
+            const container = document.getElementById('chat-messages');
+            const avatar = type === 'user' ? '👤' : '🤖';
+
+            const messageHtml = `
+                <div class="message ${type}">
+                    <div class="message-avatar">${avatar}</div>
+                    <div class="message-content">${content}</div>
+                </div>
+            `;
+
+            container.insertAdjacentHTML('beforeend', messageHtml);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function renderResultsTable(columns, data) {
+            const table = document.getElementById('results-table');
+            let html = `
+                <thead>
+                    <tr>${columns.map(c => `<th>${c}</th>`).join('')}</tr>
+                </thead>
+                <tbody>
+            `;
+
+            if (data.length === 0) {
+                html += `<tr><td colspan="${columns.length}" style="text-align: center; color: #6b7280;">No results</td></tr>`;
+            } else {
+                data.forEach(row => {
+                    html += `<tr>${row.map(v => `<td title="${v || ''}">${v || '-'}</td>`).join('')}</tr>`;
+                });
+            }
+
+            html += '</tbody>';
+            table.innerHTML = html;
+        }
+
+        // Keyboard shortcut for connection
+        document.getElementById('connection-string').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                connectDatabase();
+            }
+        });
+    </script>
+</body>
+</html>
