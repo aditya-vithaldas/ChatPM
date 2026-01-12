@@ -672,49 +672,41 @@ app.post('/api/analyze-reviews', async (req, res) => {
 
     // Use OpenAI to analyze reviews if available
     if (openai) {
-      const prompt = `Analyze the following customer reviews and extract key themes.
+      const prompt = `You are a product analyst. Analyze customer reviews and identify SPECIFIC FEATURES or ATTRIBUTES being discussed.
 
-For each theme, categorize it as either a PRO (positive feedback) or CON (negative feedback).
-Return a JSON object with this exact structure:
+YOUR #1 RULE: Keywords must be PRODUCT FEATURES or SERVICE ATTRIBUTES - things you can point to in the product.
+
+ALLOWED KEYWORDS (use these or similar):
+- "signup process", "login flow", "onboarding", "account creation"
+- "pricing", "subscription plans", "billing", "payment options", "refunds"
+- "customer support", "support team", "response time", "help center"
+- "mobile app", "desktop version", "browser extension"
+- "search functionality", "filters", "navigation", "menu", "dashboard"
+- "checkout process", "cart", "shipping", "delivery", "tracking"
+- "notifications", "alerts", "email updates"
+- "performance", "loading speed", "reliability", "uptime"
+- "user interface", "design", "layout"
+- "documentation", "tutorials", "guides"
+
+FORBIDDEN KEYWORDS (NEVER use these as keywords):
+- Emotions: "love", "hate", "like", "dislike"
+- Quality words: "good", "bad", "great", "terrible", "excellent", "poor", "amazing", "awful"
+- Generic: "experience", "service", "product", "app", "helpful", "easy", "nice"
+
+Return JSON:
 {
-  "pros": [
-    {"keyword": "keyword1", "summary": "Human-readable sentence with the keyword embedded naturally", "count": number, "sentences": ["actual review 1", "actual review 2"]},
-    ...
-  ],
-  "cons": [
-    {"keyword": "keyword1", "summary": "Human-readable sentence with the keyword embedded naturally", "count": number, "sentences": ["actual review 1", "actual review 2"]},
-    ...
-  ]
+  "pros": [{"keyword": "feature name", "summary": "2-3 sentence description of what users said about this feature", "count": number, "sentences": ["review1", "review2"]}],
+  "cons": [{"keyword": "feature name", "summary": "2-3 sentence description of what users said about this feature", "count": number, "sentences": ["review1", "review2"]}]
 }
 
-CRITICAL RULES FOR KEYWORDS:
-- Keywords must be SPECIFIC PRODUCT/SERVICE ATTRIBUTES, not sentiment words
-- GOOD keywords (specific attributes): "signup flow", "pricing", "customer support", "checkout process", "search feature", "notifications", "loading speed", "onboarding", "payment options", "navigation", "mobile app", "dashboard", "shipping", "returns policy", "account settings"
-- BAD keywords (sentiment words - DO NOT USE): "good", "bad", "love", "hate", "great", "terrible", "amazing", "awful", "excellent", "poor"
-- Keywords should identify WHAT feature or aspect users are talking about, not HOW they feel
+Example good output:
+- keyword: "customer support" NOT "helpful"
+- keyword: "checkout process" NOT "easy"
+- keyword: "mobile app" NOT "great"
+- keyword: "pricing" NOT "expensive"
+- keyword: "signup flow" NOT "simple"
 
-CRITICAL RULES FOR SUMMARIES:
-- Write detailed, insightful summaries (2-3 sentences) that describe specific user sentiment with rich context
-- The keyword (the specific attribute) MUST appear naturally within the summary
-- Include specific details about WHY users feel this way and WHAT specific aspects they mention
-- GOOD examples (detailed and insightful):
-  * "The signup flow was praised for being quick and straightforward, taking less than a minute to complete. Users appreciated not needing to verify email before accessing basic features."
-  * "Customers were frustrated with the pricing structure, finding it confusing and expensive compared to competitors. Hidden fees at checkout were a common complaint."
-  * "The customer support team received high marks for fast response times and knowledgeable agents. Most issues were resolved within hours rather than days."
-  * "The checkout process caused significant frustration due to frequent crashes and lost cart items. Users on mobile devices experienced this more frequently."
-- BAD examples (DO NOT write like this):
-  * "Users mentioned interface"
-  * "People spoke about delivery"
-  * "Users love the product"
-  * "The app is great"
-- The summary should tell a detailed story about what people experienced with that specific feature/attribute
-
-Other rules:
-- Extract 5-10 keywords for each category (pros and cons)
-- Keywords should be 1-3 words identifying specific features or attributes (e.g., "signup flow", "customer support", "checkout", "pricing", "mobile app", "search", "notifications")
-- Count how many reviews mention each theme
-- Include the actual review sentences that mention each theme
-- Only return valid JSON, no other text
+Summary example: "The customer support team was praised for quick response times, typically under 2 hours. Users especially appreciated the knowledgeable agents who resolved issues on first contact."
 
 Reviews to analyze:
 ${reviews.slice(0, 100).map((r, i) => `${i + 1}. ${r}`).join('\n')}`;
@@ -738,73 +730,128 @@ ${reviews.slice(0, 100).map((r, i) => `${i + 1}. ${r}`).join('\n')}`;
     // Basic keyword extraction fallback (without AI)
     console.log('Using fallback analysis (no AI available or AI failed)');
 
-    const positiveTemplates = {
-      'great': 'Customers consistently described their experience as great, highlighting the overall quality and value. Many expressed genuine satisfaction and said it exceeded their expectations.',
-      'love': 'Users love the product and express strong emotional attachment to it. They frequently recommend it to friends and family, citing it as a must-have solution.',
-      'excellent': 'The service received excellent ratings across multiple dimensions including quality, reliability, and value. Reviewers often compared it favorably to premium alternatives.',
-      'amazing': 'People were amazed by the quality and performance, with many describing unexpected positive surprises. First impressions were overwhelmingly positive.',
-      'good': 'The overall experience was rated as good by the majority of customers. While not always exceptional, it consistently met expectations and delivered solid value.',
-      'best': 'Many consider this among the best options available in its category. Customers who tried alternatives often returned, citing superior quality and features.',
-      'helpful': 'Users found the support team and documentation genuinely helpful in solving their problems. Response times were quick and solutions were effective.',
-      'easy': 'The product was praised for being easy to use from day one. Even users who described themselves as non-technical were able to get started quickly.',
-      'fast': 'Customers appreciated the fast performance, noting snappy load times and quick responses. Delivery times also exceeded expectations for physical products.',
-      'beautiful': 'The design was described as beautiful by users who appreciated attention to aesthetic details. The visual experience enhanced overall satisfaction significantly.',
-      'perfect': 'Many reviewers called the experience perfect for their specific needs. It solved their problems completely without requiring workarounds or compromises.',
-      'awesome': 'Users thought the product was awesome, frequently using enthusiastic language in their reviews. The excitement was evident across different user segments.',
-      'fantastic': 'The service received fantastic feedback with customers praising multiple aspects simultaneously. The combination of features created a compelling overall package.',
-      'wonderful': 'Customers had a wonderful experience that they were eager to share. Positive word-of-mouth was common, with many reviews mentioning referrals.',
-      'nice': 'Users found the product nice and pleasant to use on a daily basis. The experience was described as smooth and enjoyable without major friction points.',
-      'friendly': 'The interface and support team were described as friendly and approachable. Users felt comfortable reaching out for help and navigating the product.',
-      'quick': 'Reviewers praised the quick turnaround on everything from support responses to feature delivery. Efficiency was a standout characteristic.',
-      'simple': 'The product was appreciated for its simple, uncluttered design philosophy. Complexity was hidden well, making common tasks straightforward.',
-      'intuitive': 'Users found the interface intuitive and were able to accomplish tasks without extensive training. The learning curve was minimal even for advanced features.',
-      'reliable': 'Customers valued the reliable performance and consistency over time. Uptime was excellent and the product worked as expected without surprises.'
+    // Attribute-based templates for fallback analysis
+    const attributePatterns = {
+      // Positive patterns - map search terms to attribute keywords
+      'customer support': {
+        searchTerms: ['support', 'help desk', 'customer service', 'support team', 'agent'],
+        summary: 'The customer support team received praise for being responsive and helpful. Users noted quick resolution times and knowledgeable staff who understood their issues.'
+      },
+      'signup process': {
+        searchTerms: ['sign up', 'signup', 'register', 'registration', 'create account', 'onboard'],
+        summary: 'The signup process was described as smooth and straightforward. Users appreciated the minimal steps required to get started with the product.'
+      },
+      'user interface': {
+        searchTerms: ['interface', 'ui', 'design', 'layout', 'look', 'clean', 'intuitive'],
+        summary: 'The user interface received positive feedback for its clean design and intuitive layout. Users found it easy to navigate and locate features.'
+      },
+      'pricing': {
+        searchTerms: ['price', 'pricing', 'cost', 'value', 'affordable', 'cheap', 'worth'],
+        summary: 'The pricing structure was seen as fair and competitive. Users felt they received good value for the features and quality provided.'
+      },
+      'mobile app': {
+        searchTerms: ['mobile', 'app', 'phone', 'android', 'ios', 'iphone'],
+        summary: 'The mobile app was praised for its functionality and ease of use. Users appreciated having full features available on their phones.'
+      },
+      'performance': {
+        searchTerms: ['fast', 'speed', 'quick', 'performance', 'load', 'responsive'],
+        summary: 'The performance was consistently praised with users noting fast load times and responsive interactions. The system handled tasks efficiently.'
+      },
+      'checkout process': {
+        searchTerms: ['checkout', 'payment', 'purchase', 'buy', 'cart', 'order'],
+        summary: 'The checkout process was smooth and hassle-free according to users. Payment options were flexible and the flow was straightforward.'
+      },
+      'shipping': {
+        searchTerms: ['shipping', 'delivery', 'arrived', 'package', 'fast delivery'],
+        summary: 'The shipping and delivery experience exceeded expectations. Products arrived on time and in good condition.'
+      },
+      'search functionality': {
+        searchTerms: ['search', 'find', 'filter', 'sort', 'browse'],
+        summary: 'The search functionality helped users quickly find what they needed. Filters and sorting options made browsing efficient.'
+      },
+      'documentation': {
+        searchTerms: ['documentation', 'docs', 'guide', 'tutorial', 'instructions', 'manual'],
+        summary: 'The documentation was comprehensive and easy to follow. Users found helpful guides that answered their questions.'
+      }
     };
 
-    const negativeTemplates = {
-      'bad': 'Some users had a genuinely bad experience that significantly impacted their satisfaction. Issues ranged from functionality problems to poor customer service interactions.',
-      'terrible': 'A subset of customers described their experience as terrible, citing multiple compounding issues. These reviews often mentioned feeling ignored or let down.',
-      'awful': 'Some reviewers found the service awful and expressed regret about their purchase decision. The negative experience was often unexpected given marketing promises.',
-      'slow': 'Users complained about slow performance that impacted their productivity. Load times, response delays, and processing speeds were common pain points.',
-      'crash': 'Multiple users reported frustrating crashes that interrupted their work and caused data loss. The instability appeared across different devices and scenarios.',
-      'bug': 'Customers encountered bugs that affected core functionality. Some issues persisted across updates, leading to frustration with the development team.',
-      'broken': 'Key features were reported as broken by users who could not complete essential tasks. Workarounds were often required for basic functionality.',
-      'hate': 'A number of users expressed strong negative emotions about their experience. The frustration was deep enough to prompt detailed negative reviews.',
-      'worst': 'Some considered this among the worst experiences in the category. Comparisons to competitors were unfavorable across multiple dimensions.',
-      'poor': 'The quality was rated as poor by customers who expected more given the price point. Value perception was significantly impacted.',
-      'difficult': 'Users found critical tasks difficult to accomplish without extensive trial and error. The learning curve was steeper than anticipated.',
-      'confusing': 'The interface was described as confusing with unclear navigation and labeling. Users struggled to find features and understand workflows.',
-      'expensive': 'Many customers felt the pricing was expensive relative to the value delivered. Cost concerns were amplified when issues arose.',
-      'annoying': 'Specific features and behaviors were found annoying by users during regular use. Small frustrations accumulated into significant dissatisfaction.',
-      'frustrating': 'Users expressed deep frustration with recurring issues that never seemed to get resolved. The emotional toll was evident in review language.',
-      'useless': 'Some features were considered useless and added clutter without providing value. Users questioned why resources were spent on them.',
-      'disappointing': 'The experience was disappointing compared to expectations set by marketing and reviews. The gap between promise and reality was significant.',
-      'horrible': 'A portion of customers had a horrible experience that they felt compelled to warn others about. The negativity was intense and detailed.',
-      'laggy': 'Users reported laggy performance that made the experience feel outdated and unpolished. Responsiveness issues were particularly noticeable.',
-      'glitch': 'Customers encountered visual and functional glitches that undermined confidence in the product. The polish expected at this level was missing.'
+    const negativeAttributePatterns = {
+      'customer support': {
+        searchTerms: ['support', 'help', 'customer service', 'no response', 'waiting'],
+        summary: 'The customer support experience was frustrating for many users. Long wait times and unhelpful responses were commonly cited issues.'
+      },
+      'pricing': {
+        searchTerms: ['expensive', 'overpriced', 'cost', 'price', 'fee', 'charge'],
+        summary: 'The pricing was considered too high by many users relative to competitors. Hidden fees and unexpected charges added to the frustration.'
+      },
+      'performance': {
+        searchTerms: ['slow', 'lag', 'crash', 'freeze', 'loading', 'hang'],
+        summary: 'Performance issues plagued the user experience with slow load times and crashes. Users reported lost work and productivity due to instability.'
+      },
+      'mobile app': {
+        searchTerms: ['mobile', 'app', 'phone', 'crash', 'bug'],
+        summary: 'The mobile app had significant issues including crashes and missing features. Users found it less reliable than the desktop version.'
+      },
+      'checkout process': {
+        searchTerms: ['checkout', 'payment', 'cart', 'error', 'fail'],
+        summary: 'The checkout process caused frustration with errors and lost cart items. Users had to retry multiple times to complete purchases.'
+      },
+      'user interface': {
+        searchTerms: ['confusing', 'interface', 'ui', 'navigate', 'find', 'unclear'],
+        summary: 'The user interface was described as confusing and hard to navigate. Users struggled to find features and complete basic tasks.'
+      },
+      'shipping': {
+        searchTerms: ['shipping', 'delivery', 'late', 'delayed', 'lost', 'damaged'],
+        summary: 'Shipping and delivery problems were a major pain point. Late arrivals, damaged packages, and lost orders were frequently mentioned.'
+      },
+      'signup process': {
+        searchTerms: ['signup', 'register', 'account', 'verify', 'confirmation'],
+        summary: 'The signup process was cumbersome with too many steps required. Users encountered errors and verification issues that delayed access.'
+      },
+      'notifications': {
+        searchTerms: ['notification', 'email', 'spam', 'alert', 'too many'],
+        summary: 'The notification system was overwhelming with too many emails and alerts. Users felt spammed and had trouble managing preferences.'
+      },
+      'billing': {
+        searchTerms: ['billing', 'charge', 'invoice', 'cancel', 'refund', 'subscription'],
+        summary: 'Billing issues caused significant problems including unexpected charges and difficulty canceling. Refund processes were described as painful.'
+      }
     };
 
     const prosMap = {};
     const consMap = {};
 
+    // Positive sentiment indicators
+    const positiveIndicators = ['great', 'love', 'excellent', 'amazing', 'good', 'best', 'helpful', 'easy', 'fast', 'beautiful', 'perfect', 'awesome', 'fantastic', 'wonderful', 'nice', 'friendly', 'quick', 'simple', 'intuitive', 'reliable', 'recommend'];
+    // Negative sentiment indicators
+    const negativeIndicators = ['bad', 'terrible', 'awful', 'slow', 'crash', 'bug', 'broken', 'hate', 'worst', 'poor', 'difficult', 'confusing', 'expensive', 'annoying', 'frustrating', 'useless', 'disappointing', 'horrible', 'laggy', 'glitch', 'error', 'fail', 'problem', 'issue'];
+
     reviews.forEach(review => {
       const lowerReview = review.toLowerCase();
+      const isPositive = positiveIndicators.some(word => lowerReview.includes(word));
+      const isNegative = negativeIndicators.some(word => lowerReview.includes(word));
 
-      Object.keys(positiveTemplates).forEach(word => {
-        if (lowerReview.includes(word)) {
-          if (!prosMap[word]) prosMap[word] = { count: 0, sentences: [], summary: positiveTemplates[word] };
-          prosMap[word].count++;
-          if (prosMap[word].sentences.length < 5) prosMap[word].sentences.push(review);
-        }
-      });
+      // Check for attribute matches in positive context
+      if (isPositive) {
+        Object.entries(attributePatterns).forEach(([attribute, config]) => {
+          if (config.searchTerms.some(term => lowerReview.includes(term))) {
+            if (!prosMap[attribute]) prosMap[attribute] = { count: 0, sentences: [], summary: config.summary };
+            prosMap[attribute].count++;
+            if (prosMap[attribute].sentences.length < 5) prosMap[attribute].sentences.push(review);
+          }
+        });
+      }
 
-      Object.keys(negativeTemplates).forEach(word => {
-        if (lowerReview.includes(word)) {
-          if (!consMap[word]) consMap[word] = { count: 0, sentences: [], summary: negativeTemplates[word] };
-          consMap[word].count++;
-          if (consMap[word].sentences.length < 5) consMap[word].sentences.push(review);
-        }
-      });
+      // Check for attribute matches in negative context
+      if (isNegative) {
+        Object.entries(negativeAttributePatterns).forEach(([attribute, config]) => {
+          if (config.searchTerms.some(term => lowerReview.includes(term))) {
+            if (!consMap[attribute]) consMap[attribute] = { count: 0, sentences: [], summary: config.summary };
+            consMap[attribute].count++;
+            if (consMap[attribute].sentences.length < 5) consMap[attribute].sentences.push(review);
+          }
+        });
+      }
     });
 
     const pros = Object.entries(prosMap)
