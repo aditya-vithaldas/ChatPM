@@ -90,7 +90,8 @@ if (!DEV_MODE) {
   passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: process.env.GOOGLE_CALLBACK_URL || '/auth/google/callback'
+    callbackURL: process.env.GOOGLE_CALLBACK_URL || '/auth/google/callback',
+    proxy: true // Trust proxy for Cloud Run (https behind load balancer)
   }, (accessToken, refreshToken, profile, done) => {
     // In a real app, you'd save/lookup user in database
     const user = {
@@ -102,6 +103,9 @@ if (!DEV_MODE) {
     return done(null, user);
   }));
 }
+
+// Trust proxy for Cloud Run (needed for secure cookies and OAuth callbacks)
+app.set('trust proxy', true);
 
 passport.serializeUser((user, done) => {
   done(null, user);
