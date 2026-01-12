@@ -677,19 +677,33 @@ For each theme, categorize it as either a PRO (positive feedback) or CON (negati
 Return a JSON object with this exact structure:
 {
   "pros": [
-    {"keyword": "keyword1", "summary": "A natural sentence summarizing what users say about this theme", "count": number, "sentences": ["actual review 1", "actual review 2"]},
+    {"keyword": "keyword1", "summary": "Human-readable sentence with the keyword embedded naturally", "count": number, "sentences": ["actual review 1", "actual review 2"]},
     ...
   ],
   "cons": [
-    {"keyword": "keyword1", "summary": "A natural sentence summarizing what users say about this theme", "count": number, "sentences": ["actual review 1", "actual review 2"]},
+    {"keyword": "keyword1", "summary": "Human-readable sentence with the keyword embedded naturally", "count": number, "sentences": ["actual review 1", "actual review 2"]},
     ...
   ]
 }
 
-Rules:
+CRITICAL RULES FOR SUMMARIES:
+- Write summaries as natural, human-readable sentences that describe specific user sentiment
+- The keyword MUST appear naturally within the sentence
+- GOOD examples:
+  * "People found the interface intuitive and easy to navigate"
+  * "Customers thought the delivery cost was too high"
+  * "Users appreciated the fast customer support response times"
+  * "Many reviewers complained about frequent crashes during checkout"
+  * "The search feature was praised for being accurate and helpful"
+- BAD examples (DO NOT write like this):
+  * "Users mentioned interface"
+  * "People spoke about delivery"
+  * "Customers discussed support"
+- The summary should tell a story about what people think, not just that they mentioned something
+
+Other rules:
 - Extract 5-10 keywords for each category (pros and cons)
-- Keywords should be 1-2 words describing the theme (e.g., "interface", "support", "crashes", "speed")
-- Write a natural, readable summary sentence for each theme that captures the overall sentiment (e.g., "Users love the clean and intuitive interface" or "Many customers complain about frequent app crashes")
+- Keywords should be 1-2 words (e.g., "interface", "support", "crashes", "delivery", "pricing")
 - Count how many reviews mention each theme
 - Include the actual review sentences that mention each theme
 - Only return valid JSON, no other text
