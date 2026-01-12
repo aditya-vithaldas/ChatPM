@@ -361,16 +361,11 @@
         .hero-content { display: flex; gap: 60px; align-items: center; max-width: 1200px; margin: 0 auto; }
         .hero-left { flex: 1; }
         .hero-title {
-            font-family: 'Plus Jakarta Sans', sans-serif; font-size: 3.5rem; font-weight: 800;
-            line-height: 1.1; margin-bottom: 32px; color: white;
+            font-family: 'Plus Jakarta Sans', sans-serif; font-size: 2.8rem; font-weight: 800;
+            line-height: 1.2; margin-bottom: 24px; color: white;
         }
-        .hero-features { display: flex; flex-direction: column; gap: 16px; }
-        .hero-feature-item {
-            display: flex; align-items: flex-start; gap: 12px;
-            color: #cbd5e1; font-size: 1.1rem; line-height: 1.5;
-        }
-        .hero-check {
-            color: var(--accent); font-weight: 700; font-size: 1.2rem; margin-top: 2px;
+        .hero-subtitle {
+            font-size: 1.2rem; color: #94a3b8; line-height: 1.6; max-width: 500px;
         }
 
         .hero-right { flex: 0 0 420px; }
@@ -416,36 +411,39 @@
             font-family: 'Plus Jakarta Sans', sans-serif; font-size: 2rem; font-weight: 700;
             color: white; text-align: center; margin-bottom: 48px;
         }
-        .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; max-width: 1200px; margin: 0 auto; }
+        .features-grid { display: flex; flex-direction: column; gap: 48px; max-width: 1000px; margin: 0 auto; }
         .feature-card {
             background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 20px; overflow: hidden; transition: all 0.3s;
+            display: flex; flex-direction: row; min-height: 300px;
         }
-        .feature-card:hover { transform: translateY(-4px); border-color: rgba(255, 255, 255, 0.15); }
-        .feature-screenshot { padding: 24px 24px 0; }
+        .feature-card:nth-child(even) { flex-direction: row-reverse; }
+        .feature-card:hover { border-color: rgba(255, 255, 255, 0.15); }
+        .feature-screenshot { flex: 1; padding: 32px; display: flex; align-items: center; justify-content: center; }
         .screenshot-placeholder {
             background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(249, 115, 22, 0.2));
-            border-radius: 12px; height: 180px; display: flex; flex-direction: column;
+            border-radius: 12px; width: 100%; height: 100%; min-height: 240px; display: flex; flex-direction: column;
             align-items: center; justify-content: center; gap: 12px;
             border: 1px dashed rgba(255, 255, 255, 0.2);
         }
-        .screenshot-icon { font-size: 48px; }
-        .screenshot-label { color: #94a3b8; font-size: 0.85rem; font-weight: 500; }
-        .feature-content { padding: 24px; }
+        .screenshot-icon { font-size: 64px; }
+        .screenshot-label { color: #94a3b8; font-size: 0.9rem; font-weight: 500; }
+        .feature-content { flex: 1; padding: 40px; display: flex; flex-direction: column; justify-content: center; }
         .feature-name {
-            font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.15rem; font-weight: 700;
-            color: white; margin-bottom: 12px;
+            font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.5rem; font-weight: 700;
+            color: white; margin-bottom: 16px;
         }
-        .feature-desc { color: #94a3b8; font-size: 0.9rem; line-height: 1.6; }
+        .feature-desc { color: #94a3b8; font-size: 1rem; line-height: 1.7; }
 
         .landing-footer { padding: 32px 48px; text-align: center; color: #64748b; font-size: 0.85rem; }
 
         @media (max-width: 1024px) {
             .hero-content { flex-direction: column; text-align: center; }
             .hero-left { text-align: center; }
-            .hero-features { align-items: center; }
+            .hero-subtitle { margin: 0 auto; }
             .hero-right { flex: none; width: 100%; max-width: 420px; }
-            .features-grid { grid-template-columns: 1fr; max-width: 400px; }
+            .feature-card, .feature-card:nth-child(even) { flex-direction: column; }
+            .feature-screenshot { min-height: 200px; }
         }
         @media (max-width: 600px) {
             .landing-header { padding: 20px 24px; }
@@ -473,21 +471,8 @@
             <section class="hero-section">
                 <div class="hero-content">
                     <div class="hero-left">
-                        <h1 class="hero-title">One Stop Shop<br/>for Product Managers</h1>
-                        <div class="hero-features">
-                            <div class="hero-feature-item">
-                                <span class="hero-check">✓</span> Clarify your strategy
-                            </div>
-                            <div class="hero-feature-item">
-                                <span class="hero-check">✓</span> See what percentage of your roadmap is aligned with your strategy
-                            </div>
-                            <div class="hero-feature-item">
-                                <span class="hero-check">✓</span> Connect your data sources
-                            </div>
-                            <div class="hero-feature-item">
-                                <span class="hero-check">✓</span> Get natural language insights
-                            </div>
-                        </div>
+                        <h1 class="hero-title">Sometimes you just need to be nudged to stay on track and sure that you're not sorry.</h1>
+                        <p class="hero-subtitle">Ensure your strategy, your execution and your metrics are all pointing in the same direction.</p>
                     </div>
                     <div class="hero-right">
                         <div class="waitlist-card">
@@ -553,6 +538,20 @@
                         <div class="feature-content">
                             <h3 class="feature-name">View Goals and Metrics</h3>
                             <p class="feature-desc">Connect to your primary data source and track your metrics in real-time with AI-generated visualization tools.</p>
+                        </div>
+                    </div>
+
+                    <!-- Feature 4 -->
+                    <div class="feature-card">
+                        <div class="feature-screenshot">
+                            <div class="screenshot-placeholder">
+                                <span class="screenshot-icon">👥</span>
+                                <span class="screenshot-label">Persona Simulator</span>
+                            </div>
+                        </div>
+                        <div class="feature-content">
+                            <h3 class="feature-name">Simulate Your Personas</h3>
+                            <p class="feature-desc">Create your personas and let them talk to your requirements. Bulletproof your requirements by simulating how your personas are likely to interact with your new features.</p>
                         </div>
                     </div>
                 </div>
