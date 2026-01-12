@@ -1459,6 +1459,49 @@
                 connectDatabase();
             }
         });
+
+        // Auto-connect to PostgreSQL sample database on page load
+        const DEFAULT_CONNECTION = 'postgresql://datareporter:datareporter123@localhost:5432/ecommerce';
+
+        async function autoConnect() {
+            document.getElementById('connection-string').value = DEFAULT_CONNECTION;
+            showStatus('connect-status', 'info', '<div class="spinner" style="display: inline-block;"></div> Auto-connecting to sample database...');
+
+            try {
+                const response = await fetch(`${API_BASE}/connect`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ connection_string: DEFAULT_CONNECTION })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showStatus('connect-status', 'success', '✓ Auto-connected to sample e-commerce database!');
+                    updateConnectionStatus(true, 'Connected');
+
+                    // Enable all navigation items
+                    enableNav('explore');
+                    enableNav('document');
+                    enableNav('query');
+                    document.getElementById('query-badge').style.display = 'inline';
+
+                    // Auto-switch to explore panel
+                    setTimeout(() => switchPanel('explore'), 500);
+                } else {
+                    showStatus('connect-status', 'warning', '⚠️ Auto-connect failed. Please ensure PostgreSQL is running or enter a connection string manually.');
+                    updateConnectionStatus(false, 'Not connected');
+                }
+            } catch (error) {
+                showStatus('connect-status', 'warning', '⚠️ Could not auto-connect. Start the PostgreSQL database or enter a connection string.');
+                updateConnectionStatus(false, 'Not connected');
+            }
+        }
+
+        // Try to auto-connect when the page loads
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(autoConnect, 500);
+        });
     </script>
 </body>
 </html>
