@@ -8,10 +8,15 @@
     "start": "node server.js",
     "dev": "node --watch server.js"
   },
-  "keywords": ["database", "query", "google-auth"],
+  "keywords": [
+    "database",
+    "query",
+    "google-auth"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@google-cloud/firestore": "^8.1.0",
     "better-sqlite3": "^12.6.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",

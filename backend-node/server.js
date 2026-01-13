@@ -10,6 +10,7 @@ import mysql from 'mysql2/promise';
 import OpenAI from 'openai';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { Firestore } from '@google-cloud/firestore';
 
 dotenv.config();
 
@@ -48,6 +49,12 @@ let openai = null;
 if (process.env.OPENAI_API_KEY) {
   openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 }
+
+// Firestore for persistent waitlist storage
+const firestore = new Firestore({
+  projectId: 'striking-loop-447915-q3'
+});
+const waitlistCollection = firestore.collection('waitlist');
 
 // Middleware
 app.use(express.json({ limit: '10mb' }));
@@ -632,7 +639,7 @@ waitlistDb.exec(`
   )
 `);
 
-app.post('/api/waitlist', (req, res) => {
+app.post('/api/waitlist', async (req, res) => {
   try {
     const { email } = req.body;
 
@@ -646,18 +653,39 @@ app.post('/api/waitlist', (req, res) => {
       return res.status(400).json({ error: 'Please enter a valid email address' });
     }
 
-    // Insert email into waitlist
-    const stmt = waitlistDb.prepare('INSERT INTO waitlist (email) VALUES (?)');
-    stmt.run(email);
+    // Check if email already exists in Firestore
+    const existingDoc = await waitlistCollection.doc(email).get();
+    if (existingDoc.exists) {
+      return res.json({ success: true, message: 'You\'re already on the list!' });
+    }
+
+    // Add email to Firestore waitlist
+    await waitlistCollection.doc(email).set({
+      email: email,
+      createdAt: new Date().toISOString(),
+      source: 'website'
+    });
 
     console.log(`New waitlist signup: ${email}`);
     res.json({ success: true, message: 'Successfully added to waitlist!' });
   } catch (error) {
-    if (error.message.includes('UNIQUE constraint failed')) {
-      return res.json({ success: true, message: 'You\'re already on the list!' });
-    }
     console.error('Waitlist error:', error);
     res.status(500).json({ error: 'Failed to add to waitlist. Please try again.' });
+  }
+});
+
+// Get all waitlist entries (for admin)
+app.get('/api/waitlist', async (req, res) => {
+  try {
+    const snapshot = await waitlistCollection.orderBy('createdAt', 'desc').get();
+    const entries = [];
+    snapshot.forEach(doc => {
+      entries.push({ id: doc.id, ...doc.data() });
+    });
+    res.json({ success: true, count: entries.length, entries });
+  } catch (error) {
+    console.error('Waitlist fetch error:', error);
+    res.status(500).json({ error: 'Failed to fetch waitlist' });
   }
 });
 
