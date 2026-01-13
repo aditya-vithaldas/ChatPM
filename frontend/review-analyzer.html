@@ -517,25 +517,29 @@ Customer support was very helpful."></textarea>
             if (keywordData?.searchTerms) {
                 searchTerms.push(...keywordData.searchTerms.map(t => t.toLowerCase()));
             }
-            // Add common variations
-            const keywordWords = keyword.toLowerCase().split(' ');
-            searchTerms.push(...keywordWords);
 
-            // Filter original reviews to find actual matches
+            // Helper function to check for whole word/phrase match
+            function matchesWholeWord(text, term) {
+                // Escape special regex characters in the term
+                const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                // Match whole word (with word boundaries)
+                const regex = new RegExp(`\\b${escaped}\\b`, 'i');
+                return regex.test(text);
+            }
+
+            // Filter original reviews to find actual matches (whole words only)
             let matchingReviews = [];
             if (keywordData?.sentences && keywordData.sentences.length > 0) {
-                // Verify the AI-provided sentences actually contain relevant terms
+                // Verify the AI-provided sentences actually contain relevant terms as whole words
                 matchingReviews = keywordData.sentences.filter(sentence => {
-                    const lowerSentence = sentence.toLowerCase();
-                    return searchTerms.some(term => lowerSentence.includes(term));
+                    return searchTerms.some(term => matchesWholeWord(sentence, term));
                 });
             }
 
             // If AI sentences don't match, fall back to filtering original reviews
             if (matchingReviews.length === 0 && originalReviews.length > 0) {
                 matchingReviews = originalReviews.filter(review => {
-                    const lowerReview = review.toLowerCase();
-                    return searchTerms.some(term => lowerReview.includes(term));
+                    return searchTerms.some(term => matchesWholeWord(review, term));
                 });
             }
 
@@ -581,7 +585,9 @@ Customer support was very helpful."></textarea>
             const sortedKeywords = [...keywords].sort((a, b) => b.length - a.length);
             for (const keyword of sortedKeywords) {
                 if (keyword.length > 1) { // Skip single characters
-                    const regex = new RegExp(`(${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+                    // Use word boundaries to match whole words only
+                    const escaped = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                    const regex = new RegExp(`\\b(${escaped})\\b`, 'gi');
                     result = result.replace(regex, '<mark>$1</mark>');
                 }
             }
