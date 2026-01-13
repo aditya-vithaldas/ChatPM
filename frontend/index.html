@@ -483,7 +483,6 @@
                     <span class="landing-logo-icon">🎯</span>
                     <span class="landing-logo-text">DecisionOS</span>
                 </div>
-                <a href="/login" class="login-link">Login</a>
             </header>
 
             <!-- Hero Section -->
@@ -1362,25 +1361,9 @@
         }
 
         window.addEventListener('DOMContentLoaded', () => {
-            // Check if user is logged in
-            checkAuth();
+            // Show landing page
+            showLoginScreen();
         });
-
-        async function checkAuth() {
-            try {
-                const r = await fetch(`${AUTH_BASE}/user`, { credentials: 'include' });
-                const d = await r.json();
-                if (d.user) {
-                    currentUser = d.user;
-                    showMainApp();
-                } else {
-                    showLoginScreen();
-                }
-            } catch (e) {
-                console.error('Auth check failed:', e);
-                showLoginScreen();
-            }
-        }
         document.getElementById('connection-string').addEventListener('keypress', e => { if (e.key === 'Enter') connectDatabase(); });
 
         // Waitlist submission
