@@ -139,6 +139,11 @@ const requireAuth = (req, res, next) => {
 // Auth routes
 const getRedirectUrl = () => process.env.FRONTEND_URL || '/';
 
+// /login route - redirects to Google OAuth
+app.get('/login', (req, res) => {
+  res.redirect('/auth/google');
+});
+
 app.get('/auth/google', (req, res, next) => {
   if (DEV_MODE) {
     // In dev mode, auto-login and redirect

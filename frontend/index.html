@@ -353,6 +353,14 @@
         .landing-header {
             padding: 24px 48px; display: flex; align-items: center; justify-content: space-between;
         }
+        .login-link {
+            color: white; text-decoration: none; font-weight: 600; font-size: 0.95rem;
+            padding: 10px 24px; border: 1px solid rgba(255,255,255,0.3); border-radius: 8px;
+            transition: all 0.3s;
+        }
+        .login-link:hover {
+            background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.5);
+        }
         .landing-logo { display: flex; align-items: center; gap: 12px; }
         .landing-logo-icon {
             width: 48px; height: 48px; background: var(--gradient-2); border-radius: 12px;
@@ -475,6 +483,7 @@
                     <span class="landing-logo-icon">🎯</span>
                     <span class="landing-logo-text">DecisionOS</span>
                 </div>
+                <a href="/login" class="login-link">Login</a>
             </header>
 
             <!-- Hero Section -->
@@ -1353,9 +1362,25 @@
         }
 
         window.addEventListener('DOMContentLoaded', () => {
-            // Show landing page by default - don't auto-redirect to app
-            showLoginScreen();
+            // Check if user is logged in
+            checkAuth();
         });
+
+        async function checkAuth() {
+            try {
+                const r = await fetch(`${AUTH_BASE}/user`, { credentials: 'include' });
+                const d = await r.json();
+                if (d.user) {
+                    currentUser = d.user;
+                    showMainApp();
+                } else {
+                    showLoginScreen();
+                }
+            } catch (e) {
+                console.error('Auth check failed:', e);
+                showLoginScreen();
+            }
+        }
         document.getElementById('connection-string').addEventListener('keypress', e => { if (e.key === 'Enter') connectDatabase(); });
 
         // Waitlist submission
