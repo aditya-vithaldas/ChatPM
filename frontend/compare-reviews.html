@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Competitive Comparison - DecisionOS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #6366f1; --primary-dark: #4f46e5; --primary-light: #818cf8;
+            --accent: #f97316; --accent-light: #fb923c;
+            --bg-dark: #0f172a; --bg-darker: #020617;
+            --text-primary: #f8fafc; --text-secondary: #94a3b8; --text-muted: #64748b;
+            --success: #22c55e; --error: #ef4444; --warning: #f59e0b;
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --company1: #3b82f6; --company1-light: #60a5fa;
+            --company2: #ec4899; --company2-light: #f472b6;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .container { max-width: 1400px; margin: 0 auto; padding: 40px 24px; }
+
+        /* Header */
+        .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 48px; }
+        .logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+        .logo-icon {
+            width: 48px; height: 48px;
+            background: linear-gradient(135deg, #f97316 0%, #ec4899 100%);
+            border-radius: 12px; display: flex; align-items: center; justify-content: center;
+            font-size: 24px; box-shadow: 0 4px 16px rgba(249, 115, 22, 0.3);
+        }
+        .logo-text { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.5rem; font-weight: 800; color: white; }
+        .back-link { color: var(--text-secondary); text-decoration: none; font-size: 0.9rem; display: flex; align-items: center; gap: 8px; }
+        .back-link:hover { color: white; }
+
+        /* Page Title */
+        .page-title {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 2.5rem; font-weight: 800; margin-bottom: 12px;
+            background: linear-gradient(135deg, #ffffff 0%, #c7d2fe 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .page-subtitle { color: var(--text-secondary); font-size: 1.1rem; margin-bottom: 12px; }
+        .page-caveat { color: var(--text-muted); font-size: 0.8rem; margin-bottom: 32px; line-height: 1.6; }
+
+        /* Upload Section */
+        .upload-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px; }
+        @media (max-width: 768px) { .upload-grid { grid-template-columns: 1fr; } }
+
+        .upload-card {
+            background: var(--card-bg); border: 1px solid var(--border-color);
+            border-radius: 20px; padding: 24px;
+        }
+        .upload-card.company1 { border-top: 4px solid var(--company1); }
+        .upload-card.company2 { border-top: 4px solid var(--company2); }
+
+        .company-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+        .company-badge {
+            padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;
+        }
+        .company1 .company-badge { background: rgba(59, 130, 246, 0.2); color: var(--company1-light); }
+        .company2 .company-badge { background: rgba(236, 72, 153, 0.2); color: var(--company2-light); }
+
+        .company-name-input {
+            flex: 1; padding: 10px 16px;
+            background: rgba(0, 0, 0, 0.2); border: 1px solid var(--border-color);
+            border-radius: 10px; color: white; font-size: 1rem; font-weight: 600;
+        }
+        .company-name-input::placeholder { color: var(--text-muted); font-weight: 400; }
+        .company-name-input:focus { outline: none; border-color: var(--primary); }
+
+        /* File Upload */
+        .file-upload {
+            border: 2px dashed var(--border-color); border-radius: 16px;
+            padding: 32px; text-align: center; cursor: pointer; transition: all 0.3s;
+        }
+        .company1 .file-upload:hover { border-color: var(--company1); background: rgba(59, 130, 246, 0.05); }
+        .company2 .file-upload:hover { border-color: var(--company2); background: rgba(236, 72, 153, 0.05); }
+        .file-upload.dragover { background: rgba(99, 102, 241, 0.1); }
+        .file-upload-icon { font-size: 36px; margin-bottom: 12px; }
+        .file-upload-text { color: var(--text-secondary); margin-bottom: 6px; font-size: 0.95rem; }
+        .file-upload-hint { color: var(--text-muted); font-size: 0.8rem; }
+        .file-input { display: none; }
+        .file-name { margin-top: 12px; color: var(--success); font-weight: 500; font-size: 0.9rem; }
+
+        /* Paste Toggle */
+        .paste-toggle {
+            margin-top: 16px; padding: 8px 16px;
+            background: transparent; border: 1px solid var(--border-color);
+            border-radius: 8px; color: var(--text-secondary); cursor: pointer;
+            font-size: 0.85rem; transition: all 0.2s;
+        }
+        .paste-toggle:hover { border-color: var(--primary-light); color: white; }
+
+        .paste-area {
+            width: 100%; min-height: 120px; padding: 12px; margin-top: 12px;
+            background: rgba(0, 0, 0, 0.2); border: 1px solid var(--border-color);
+            border-radius: 10px; color: white; font-family: inherit; font-size: 0.9rem;
+            resize: vertical; display: none;
+        }
+        .paste-area.visible { display: block; }
+        .paste-area::placeholder { color: var(--text-muted); }
+        .paste-area:focus { outline: none; border-color: var(--primary); }
+
+        /* Compare Button */
+        .compare-btn {
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            width: 100%; padding: 16px 32px;
+            background: linear-gradient(135deg, #f97316 0%, #ec4899 100%);
+            border: none; border-radius: 12px; color: white;
+            font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1rem; font-weight: 700;
+            cursor: pointer; transition: all 0.3s;
+        }
+        .compare-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(249, 115, 22, 0.4); }
+        .compare-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+        .spinner { width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Results Section */
+        .results-section { display: none; margin-top: 48px; }
+        .results-section.visible { display: block; }
+
+        .results-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; flex-wrap: wrap; gap: 16px; }
+        .results-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.75rem; font-weight: 700; }
+
+        .company-legend { display: flex; gap: 24px; }
+        .legend-item { display: flex; align-items: center; gap: 8px; font-size: 0.95rem; font-weight: 600; }
+        .legend-dot { width: 12px; height: 12px; border-radius: 50%; }
+        .legend-dot.company1 { background: var(--company1); }
+        .legend-dot.company2 { background: var(--company2); }
+
+        /* Comparison Table */
+        .comparison-table {
+            background: var(--card-bg); border: 1px solid var(--border-color);
+            border-radius: 20px; overflow: hidden;
+        }
+
+        .table-header {
+            display: grid; grid-template-columns: 2fr 1fr 1fr 120px;
+            background: rgba(0, 0, 0, 0.3); padding: 16px 24px;
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 600; font-size: 0.9rem; color: var(--text-secondary);
+        }
+        @media (max-width: 768px) {
+            .table-header { grid-template-columns: 1fr 1fr 1fr; }
+            .table-header .attr-col { display: none; }
+        }
+
+        .table-row {
+            display: grid; grid-template-columns: 2fr 1fr 1fr 120px;
+            padding: 20px 24px; border-bottom: 1px solid var(--border-color);
+            align-items: center; transition: background 0.2s;
+        }
+        .table-row:hover { background: rgba(255, 255, 255, 0.02); }
+        .table-row:last-child { border-bottom: none; }
+        @media (max-width: 768px) {
+            .table-row { grid-template-columns: 1fr 1fr 1fr; }
+            .table-row .attr-col { display: none; }
+        }
+
+        .attr-name {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 700; font-size: 1rem; color: white;
+        }
+        .attr-description {
+            font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;
+        }
+
+        .score-cell { text-align: center; }
+        .score-bar {
+            height: 8px; border-radius: 4px; margin-bottom: 6px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .score-fill { height: 100%; border-radius: 4px; transition: width 0.5s ease-out; }
+        .score-fill.company1 { background: linear-gradient(90deg, var(--company1) 0%, var(--company1-light) 100%); }
+        .score-fill.company2 { background: linear-gradient(90deg, var(--company2) 0%, var(--company2-light) 100%); }
+
+        .score-value { font-size: 0.9rem; font-weight: 600; }
+        .score-value.company1 { color: var(--company1-light); }
+        .score-value.company2 { color: var(--company2-light); }
+        .score-value.na { color: var(--text-muted); font-weight: 400; }
+
+        .winner-badge {
+            padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600;
+            text-align: center;
+        }
+        .winner-badge.company1 { background: rgba(59, 130, 246, 0.2); color: var(--company1-light); }
+        .winner-badge.company2 { background: rgba(236, 72, 153, 0.2); color: var(--company2-light); }
+        .winner-badge.tie { background: rgba(255, 255, 255, 0.1); color: var(--text-muted); }
+
+        /* Summary Cards */
+        .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 32px; }
+        @media (max-width: 768px) { .summary-grid { grid-template-columns: 1fr; } }
+
+        .summary-card {
+            background: var(--card-bg); border: 1px solid var(--border-color);
+            border-radius: 16px; padding: 24px;
+        }
+        .summary-card.company1 { border-left: 4px solid var(--company1); }
+        .summary-card.company2 { border-left: 4px solid var(--company2); }
+
+        .summary-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+        .summary-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.1rem; font-weight: 700; }
+        .summary-card.company1 .summary-title { color: var(--company1-light); }
+        .summary-card.company2 .summary-title { color: var(--company2-light); }
+
+        .summary-stats { display: flex; gap: 24px; margin-bottom: 16px; }
+        .stat-item { text-align: center; }
+        .stat-value { font-size: 1.5rem; font-weight: 700; color: white; }
+        .stat-label { font-size: 0.8rem; color: var(--text-muted); }
+
+        .summary-list { list-style: none; }
+        .summary-list li {
+            padding: 8px 0; border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem; color: var(--text-secondary);
+            display: flex; align-items: center; gap: 8px;
+        }
+        .summary-list li:last-child { border-bottom: none; }
+        .summary-list li::before { content: ''; width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+        .summary-card.company1 .summary-list li::before { background: var(--company1); }
+        .summary-card.company2 .summary-list li::before { background: var(--company2); }
+
+        /* Loading Overlay */
+        .loading-overlay {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.7); z-index: 1000;
+            align-items: center; justify-content: center; flex-direction: column; gap: 16px;
+        }
+        .loading-overlay.visible { display: flex; }
+        .loading-text { color: white; font-size: 1.1rem; }
+
+        /* Clickable keyword */
+        .keyword-link {
+            color: var(--primary-light); cursor: pointer; text-decoration: underline;
+            text-decoration-style: dotted;
+        }
+        .keyword-link:hover { color: white; }
+
+        /* Modal */
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.85); z-index: 1000;
+            align-items: center; justify-content: center; padding: 24px;
+        }
+        .modal-overlay.visible { display: flex; }
+
+        .modal-content {
+            background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 20px; max-width: 700px; width: 100%; max-height: 80vh;
+            display: flex; flex-direction: column; overflow: hidden;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 24px 28px; border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .modal-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.25rem; font-weight: 700; color: white; }
+        .modal-close {
+            background: rgba(255, 255, 255, 0.1); border: none; color: white; cursor: pointer;
+            width: 36px; height: 36px; border-radius: 10px; font-size: 1.2rem;
+            display: flex; align-items: center; justify-content: center; transition: all 0.2s;
+        }
+        .modal-close:hover { background: rgba(255, 255, 255, 0.2); }
+
+        .modal-body { padding: 24px 28px; overflow-y: auto; flex: 1; }
+
+        .review-item {
+            padding: 16px; background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px; margin-bottom: 12px;
+            border-left: 4px solid var(--primary);
+        }
+        .review-item.company1 { border-left-color: var(--company1); }
+        .review-item.company2 { border-left-color: var(--company2); }
+        .review-text { color: var(--text-primary); font-size: 0.95rem; line-height: 1.7; }
+        .review-source { margin-top: 8px; font-size: 0.8rem; color: var(--text-muted); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <a href="/" class="logo">
+                <span class="logo-icon">🎯</span>
+                <span class="logo-text">DecisionOS</span>
+            </a>
+            <a href="/" class="back-link">← Back to Home</a>
+        </header>
+
+        <!-- Page Title -->
+        <h1 class="page-title">Competitive Comparison</h1>
+        <p class="page-subtitle">Compare customer reviews between two companies to see how they stack up on key attributes.</p>
+        <p class="page-caveat">
+            <strong>Note:</strong> This is an MVP and not yet integrated with Play Store. To get your reviews:<br>
+            (a) Go to each app's Play Store page → "See all reviews" → copy/paste all content here, or<br>
+            (b) Log into Play Console → export feedback for each app as CSV
+        </p>
+
+        <!-- Upload Section -->
+        <div class="upload-grid">
+            <!-- Company 1 -->
+            <div class="upload-card company1">
+                <div class="company-header">
+                    <span class="company-badge">Company 1</span>
+                    <input type="text" class="company-name-input" id="company1-name" placeholder="Your Company Name">
+                </div>
+                <div class="file-upload" id="file-upload-1" onclick="document.getElementById('file-input-1').click()">
+                    <div class="file-upload-icon">📄</div>
+                    <div class="file-upload-text">Drop CSV or click to upload</div>
+                    <div class="file-upload-hint">Reviews from your app</div>
+                    <input type="file" class="file-input" id="file-input-1" accept=".csv" onchange="handleFileSelect(1, event)">
+                    <div class="file-name" id="file-name-1"></div>
+                </div>
+                <button class="paste-toggle" onclick="togglePaste(1)">Or paste reviews manually</button>
+                <textarea class="paste-area" id="paste-area-1" placeholder="Paste reviews here, one per line..."></textarea>
+            </div>
+
+            <!-- Company 2 -->
+            <div class="upload-card company2">
+                <div class="company-header">
+                    <span class="company-badge">Company 2</span>
+                    <input type="text" class="company-name-input" id="company2-name" placeholder="Competitor Name">
+                </div>
+                <div class="file-upload" id="file-upload-2" onclick="document.getElementById('file-input-2').click()">
+                    <div class="file-upload-icon">📄</div>
+                    <div class="file-upload-text">Drop CSV or click to upload</div>
+                    <div class="file-upload-hint">Reviews from competitor</div>
+                    <input type="file" class="file-input" id="file-input-2" accept=".csv" onchange="handleFileSelect(2, event)">
+                    <div class="file-name" id="file-name-2"></div>
+                </div>
+                <button class="paste-toggle" onclick="togglePaste(2)">Or paste reviews manually</button>
+                <textarea class="paste-area" id="paste-area-2" placeholder="Paste reviews here, one per line..."></textarea>
+            </div>
+        </div>
+
+        <button class="compare-btn" id="compare-btn" onclick="compareReviews()">
+            <span id="btn-text">⚔️ Compare Reviews</span>
+            <span class="spinner" id="btn-spinner" style="display:none"></span>
+        </button>
+
+        <!-- Results Section -->
+        <div class="results-section" id="results-section">
+            <div class="results-header">
+                <h2 class="results-title">Comparison Results</h2>
+                <div class="company-legend">
+                    <div class="legend-item"><span class="legend-dot company1"></span><span id="legend-name-1">Company 1</span></div>
+                    <div class="legend-item"><span class="legend-dot company2"></span><span id="legend-name-2">Company 2</span></div>
+                </div>
+            </div>
+
+            <!-- Comparison Table -->
+            <div class="comparison-table">
+                <div class="table-header">
+                    <div class="attr-col">Attribute</div>
+                    <div>Company 1</div>
+                    <div>Company 2</div>
+                    <div>Winner</div>
+                </div>
+                <div id="comparison-rows"></div>
+            </div>
+
+            <!-- Summary Cards -->
+            <div class="summary-grid">
+                <div class="summary-card company1">
+                    <div class="summary-header">
+                        <h3 class="summary-title" id="summary-name-1">Company 1</h3>
+                    </div>
+                    <div class="summary-stats">
+                        <div class="stat-item">
+                            <div class="stat-value" id="wins-1">0</div>
+                            <div class="stat-label">Wins</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="reviews-count-1">0</div>
+                            <div class="stat-label">Reviews</div>
+                        </div>
+                    </div>
+                    <h4 style="color: var(--success); font-size: 0.9rem; margin-bottom: 8px;">Strengths</h4>
+                    <ul class="summary-list" id="strengths-1"></ul>
+                </div>
+
+                <div class="summary-card company2">
+                    <div class="summary-header">
+                        <h3 class="summary-title" id="summary-name-2">Company 2</h3>
+                    </div>
+                    <div class="summary-stats">
+                        <div class="stat-item">
+                            <div class="stat-value" id="wins-2">0</div>
+                            <div class="stat-label">Wins</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="reviews-count-2">0</div>
+                            <div class="stat-label">Reviews</div>
+                        </div>
+                    </div>
+                    <h4 style="color: var(--success); font-size: 0.9rem; margin-bottom: 8px;">Strengths</h4>
+                    <ul class="summary-list" id="strengths-2"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for viewing reviews -->
+    <div class="modal-overlay" id="reviews-modal" onclick="closeModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modal-title">Reviews</h3>
+                <button class="modal-close" onclick="closeModal()">✕</button>
+            </div>
+            <div class="modal-body" id="modal-body"></div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="spinner" style="width:40px;height:40px;border-width:3px"></div>
+        <div class="loading-text">Analyzing and comparing reviews...</div>
+    </div>
+
+    <script>
+        const API_BASE = '/api';
+        let uploadedFiles = { 1: null, 2: null };
+        let comparisonData = null;
+        let allReviews = { 1: [], 2: [] };
+
+        // File handling
+        function handleFileSelect(company, event) {
+            const file = event.target.files[0];
+            if (file) {
+                uploadedFiles[company] = file;
+                document.getElementById(`file-name-${company}`).textContent = `Selected: ${file.name}`;
+            }
+        }
+
+        function togglePaste(company) {
+            const pasteArea = document.getElementById(`paste-area-${company}`);
+            pasteArea.classList.toggle('visible');
+        }
+
+        // Parse CSV
+        function parseCSV(text) {
+            const lines = text.trim().split('\n');
+            if (lines.length < 2) return lines.map(l => l.trim()).filter(l => l.length > 0);
+
+            const headers = lines[0].toLowerCase().split(',').map(h => h.trim().replace(/"/g, ''));
+            const reviewCol = headers.findIndex(h =>
+                h === 'review' || h === 'text' || h === 'content' || h === 'comment' || h === 'feedback'
+            );
+
+            if (reviewCol === -1) {
+                return lines.map(line => line.trim().replace(/^"|"$/g, '')).filter(r => r.length > 0);
+            }
+
+            const reviews = [];
+            for (let i = 1; i < lines.length; i++) {
+                const values = lines[i].split(',');
+                if (values[reviewCol]) {
+                    reviews.push(values[reviewCol].trim().replace(/^"|"$/g, ''));
+                }
+            }
+            return reviews.filter(r => r.length > 0);
+        }
+
+        // Get reviews from input
+        async function getReviews(company) {
+            const pasteArea = document.getElementById(`paste-area-${company}`);
+            const pasteText = pasteArea.value.trim();
+
+            if (pasteText) {
+                return pasteText.split('\n').map(r => r.trim()).filter(r => r.length > 0);
+            }
+
+            if (uploadedFiles[company]) {
+                const text = await uploadedFiles[company].text();
+                return parseCSV(text);
+            }
+
+            return [];
+        }
+
+        // Compare reviews
+        async function compareReviews() {
+            const reviews1 = await getReviews(1);
+            const reviews2 = await getReviews(2);
+
+            if (reviews1.length === 0) {
+                alert('Please upload or paste reviews for Company 1');
+                return;
+            }
+            if (reviews2.length === 0) {
+                alert('Please upload or paste reviews for Company 2');
+                return;
+            }
+
+            const name1 = document.getElementById('company1-name').value || 'Company 1';
+            const name2 = document.getElementById('company2-name').value || 'Company 2';
+
+            // Store reviews for modal
+            allReviews = { 1: reviews1, 2: reviews2 };
+
+            // Show loading
+            const btn = document.getElementById('compare-btn');
+            const btnText = document.getElementById('btn-text');
+            const spinner = document.getElementById('btn-spinner');
+            const loading = document.getElementById('loading-overlay');
+
+            btn.disabled = true;
+            btnText.style.display = 'none';
+            spinner.style.display = 'inline-block';
+            loading.classList.add('visible');
+
+            try {
+                const response = await fetch(`${API_BASE}/compare-reviews`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        company1: { name: name1, reviews: reviews1 },
+                        company2: { name: name2, reviews: reviews2 }
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+
+                comparisonData = data;
+                displayResults(data, name1, name2, reviews1.length, reviews2.length);
+
+            } catch (error) {
+                console.error('Comparison error:', error);
+                alert('Failed to compare reviews. Please try again.');
+            } finally {
+                btn.disabled = false;
+                btnText.style.display = 'inline';
+                spinner.style.display = 'none';
+                loading.classList.remove('visible');
+            }
+        }
+
+        // Display results
+        function displayResults(data, name1, name2, count1, count2) {
+            const resultsSection = document.getElementById('results-section');
+            resultsSection.classList.add('visible');
+
+            // Update names
+            document.getElementById('legend-name-1').textContent = name1;
+            document.getElementById('legend-name-2').textContent = name2;
+            document.getElementById('summary-name-1').textContent = name1;
+            document.getElementById('summary-name-2').textContent = name2;
+
+            // Count wins
+            let wins1 = 0, wins2 = 0;
+            const strengths1 = [], strengths2 = [];
+
+            // Build comparison rows
+            const rowsContainer = document.getElementById('comparison-rows');
+            rowsContainer.innerHTML = data.attributes.map(attr => {
+                const score1 = attr.company1Score;
+                const score2 = attr.company2Score;
+
+                let winner = 'tie';
+                let winnerLabel = 'Tie';
+                if (score1 !== null && score2 !== null) {
+                    if (score1 > score2) { winner = 'company1'; winnerLabel = name1; wins1++; strengths1.push(attr.name); }
+                    else if (score2 > score1) { winner = 'company2'; winnerLabel = name2; wins2++; strengths2.push(attr.name); }
+                } else if (score1 !== null) {
+                    winner = 'company1'; winnerLabel = name1; wins1++; strengths1.push(attr.name);
+                } else if (score2 !== null) {
+                    winner = 'company2'; winnerLabel = name2; wins2++; strengths2.push(attr.name);
+                }
+
+                return `
+                    <div class="table-row">
+                        <div class="attr-col">
+                            <div class="attr-name">${escapeHtml(attr.name)}</div>
+                            <div class="attr-description">${escapeHtml(attr.description || '')}</div>
+                        </div>
+                        <div class="score-cell">
+                            <div class="score-bar"><div class="score-fill company1" style="width: ${score1 !== null ? score1 : 0}%"></div></div>
+                            ${score1 !== null
+                                ? `<span class="score-value company1 keyword-link" onclick="showReviews('${escapeHtml(attr.name)}', 1)">${score1}/100</span>`
+                                : '<span class="score-value na">N/A</span>'
+                            }
+                        </div>
+                        <div class="score-cell">
+                            <div class="score-bar"><div class="score-fill company2" style="width: ${score2 !== null ? score2 : 0}%"></div></div>
+                            ${score2 !== null
+                                ? `<span class="score-value company2 keyword-link" onclick="showReviews('${escapeHtml(attr.name)}', 2)">${score2}/100</span>`
+                                : '<span class="score-value na">N/A</span>'
+                            }
+                        </div>
+                        <div><span class="winner-badge ${winner}">${winnerLabel}</span></div>
+                    </div>
+                `;
+            }).join('');
+
+            // Update summary stats
+            document.getElementById('wins-1').textContent = wins1;
+            document.getElementById('wins-2').textContent = wins2;
+            document.getElementById('reviews-count-1').textContent = count1;
+            document.getElementById('reviews-count-2').textContent = count2;
+
+            // Update strengths lists
+            document.getElementById('strengths-1').innerHTML = strengths1.slice(0, 5).map(s => `<li>${escapeHtml(s)}</li>`).join('') || '<li style="color: var(--text-muted)">No clear strengths identified</li>';
+            document.getElementById('strengths-2').innerHTML = strengths2.slice(0, 5).map(s => `<li>${escapeHtml(s)}</li>`).join('') || '<li style="color: var(--text-muted)">No clear strengths identified</li>';
+
+            // Scroll to results
+            resultsSection.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Show reviews modal
+        function showReviews(attributeName, company) {
+            const modal = document.getElementById('reviews-modal');
+            const title = document.getElementById('modal-title');
+            const body = document.getElementById('modal-body');
+
+            const attr = comparisonData.attributes.find(a => a.name === attributeName);
+            const sentences = company === 1 ? attr?.company1Sentences : attr?.company2Sentences;
+            const companyName = company === 1
+                ? document.getElementById('company1-name').value || 'Company 1'
+                : document.getElementById('company2-name').value || 'Company 2';
+
+            title.textContent = `${companyName} - ${attributeName}`;
+
+            if (sentences && sentences.length > 0) {
+                body.innerHTML = sentences.map((s, i) => `
+                    <div class="review-item company${company}">
+                        <div class="review-text">${escapeHtml(s)}</div>
+                        <div class="review-source">Review ${i + 1}</div>
+                    </div>
+                `).join('');
+            } else {
+                body.innerHTML = '<p style="color: var(--text-muted);">No specific reviews found for this attribute.</p>';
+            }
+
+            modal.classList.add('visible');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(event) {
+            if (event && event.target !== event.currentTarget) return;
+            document.getElementById('reviews-modal').classList.remove('visible');
+            document.body.style.overflow = '';
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Drag and drop for both upload areas
+        [1, 2].forEach(company => {
+            const fileUpload = document.getElementById(`file-upload-${company}`);
+
+            fileUpload.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                fileUpload.classList.add('dragover');
+            });
+
+            fileUpload.addEventListener('dragleave', () => {
+                fileUpload.classList.remove('dragover');
+            });
+
+            fileUpload.addEventListener('drop', (e) => {
+                e.preventDefault();
+                fileUpload.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length > 0 && files[0].name.endsWith('.csv')) {
+                    uploadedFiles[company] = files[0];
+                    document.getElementById(`file-name-${company}`).textContent = `Selected: ${files[0].name}`;
+                }
+            });
+        });
+    </script>
+</body>
+</html>

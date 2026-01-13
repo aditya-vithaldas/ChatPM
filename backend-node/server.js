@@ -911,9 +911,135 @@ ${reviews.slice(0, 100).map((r, i) => `${i + 1}. ${r}`).join('\n')}`;
   }
 });
 
+// Competitive Comparison endpoint
+app.post('/api/compare-reviews', async (req, res) => {
+  try {
+    const { company1, company2 } = req.body;
+
+    if (!company1?.reviews?.length || !company2?.reviews?.length) {
+      return res.status(400).json({ error: 'Reviews for both companies are required' });
+    }
+
+    // Use OpenAI to compare reviews
+    if (openai) {
+      const prompt = `You are a competitive analyst. Compare customer reviews from two companies and rate each on common attributes.
+
+TASK: Identify the key PRODUCT ATTRIBUTES mentioned across both sets of reviews, then score each company on those attributes.
+
+RULES FOR ATTRIBUTES:
+- Use functional feature names: "customer support", "pricing", "mobile app", "checkout process", "user interface", "performance", "shipping", "onboarding", "notifications", "search functionality"
+- NEVER use generic terms like "overall experience", "quality", "satisfaction"
+- Each attribute should be something concrete you can point to in the product
+
+SCORING:
+- Score from 0-100 based on sentiment in the reviews
+- Higher = more positive mentions relative to total mentions
+- If an attribute isn't mentioned for a company, set score to null
+- Base scores on actual review content, not assumptions
+
+Company 1 (${company1.name}): ${company1.reviews.length} reviews
+Company 2 (${company2.name}): ${company2.reviews.length} reviews
+
+Return JSON:
+{
+  "attributes": [
+    {
+      "name": "attribute name (functional feature)",
+      "description": "What this attribute covers",
+      "company1Score": number or null,
+      "company2Score": number or null,
+      "company1Sentences": ["exact review excerpts mentioning this"],
+      "company2Sentences": ["exact review excerpts mentioning this"]
+    }
+  ]
+}
+
+Include 6-10 attributes that are actually discussed in the reviews. Sort by total relevance (most discussed first).
+
+Company 1 Reviews:
+${company1.reviews.slice(0, 50).map((r, i) => `${i + 1}. ${r}`).join('\n')}
+
+Company 2 Reviews:
+${company2.reviews.slice(0, 50).map((r, i) => `${i + 1}. ${r}`).join('\n')}`;
+
+      try {
+        const response = await openai.chat.completions.create({
+          model: 'gpt-4o-mini',
+          messages: [{ role: 'user', content: prompt }],
+          temperature: 0.3,
+          response_format: { type: 'json_object' }
+        });
+
+        const result = JSON.parse(response.choices[0].message.content);
+        return res.json(result);
+      } catch (aiError) {
+        console.error('OpenAI error:', aiError);
+      }
+    }
+
+    // Fallback: basic attribute comparison without AI
+    console.log('Using fallback comparison (no AI)');
+
+    const attributeKeywords = {
+      'Customer Support': ['support', 'help', 'service', 'response', 'agent'],
+      'User Interface': ['interface', 'ui', 'design', 'layout', 'look'],
+      'Performance': ['fast', 'slow', 'speed', 'loading', 'crash'],
+      'Pricing': ['price', 'cost', 'expensive', 'cheap', 'value'],
+      'Mobile App': ['app', 'mobile', 'phone', 'android', 'ios'],
+      'Checkout Process': ['checkout', 'payment', 'purchase', 'cart'],
+      'Shipping': ['shipping', 'delivery', 'arrived', 'package'],
+      'Onboarding': ['signup', 'register', 'onboard', 'started']
+    };
+
+    const positiveWords = ['great', 'good', 'love', 'excellent', 'amazing', 'best', 'easy', 'fast', 'helpful', 'awesome'];
+    const negativeWords = ['bad', 'terrible', 'slow', 'crash', 'worst', 'hate', 'difficult', 'poor', 'awful'];
+
+    function analyzeAttribute(reviews, keywords) {
+      let positive = 0, negative = 0, sentences = [];
+      reviews.forEach(review => {
+        const lower = review.toLowerCase();
+        if (keywords.some(k => lower.includes(k))) {
+          const isPositive = positiveWords.some(w => lower.includes(w));
+          const isNegative = negativeWords.some(w => lower.includes(w));
+          if (isPositive) positive++;
+          if (isNegative) negative++;
+          if (sentences.length < 3) sentences.push(review);
+        }
+      });
+      const total = positive + negative;
+      if (total === 0) return { score: null, sentences: [] };
+      return { score: Math.round((positive / total) * 100), sentences };
+    }
+
+    const attributes = Object.entries(attributeKeywords).map(([name, keywords]) => {
+      const c1 = analyzeAttribute(company1.reviews, keywords);
+      const c2 = analyzeAttribute(company2.reviews, keywords);
+      return {
+        name,
+        description: `How customers rated ${name.toLowerCase()}`,
+        company1Score: c1.score,
+        company2Score: c2.score,
+        company1Sentences: c1.sentences,
+        company2Sentences: c2.sentences
+      };
+    }).filter(a => a.company1Score !== null || a.company2Score !== null);
+
+    res.json({ attributes });
+
+  } catch (error) {
+    console.error('Comparison error:', error);
+    res.status(500).json({ error: 'Failed to compare reviews' });
+  }
+});
+
 // Serve review-analyzer page
 app.get('/review-analyzer', (req, res) => {
   res.sendFile(path.join(FRONTEND_PATH, 'review-analyzer.html'));
+});
+
+// Serve compare-reviews page
+app.get('/compare-reviews', (req, res) => {
+  res.sendFile(path.join(FRONTEND_PATH, 'compare-reviews.html'));
 });
 
 // Health check
