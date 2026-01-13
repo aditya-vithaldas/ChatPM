@@ -256,6 +256,11 @@ Customer support was very helpful."></textarea>
                 <span id="btn-text">🔍 Analyze Reviews</span>
                 <span class="spinner" id="btn-spinner" style="display:none"></span>
             </button>
+
+            <button class="analyze-btn" id="sample-btn" onclick="loadSampleAndAnalyze()" style="margin-top: 12px; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);">
+                <span id="sample-btn-text">🧪 Analyze Sample App (ChatGPT)</span>
+                <span class="spinner" id="sample-btn-spinner" style="display:none"></span>
+            </button>
         </div>
 
         <!-- Results Section -->
@@ -603,6 +608,53 @@ Customer support was very helpful."></textarea>
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
+        }
+
+        // Sample ChatGPT reviews for demo
+        const sampleChatGPTReviews = [
+            "Amazing app! The AI responses are incredibly helpful and accurate. Best productivity tool I've ever used.",
+            "Love the voice feature, makes it so easy to interact while driving. Customer support was quick when I had billing questions.",
+            "The mobile app crashes sometimes when I switch between chats. Needs better stability.",
+            "Subscription pricing is too expensive for what you get. The free tier is very limited.",
+            "Search functionality within conversations is excellent. Finally found that recipe from months ago!",
+            "The user interface is clean and intuitive. Easy to navigate even for my parents.",
+            "Response speed has improved dramatically. No more waiting 30 seconds for answers.",
+            "Code assistance feature is a game changer for developers. Saved me hours of debugging.",
+            "Notifications are annoying and too frequent. Had to turn them all off.",
+            "Image generation quality is impressive but sometimes takes too long to process.",
+            "The app drains my battery quickly. Needs optimization for mobile devices.",
+            "Customer support never responded to my refund request. Very disappointed.",
+            "Love the new memory feature - it remembers my preferences across conversations!",
+            "Offline mode would be amazing. Can't use it during my commute on the subway.",
+            "The plugins and integrations work seamlessly. Connected it to my calendar easily.",
+            "Sometimes gives incorrect information presented confidently. Always double-check facts.",
+            "Dark mode is perfect for late night use. Easy on the eyes.",
+            "File upload feature is clunky. Takes forever to process PDFs.",
+            "Best AI assistant on the market. Completely replaced my need for Google searches.",
+            "Wish there was a family plan option. Paying for multiple subscriptions is costly."
+        ];
+
+        async function loadSampleAndAnalyze() {
+            // Switch to paste tab and load sample data
+            switchTab('paste');
+            document.getElementById('paste-area').value = sampleChatGPTReviews.join('\n');
+
+            // Show loading on sample button
+            const btn = document.getElementById('sample-btn');
+            const btnText = document.getElementById('sample-btn-text');
+            const spinner = document.getElementById('sample-btn-spinner');
+
+            btn.disabled = true;
+            btnText.style.display = 'none';
+            spinner.style.display = 'inline-block';
+
+            // Trigger analysis
+            await analyzeReviews();
+
+            // Reset button
+            btn.disabled = false;
+            btnText.style.display = 'inline';
+            spinner.style.display = 'none';
         }
     </script>
 </body>

@@ -348,6 +348,11 @@
             <span class="spinner" id="btn-spinner" style="display:none"></span>
         </button>
 
+        <button class="compare-btn" id="sample-btn" onclick="loadSampleAndCompare()" style="margin-top: 12px; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);">
+            <span id="sample-btn-text">🧪 Compare Sample Apps (ChatGPT vs Gemini)</span>
+            <span class="spinner" id="sample-btn-spinner" style="display:none"></span>
+        </button>
+
         <!-- Results Section -->
         <div class="results-section" id="results-section">
             <div class="results-header">
@@ -689,6 +694,83 @@
                 }
             });
         });
+
+        // Sample reviews for ChatGPT
+        const sampleChatGPTReviews = [
+            "Amazing app! The AI responses are incredibly helpful and accurate. Best productivity tool I've ever used.",
+            "Love the voice feature, makes it so easy to interact while driving. Customer support was quick when I had billing questions.",
+            "The mobile app crashes sometimes when I switch between chats. Needs better stability.",
+            "Subscription pricing is too expensive for what you get. The free tier is very limited.",
+            "Search functionality within conversations is excellent. Finally found that recipe from months ago!",
+            "The user interface is clean and intuitive. Easy to navigate even for my parents.",
+            "Response speed has improved dramatically. No more waiting 30 seconds for answers.",
+            "Code assistance feature is a game changer for developers. Saved me hours of debugging.",
+            "Notifications are annoying and too frequent. Had to turn them all off.",
+            "Image generation quality is impressive but sometimes takes too long to process.",
+            "The app drains my battery quickly. Needs optimization for mobile devices.",
+            "Customer support never responded to my refund request. Very disappointed.",
+            "Love the new memory feature - it remembers my preferences across conversations!",
+            "Offline mode would be amazing. Can't use it during my commute on the subway.",
+            "The plugins and integrations work seamlessly. Connected it to my calendar easily.",
+            "Sometimes gives incorrect information presented confidently. Always double-check facts.",
+            "Dark mode is perfect for late night use. Easy on the eyes.",
+            "File upload feature is clunky. Takes forever to process PDFs.",
+            "Best AI assistant on the market. Completely replaced my need for Google searches.",
+            "Wish there was a family plan option. Paying for multiple subscriptions is costly."
+        ];
+
+        // Sample reviews for Gemini
+        const sampleGeminiReviews = [
+            "Google integration is seamless - works perfectly with my Gmail and Drive. Love having everything connected.",
+            "The free tier is generous compared to competitors. Great value for casual users.",
+            "Response quality is inconsistent. Sometimes brilliant, sometimes completely off-topic.",
+            "Mobile app performance is smooth and fast. Never crashes on my Pixel phone.",
+            "Image understanding capabilities are impressive. It accurately describes complex photos.",
+            "The user interface feels cluttered with too many options. Hard to find basic features.",
+            "Customer support through Google is nearly impossible to reach. Just automated responses.",
+            "Love the real-time information - it knows current events unlike other AI assistants.",
+            "Multimodal features are ahead of the competition. Voice, image, and text all work great together.",
+            "Pricing tiers are confusing. Not sure what I'm paying for with the premium subscription.",
+            "Search results integration makes fact-checking easy. Trust the answers more.",
+            "Sometimes the app is slow to respond, especially during peak hours.",
+            "The extensions for Workspace are incredibly useful for my business workflows.",
+            "Notifications are well-managed. Not intrusive at all compared to other apps.",
+            "Code generation is decent but not as good as specialized coding assistants.",
+            "Battery usage is optimized well. Can use it all day without draining my phone.",
+            "Wish there was better conversation history organization. Hard to find old chats.",
+            "The AI personality feels more natural and conversational than competitors.",
+            "Export options are limited. Can't easily save conversations for later reference.",
+            "Overall a solid alternative that keeps improving with each update."
+        ];
+
+        async function loadSampleAndCompare() {
+            // Set company names
+            document.getElementById('company1-name').value = 'ChatGPT';
+            document.getElementById('company2-name').value = 'Gemini';
+
+            // Show paste areas and fill with sample data
+            document.getElementById('paste-area-1').classList.add('visible');
+            document.getElementById('paste-area-2').classList.add('visible');
+            document.getElementById('paste-area-1').value = sampleChatGPTReviews.join('\n');
+            document.getElementById('paste-area-2').value = sampleGeminiReviews.join('\n');
+
+            // Show loading on sample button
+            const btn = document.getElementById('sample-btn');
+            const btnText = document.getElementById('sample-btn-text');
+            const spinner = document.getElementById('sample-btn-spinner');
+
+            btn.disabled = true;
+            btnText.style.display = 'none';
+            spinner.style.display = 'inline-block';
+
+            // Trigger comparison
+            await compareReviews();
+
+            // Reset button
+            btn.disabled = false;
+            btnText.style.display = 'inline';
+            spinner.style.display = 'none';
+        }
     </script>
 </body>
 </html>
