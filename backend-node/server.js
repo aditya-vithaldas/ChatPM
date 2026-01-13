@@ -728,9 +728,15 @@ FORBIDDEN KEYWORDS (NEVER use these as keywords):
 
 Return JSON:
 {
-  "pros": [{"keyword": "feature name", "summary": "2-3 sentence description of what users said about this feature", "count": number, "sentences": ["review1", "review2"]}],
-  "cons": [{"keyword": "feature name", "summary": "2-3 sentence description of what users said about this feature", "count": number, "sentences": ["review1", "review2"]}]
+  "pros": [{"keyword": "feature name", "summary": "2-3 sentence description", "count": number, "sentences": ["exact review text 1", "exact review text 2"], "searchTerms": ["term1", "term2"]}],
+  "cons": [{"keyword": "feature name", "summary": "2-3 sentence description", "count": number, "sentences": ["exact review text 1", "exact review text 2"], "searchTerms": ["term1", "term2"]}]
 }
+
+CRITICAL FOR "sentences" FIELD:
+- Include the EXACT, COMPLETE review text from the input - copy it word for word
+- Only include reviews that ACTUALLY mention this feature/attribute
+- These must be real reviews from the input, not summaries or paraphrases
+- "searchTerms" should list the actual words/phrases from reviews that relate to this keyword (e.g., for "customer support": ["support", "help desk", "customer service", "agent"])
 
 Example good output:
 - keyword: "customer support" NOT "helpful"

@@ -308,6 +308,7 @@ Customer support was very helpful."></textarea>
     <script>
         const API_BASE = '/api';
         let currentData = null;
+        let originalReviews = [];
         let uploadedFile = null;
 
         // Tab switching
@@ -427,6 +428,7 @@ Customer support was very helpful."></textarea>
                 }
 
                 currentData = data;
+                originalReviews = reviews;
                 displayResults(data, reviews.length);
 
             } catch (error) {
@@ -505,19 +507,46 @@ Customer support was very helpful."></textarea>
             const subtitle = document.getElementById('modal-subtitle');
             const list = document.getElementById('sentences-list');
 
-            // Find sentences containing this keyword
+            // Find data for this keyword
             const keywordData = type === 'pro'
                 ? currentData.pros.find(p => p.keyword === keyword)
                 : currentData.cons.find(c => c.keyword === keyword);
 
-            const sentenceCount = keywordData?.sentences?.length || 0;
+            // Get search terms for filtering (keyword + any searchTerms from AI)
+            const searchTerms = [keyword.toLowerCase()];
+            if (keywordData?.searchTerms) {
+                searchTerms.push(...keywordData.searchTerms.map(t => t.toLowerCase()));
+            }
+            // Add common variations
+            const keywordWords = keyword.toLowerCase().split(' ');
+            searchTerms.push(...keywordWords);
+
+            // Filter original reviews to find actual matches
+            let matchingReviews = [];
+            if (keywordData?.sentences && keywordData.sentences.length > 0) {
+                // Verify the AI-provided sentences actually contain relevant terms
+                matchingReviews = keywordData.sentences.filter(sentence => {
+                    const lowerSentence = sentence.toLowerCase();
+                    return searchTerms.some(term => lowerSentence.includes(term));
+                });
+            }
+
+            // If AI sentences don't match, fall back to filtering original reviews
+            if (matchingReviews.length === 0 && originalReviews.length > 0) {
+                matchingReviews = originalReviews.filter(review => {
+                    const lowerReview = review.toLowerCase();
+                    return searchTerms.some(term => lowerReview.includes(term));
+                });
+            }
+
+            const sentenceCount = matchingReviews.length;
             title.textContent = `Reviews mentioning "${keyword}"`;
             subtitle.textContent = `${sentenceCount} matching review${sentenceCount !== 1 ? 's' : ''}`;
 
-            if (keywordData && keywordData.sentences) {
-                list.innerHTML = keywordData.sentences.map((sentence, i) => `
+            if (sentenceCount > 0) {
+                list.innerHTML = matchingReviews.map((sentence, i) => `
                     <div class="sentence-item ${type}">
-                        <div class="sentence-text">${highlightKeyword(escapeHtml(sentence), keyword)}</div>
+                        <div class="sentence-text">${highlightKeywords(escapeHtml(sentence), searchTerms)}</div>
                         <div class="sentence-meta">Review ${i + 1} of ${sentenceCount}</div>
                     </div>
                 `).join('');
@@ -544,6 +573,19 @@ Customer support was very helpful."></textarea>
         function highlightKeyword(text, keyword) {
             const regex = new RegExp(`(${keyword})`, 'gi');
             return text.replace(regex, '<mark>$1</mark>');
+        }
+
+        function highlightKeywords(text, keywords) {
+            let result = text;
+            // Sort by length descending to match longer phrases first
+            const sortedKeywords = [...keywords].sort((a, b) => b.length - a.length);
+            for (const keyword of sortedKeywords) {
+                if (keyword.length > 1) { // Skip single characters
+                    const regex = new RegExp(`(${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+                    result = result.replace(regex, '<mark>$1</mark>');
+                }
+            }
+            return result;
         }
 
         function escapeHtml(text) {
