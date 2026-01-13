@@ -297,6 +297,54 @@
         .review-item.company2 { border-left-color: var(--company2); }
         .review-text { color: var(--text-primary); font-size: 0.95rem; line-height: 1.7; }
         .review-source { margin-top: 8px; font-size: 0.8rem; color: var(--text-muted); }
+
+        /* Feedback Button */
+        .feedback-btn {
+            position: fixed; bottom: 24px; right: 24px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            border: none; border-radius: 50px; padding: 12px 20px;
+            color: white; font-size: 0.9rem; font-weight: 600;
+            cursor: pointer; box-shadow: 0 4px 16px rgba(99, 102, 241, 0.4);
+            display: flex; align-items: center; gap: 8px;
+            transition: all 0.3s; z-index: 100;
+        }
+        .feedback-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5); }
+
+        /* Feedback Modal */
+        .feedback-modal {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.8); z-index: 1001;
+            align-items: center; justify-content: center; padding: 24px;
+        }
+        .feedback-modal.visible { display: flex; }
+        .feedback-content {
+            background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+            border: 1px solid var(--border-color); border-radius: 20px;
+            padding: 32px; max-width: 500px; width: 100%;
+        }
+        .feedback-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.5rem; font-weight: 700; margin-bottom: 8px; }
+        .feedback-subtitle { color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 24px; }
+        .feedback-textarea {
+            width: 100%; min-height: 150px; padding: 16px;
+            background: rgba(0, 0, 0, 0.3); border: 1px solid var(--border-color);
+            border-radius: 12px; color: white; font-family: inherit; font-size: 0.95rem;
+            resize: vertical; margin-bottom: 16px;
+        }
+        .feedback-textarea::placeholder { color: var(--text-muted); }
+        .feedback-textarea:focus { outline: none; border-color: var(--primary); }
+        .feedback-actions { display: flex; gap: 12px; justify-content: flex-end; }
+        .feedback-cancel {
+            padding: 10px 20px; background: transparent; border: 1px solid var(--border-color);
+            border-radius: 8px; color: var(--text-secondary); cursor: pointer; font-size: 0.9rem;
+        }
+        .feedback-cancel:hover { border-color: var(--text-secondary); color: white; }
+        .feedback-submit {
+            padding: 10px 20px; background: var(--primary); border: none;
+            border-radius: 8px; color: white; cursor: pointer; font-size: 0.9rem; font-weight: 600;
+        }
+        .feedback-submit:hover { background: var(--primary-dark); }
+        .feedback-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+        .feedback-success { color: var(--success); text-align: center; padding: 20px; font-size: 1.1rem; }
     </style>
 </head>
 <body>
@@ -832,6 +880,77 @@
                 spinner.style.display = 'none';
             }
         }
+
+        // Feedback functions
+        function openFeedback() {
+            document.getElementById('feedback-modal').classList.add('visible');
+            document.getElementById('feedback-text').value = '';
+            document.getElementById('feedback-form').style.display = 'block';
+            document.getElementById('feedback-success').style.display = 'none';
+        }
+
+        function closeFeedback() {
+            document.getElementById('feedback-modal').classList.remove('visible');
+        }
+
+        async function submitFeedback() {
+            const text = document.getElementById('feedback-text').value.trim();
+            if (!text) {
+                alert('Please enter your feedback');
+                return;
+            }
+
+            const btn = document.getElementById('feedback-submit-btn');
+            btn.disabled = true;
+            btn.textContent = 'Sending...';
+
+            try {
+                const response = await fetch('/api/feedback', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        page: 'compare-reviews',
+                        feedback: text,
+                        timestamp: new Date().toISOString()
+                    })
+                });
+
+                if (response.ok) {
+                    document.getElementById('feedback-form').style.display = 'none';
+                    document.getElementById('feedback-success').style.display = 'block';
+                    setTimeout(closeFeedback, 2000);
+                } else {
+                    alert('Failed to submit feedback. Please try again.');
+                }
+            } catch (error) {
+                console.error('Feedback error:', error);
+                alert('Failed to submit feedback. Please try again.');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Submit';
+            }
+        }
     </script>
+
+    <!-- Feedback Button -->
+    <button class="feedback-btn" onclick="openFeedback()">💬 Feedback</button>
+
+    <!-- Feedback Modal -->
+    <div class="feedback-modal" id="feedback-modal" onclick="if(event.target===this)closeFeedback()">
+        <div class="feedback-content">
+            <div id="feedback-form">
+                <h3 class="feedback-title">Share Your Feedback</h3>
+                <p class="feedback-subtitle">Help us improve! Tell us what you think about this tool.</p>
+                <textarea class="feedback-textarea" id="feedback-text" placeholder="What's working well? What could be better? Any feature requests?"></textarea>
+                <div class="feedback-actions">
+                    <button class="feedback-cancel" onclick="closeFeedback()">Cancel</button>
+                    <button class="feedback-submit" id="feedback-submit-btn" onclick="submitFeedback()">Submit</button>
+                </div>
+            </div>
+            <div id="feedback-success" class="feedback-success" style="display:none">
+                ✅ Thank you for your feedback!
+            </div>
+        </div>
+    </div>
 </body>
 </html>

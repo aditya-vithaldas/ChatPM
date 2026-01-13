@@ -50,11 +50,12 @@ if (process.env.OPENAI_API_KEY) {
   openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 }
 
-// Firestore for persistent waitlist storage
+// Firestore for persistent storage
 const firestore = new Firestore({
   projectId: 'striking-loop-447915-q3'
 });
 const waitlistCollection = firestore.collection('waitlist');
+const feedbackCollection = firestore.collection('feedback');
 
 // Middleware
 app.use(express.json({ limit: '10mb' }));
@@ -691,6 +692,32 @@ app.get('/api/waitlist', async (req, res) => {
   } catch (error) {
     console.error('Waitlist fetch error:', error);
     res.status(500).json({ error: 'Failed to fetch waitlist' });
+  }
+});
+
+// Feedback endpoint
+app.post('/api/feedback', async (req, res) => {
+  try {
+    const { page, feedback, timestamp } = req.body;
+
+    if (!feedback || !feedback.trim()) {
+      return res.status(400).json({ error: 'Feedback is required' });
+    }
+
+    // Save feedback to Firestore
+    const docRef = await feedbackCollection.add({
+      page: page || 'unknown',
+      feedback: feedback.trim(),
+      timestamp: timestamp || new Date().toISOString(),
+      createdAt: new Date(),
+      userAgent: req.headers['user-agent'] || 'unknown'
+    });
+
+    console.log(`New feedback from ${page}: ${feedback.substring(0, 50)}...`);
+    res.json({ success: true, id: docRef.id });
+  } catch (error) {
+    console.error('Feedback error:', error);
+    res.status(500).json({ error: 'Failed to save feedback' });
   }
 });
 
