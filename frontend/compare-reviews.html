@@ -587,11 +587,24 @@
             let wins1 = 0, wins2 = 0;
             const strengths1 = [], strengths2 = [];
 
-            // Helper to truncate blurb
-            function truncateBlurb(text, maxLen = 80) {
+            // Helper to get complete sentence(s) from review
+            function getCompleteSentences(text, maxLen = 200) {
                 if (!text) return '';
-                if (text.length <= maxLen) return text;
-                return text.substring(0, maxLen).trim() + '...';
+                // Split by sentence endings
+                const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
+                let result = '';
+                for (const sentence of sentences) {
+                    if (result.length + sentence.length <= maxLen) {
+                        result += sentence;
+                    } else if (result.length === 0) {
+                        // At least include the first sentence even if long
+                        result = sentence;
+                        break;
+                    } else {
+                        break;
+                    }
+                }
+                return result.trim() || text.substring(0, maxLen).trim() + '...';
             }
 
             // Build comparison rows
@@ -622,9 +635,9 @@
                     winner2Class = 'winner';
                 }
 
-                // Get first sentence from reviews as blurb
-                const blurb1 = attr.company1Sentences?.[0] ? truncateBlurb(attr.company1Sentences[0]) : '';
-                const blurb2 = attr.company2Sentences?.[0] ? truncateBlurb(attr.company2Sentences[0]) : '';
+                // Get complete sentence(s) from reviews as blurb
+                const blurb1 = attr.company1Sentences?.[0] ? getCompleteSentences(attr.company1Sentences[0]) : '';
+                const blurb2 = attr.company2Sentences?.[0] ? getCompleteSentences(attr.company2Sentences[0]) : '';
 
                 return `
                     <div class="table-row">
