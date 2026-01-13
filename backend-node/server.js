@@ -696,6 +696,11 @@ app.get('/api/waitlist', async (req, res) => {
 
 // Review Analyzer endpoint
 app.post('/api/analyze-reviews', async (req, res) => {
+  // Prevent caching of API responses
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.set('Pragma', 'no-cache');
+  res.set('Expires', '0');
+
   try {
     const { reviews } = req.body;
 
@@ -913,6 +918,11 @@ ${reviews.slice(0, 100).map((r, i) => `${i + 1}. ${r}`).join('\n')}`;
 
 // Competitive Comparison endpoint
 app.post('/api/compare-reviews', async (req, res) => {
+  // Prevent caching of API responses
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.set('Pragma', 'no-cache');
+  res.set('Expires', '0');
+
   try {
     const { company1, company2 } = req.body;
 
