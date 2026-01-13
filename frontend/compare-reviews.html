@@ -189,6 +189,19 @@
         .score-value.company2 { color: var(--company2-light); }
         .score-value.na { color: var(--text-muted); font-weight: 400; }
 
+        .score-blurb {
+            font-size: 0.75rem; color: var(--text-muted); margin-top: 6px;
+            line-height: 1.4; text-align: left; padding: 0 4px;
+        }
+
+        .score-cell.winner .score-value {
+            color: var(--success) !important;
+            font-weight: 700;
+        }
+        .score-cell.winner .score-bar .score-fill {
+            background: linear-gradient(90deg, var(--success) 0%, #4ade80 100%) !important;
+        }
+
         .winner-badge {
             padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600;
             text-align: center;
@@ -369,8 +382,8 @@
             <div class="comparison-table">
                 <div class="table-header">
                     <div class="attr-col">Attribute</div>
-                    <div>Company 1</div>
-                    <div>Company 2</div>
+                    <div id="header-name-1">Company 1</div>
+                    <div id="header-name-2">Company 2</div>
                     <div>Winner</div>
                 </div>
                 <div id="comparison-rows"></div>
@@ -562,15 +575,24 @@
             const resultsSection = document.getElementById('results-section');
             resultsSection.classList.add('visible');
 
-            // Update names
+            // Update names everywhere
             document.getElementById('legend-name-1').textContent = name1;
             document.getElementById('legend-name-2').textContent = name2;
             document.getElementById('summary-name-1').textContent = name1;
             document.getElementById('summary-name-2').textContent = name2;
+            document.getElementById('header-name-1').textContent = name1;
+            document.getElementById('header-name-2').textContent = name2;
 
             // Count wins
             let wins1 = 0, wins2 = 0;
             const strengths1 = [], strengths2 = [];
+
+            // Helper to truncate blurb
+            function truncateBlurb(text, maxLen = 80) {
+                if (!text) return '';
+                if (text.length <= maxLen) return text;
+                return text.substring(0, maxLen).trim() + '...';
+            }
 
             // Build comparison rows
             const rowsContainer = document.getElementById('comparison-rows');
@@ -580,14 +602,29 @@
 
                 let winner = 'tie';
                 let winnerLabel = 'Tie';
+                let winner1Class = '';
+                let winner2Class = '';
+
                 if (score1 !== null && score2 !== null) {
-                    if (score1 > score2) { winner = 'company1'; winnerLabel = name1; wins1++; strengths1.push(attr.name); }
-                    else if (score2 > score1) { winner = 'company2'; winnerLabel = name2; wins2++; strengths2.push(attr.name); }
+                    if (score1 > score2) {
+                        winner = 'company1'; winnerLabel = name1; wins1++; strengths1.push(attr.name);
+                        winner1Class = 'winner';
+                    }
+                    else if (score2 > score1) {
+                        winner = 'company2'; winnerLabel = name2; wins2++; strengths2.push(attr.name);
+                        winner2Class = 'winner';
+                    }
                 } else if (score1 !== null) {
                     winner = 'company1'; winnerLabel = name1; wins1++; strengths1.push(attr.name);
+                    winner1Class = 'winner';
                 } else if (score2 !== null) {
                     winner = 'company2'; winnerLabel = name2; wins2++; strengths2.push(attr.name);
+                    winner2Class = 'winner';
                 }
+
+                // Get first sentence from reviews as blurb
+                const blurb1 = attr.company1Sentences?.[0] ? truncateBlurb(attr.company1Sentences[0]) : '';
+                const blurb2 = attr.company2Sentences?.[0] ? truncateBlurb(attr.company2Sentences[0]) : '';
 
                 return `
                     <div class="table-row">
@@ -595,19 +632,21 @@
                             <div class="attr-name">${escapeHtml(attr.name)}</div>
                             <div class="attr-description">${escapeHtml(attr.description || '')}</div>
                         </div>
-                        <div class="score-cell">
+                        <div class="score-cell ${winner1Class}">
                             <div class="score-bar"><div class="score-fill company1" style="width: ${score1 !== null ? score1 : 0}%"></div></div>
                             ${score1 !== null
-                                ? `<span class="score-value company1 keyword-link" onclick="showReviews('${escapeHtml(attr.name)}', 1)">${score1}/100</span>`
+                                ? `<span class="score-value company1 keyword-link ${winner1Class}" onclick="showReviews('${escapeHtml(attr.name)}', 1)">${score1}/100</span>`
                                 : '<span class="score-value na">N/A</span>'
                             }
+                            ${blurb1 ? `<div class="score-blurb">"${escapeHtml(blurb1)}"</div>` : ''}
                         </div>
-                        <div class="score-cell">
+                        <div class="score-cell ${winner2Class}">
                             <div class="score-bar"><div class="score-fill company2" style="width: ${score2 !== null ? score2 : 0}%"></div></div>
                             ${score2 !== null
-                                ? `<span class="score-value company2 keyword-link" onclick="showReviews('${escapeHtml(attr.name)}', 2)">${score2}/100</span>`
+                                ? `<span class="score-value company2 keyword-link ${winner2Class}" onclick="showReviews('${escapeHtml(attr.name)}', 2)">${score2}/100</span>`
                                 : '<span class="score-value na">N/A</span>'
                             }
+                            ${blurb2 ? `<div class="score-blurb">"${escapeHtml(blurb2)}"</div>` : ''}
                         </div>
                         <div><span class="winner-badge ${winner}">${winnerLabel}</span></div>
                     </div>

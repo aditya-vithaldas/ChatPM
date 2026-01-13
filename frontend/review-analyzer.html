@@ -327,6 +327,43 @@ Customer support was very helpful."></textarea>
         let originalReviews = [];
         let uploadedFile = null;
 
+        // Parse reviews from Play Store text format (must be defined early)
+        function parsePlayStoreReviews(text) {
+            const lines = text.split('\n');
+            const reviews = [];
+            let currentReview = '';
+
+            for (const line of lines) {
+                const trimmed = line.trim();
+                // Skip metadata lines
+                if (trimmed.match(/^\d+ people found this review helpful/) ||
+                    trimmed.match(/^\d+ person found this review helpful/) ||
+                    trimmed === 'Did you find this helpful?' ||
+                    trimmed.match(/^\d+ (January|February|March|April|May|June|July|August|September|October|November|December) \d{4}$/) ||
+                    trimmed.match(/^Google LLC$/) ||
+                    trimmed === '') {
+                    if (currentReview.trim()) {
+                        reviews.push(currentReview.trim());
+                        currentReview = '';
+                    }
+                    continue;
+                }
+                // Skip author names (single line that looks like a name before a date)
+                if (trimmed.length < 50 && !trimmed.includes('.') && lines[lines.indexOf(line) + 1]?.match(/^\d+ (January|February|March|April|May|June|July|August|September|October|November|December) \d{4}$/)) {
+                    continue;
+                }
+                // Skip Google's response messages
+                if (trimmed.startsWith('Hi ') && (trimmed.includes('Thanks for') || trimmed.includes('Thank you') || trimmed.includes('appreciate'))) {
+                    continue;
+                }
+                currentReview += ' ' + trimmed;
+            }
+            if (currentReview.trim()) {
+                reviews.push(currentReview.trim());
+            }
+            return reviews.filter(r => r.length > 20);
+        }
+
         // Tab switching
         function switchTab(tab) {
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -650,42 +687,6 @@ Customer support was very helpful."></textarea>
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
-        }
-
-        // Parse reviews from Play Store text format
-        function parsePlayStoreReviews(text) {
-            const lines = text.split('\n');
-            const reviews = [];
-            let currentReview = '';
-
-            for (const line of lines) {
-                const trimmed = line.trim();
-                // Skip metadata lines
-                if (trimmed.match(/^\d+ people found this review helpful/) ||
-                    trimmed === 'Did you find this helpful?' ||
-                    trimmed.match(/^\d+ (January|February|March|April|May|June|July|August|September|October|November|December) \d{4}$/) ||
-                    trimmed.match(/^Google LLC$/) ||
-                    trimmed === '') {
-                    if (currentReview.trim()) {
-                        reviews.push(currentReview.trim());
-                        currentReview = '';
-                    }
-                    continue;
-                }
-                // Skip author names (single line that looks like a name before a date)
-                if (trimmed.length < 50 && !trimmed.includes('.') && lines[lines.indexOf(line) + 1]?.match(/^\d+ (January|February|March|April|May|June|July|August|September|October|November|December) \d{4}$/)) {
-                    continue;
-                }
-                // Skip Google's response messages
-                if (trimmed.startsWith('Hi ') && (trimmed.includes('Thanks for') || trimmed.includes('Thank you') || trimmed.includes('appreciate'))) {
-                    continue;
-                }
-                currentReview += ' ' + trimmed;
-            }
-            if (currentReview.trim()) {
-                reviews.push(currentReview.trim());
-            }
-            return reviews.filter(r => r.length > 20);
         }
 
     </script>
