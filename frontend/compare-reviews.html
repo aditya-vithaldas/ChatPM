@@ -797,10 +797,11 @@
             spinner.style.display = 'inline-block';
 
             try {
-                // Fetch real reviews from both files
+                // Fetch real reviews from both files (with cache busting)
+                const cacheBust = Date.now();
                 const [chatgptResponse, geminiResponse] = await Promise.all([
-                    fetch('/chatgpt-reviews.txt'),
-                    fetch('/gemini-reviews.txt')
+                    fetch('/chatgpt-reviews.txt?t=' + cacheBust),
+                    fetch('/gemini-reviews.txt?t=' + cacheBust)
                 ]);
 
                 const chatgptText = await chatgptResponse.text();
