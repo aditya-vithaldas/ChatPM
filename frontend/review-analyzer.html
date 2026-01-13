@@ -611,35 +611,43 @@ Customer support was very helpful."></textarea>
             return div.innerHTML;
         }
 
-        // Sample ChatGPT reviews for demo
-        const sampleChatGPTReviews = [
-            "Amazing app! The AI responses are incredibly helpful and accurate. Best productivity tool I've ever used.",
-            "Love the voice feature, makes it so easy to interact while driving. Customer support was quick when I had billing questions.",
-            "The mobile app crashes sometimes when I switch between chats. Needs better stability.",
-            "Subscription pricing is too expensive for what you get. The free tier is very limited.",
-            "Search functionality within conversations is excellent. Finally found that recipe from months ago!",
-            "The user interface is clean and intuitive. Easy to navigate even for my parents.",
-            "Response speed has improved dramatically. No more waiting 30 seconds for answers.",
-            "Code assistance feature is a game changer for developers. Saved me hours of debugging.",
-            "Notifications are annoying and too frequent. Had to turn them all off.",
-            "Image generation quality is impressive but sometimes takes too long to process.",
-            "The app drains my battery quickly. Needs optimization for mobile devices.",
-            "Customer support never responded to my refund request. Very disappointed.",
-            "Love the new memory feature - it remembers my preferences across conversations!",
-            "Offline mode would be amazing. Can't use it during my commute on the subway.",
-            "The plugins and integrations work seamlessly. Connected it to my calendar easily.",
-            "Sometimes gives incorrect information presented confidently. Always double-check facts.",
-            "Dark mode is perfect for late night use. Easy on the eyes.",
-            "File upload feature is clunky. Takes forever to process PDFs.",
-            "Best AI assistant on the market. Completely replaced my need for Google searches.",
-            "Wish there was a family plan option. Paying for multiple subscriptions is costly."
-        ];
+        // Parse reviews from Play Store text format
+        function parsePlayStoreReviews(text) {
+            const lines = text.split('\n');
+            const reviews = [];
+            let currentReview = '';
+
+            for (const line of lines) {
+                const trimmed = line.trim();
+                // Skip metadata lines
+                if (trimmed.match(/^\d+ people found this review helpful/) ||
+                    trimmed === 'Did you find this helpful?' ||
+                    trimmed.match(/^\d+ (January|February|March|April|May|June|July|August|September|October|November|December) \d{4}$/) ||
+                    trimmed.match(/^Google LLC$/) ||
+                    trimmed === '') {
+                    if (currentReview.trim()) {
+                        reviews.push(currentReview.trim());
+                        currentReview = '';
+                    }
+                    continue;
+                }
+                // Skip author names (single line that looks like a name before a date)
+                if (trimmed.length < 50 && !trimmed.includes('.') && lines[lines.indexOf(line) + 1]?.match(/^\d+ (January|February|March|April|May|June|July|August|September|October|November|December) \d{4}$/)) {
+                    continue;
+                }
+                // Skip Google's response messages
+                if (trimmed.startsWith('Hi ') && (trimmed.includes('Thanks for') || trimmed.includes('Thank you') || trimmed.includes('appreciate'))) {
+                    continue;
+                }
+                currentReview += ' ' + trimmed;
+            }
+            if (currentReview.trim()) {
+                reviews.push(currentReview.trim());
+            }
+            return reviews.filter(r => r.length > 20);
+        }
 
         async function loadSampleAndAnalyze() {
-            // Switch to paste tab and load sample data
-            switchTab('paste');
-            document.getElementById('paste-area').value = sampleChatGPTReviews.join('\n');
-
             // Show loading on sample button
             const btn = document.getElementById('sample-btn');
             const btnText = document.getElementById('sample-btn-text');
@@ -649,13 +657,27 @@ Customer support was very helpful."></textarea>
             btnText.style.display = 'none';
             spinner.style.display = 'inline-block';
 
-            // Trigger analysis
-            await analyzeReviews();
+            try {
+                // Fetch real ChatGPT reviews
+                const response = await fetch('/chatgpt-reviews.txt');
+                const text = await response.text();
+                const reviews = parsePlayStoreReviews(text);
 
-            // Reset button
-            btn.disabled = false;
-            btnText.style.display = 'inline';
-            spinner.style.display = 'none';
+                // Switch to paste tab and load sample data
+                switchTab('paste');
+                document.getElementById('paste-area').value = reviews.join('\n');
+
+                // Trigger analysis
+                await analyzeReviews();
+            } catch (error) {
+                console.error('Failed to load sample reviews:', error);
+                alert('Failed to load sample reviews. Please try again.');
+            } finally {
+                // Reset button
+                btn.disabled = false;
+                btnText.style.display = 'inline';
+                spinner.style.display = 'none';
+            }
         }
     </script>
 </body>
