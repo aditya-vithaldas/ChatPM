@@ -303,8 +303,15 @@
         <p class="page-caveat">
             <strong>Note:</strong> This is an MVP and not yet integrated with Play Store. To get your reviews:<br>
             (a) Go to each app's Play Store page → "See all reviews" → copy/paste all content here, or<br>
-            (b) Log into Play Console → export feedback for each app as CSV
+            (b) Log into Play Console → export feedback for each app as CSV, or<br>
+            (c) Click "Load Sample Apps" to see a comparison of ChatGPT vs Gemini reviews
         </p>
+
+        <!-- Sample Apps Button -->
+        <button class="compare-btn" id="load-sample-btn" onclick="loadSampleReviews()" style="margin-bottom: 24px; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);">
+            <span id="load-sample-text">🧪 Load Sample Apps (ChatGPT vs Gemini)</span>
+            <span class="spinner" id="load-sample-spinner" style="display:none"></span>
+        </button>
 
         <!-- Upload Section -->
         <div class="upload-grid">
@@ -346,11 +353,6 @@
         <button class="compare-btn" id="compare-btn" onclick="compareReviews()">
             <span id="btn-text">⚔️ Compare Reviews</span>
             <span class="spinner" id="btn-spinner" style="display:none"></span>
-        </button>
-
-        <button class="compare-btn" id="sample-btn" onclick="loadSampleAndCompare()" style="margin-top: 12px; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);">
-            <span id="sample-btn-text">🧪 Compare Sample Apps (ChatGPT vs Gemini)</span>
-            <span class="spinner" id="sample-btn-spinner" style="display:none"></span>
         </button>
 
         <!-- Results Section -->
@@ -732,11 +734,11 @@
             return reviews.filter(r => r.length > 20);
         }
 
-        async function loadSampleAndCompare() {
+        async function loadSampleReviews() {
             // Show loading on sample button
-            const btn = document.getElementById('sample-btn');
-            const btnText = document.getElementById('sample-btn-text');
-            const spinner = document.getElementById('sample-btn-spinner');
+            const btn = document.getElementById('load-sample-btn');
+            const btnText = document.getElementById('load-sample-text');
+            const spinner = document.getElementById('load-sample-spinner');
 
             btn.disabled = true;
             btnText.style.display = 'none';
@@ -765,8 +767,8 @@
                 document.getElementById('paste-area-1').value = chatgptReviews.join('\n');
                 document.getElementById('paste-area-2').value = geminiReviews.join('\n');
 
-                // Trigger comparison
-                await compareReviews();
+                // Update button to show loaded state
+                btnText.textContent = `✓ Loaded ${chatgptReviews.length + geminiReviews.length} reviews — click Compare below`;
             } catch (error) {
                 console.error('Failed to load sample reviews:', error);
                 alert('Failed to load sample reviews. Please try again.');

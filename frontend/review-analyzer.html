@@ -221,7 +221,7 @@
             <strong>Note:</strong> This is an MVP and not yet integrated with Play Store. To get your reviews:<br>
             (a) Go to your app's Play Store page → "See all reviews" → copy/paste all content here, or<br>
             (b) Log into Play Console → export feedback for your app as CSV, or<br>
-            (c) View a sample app analysis using the button below (reviews from the last few weeks already loaded)
+            (c) Use the "Sample App" tab to see real ChatGPT reviews from the last few weeks
         </p>
 
         <!-- Input Section -->
@@ -229,6 +229,7 @@
             <div class="input-tabs">
                 <button class="tab-btn active" onclick="switchTab('upload')">📁 Upload CSV</button>
                 <button class="tab-btn" onclick="switchTab('paste')">📝 Paste Reviews</button>
+                <button class="tab-btn" onclick="loadSampleReviews()">🧪 Sample App (ChatGPT)</button>
             </div>
 
             <!-- Upload Tab -->
@@ -253,14 +254,18 @@ Customer support was very helpful."></textarea>
                 <div class="paste-hint">Enter one review per line</div>
             </div>
 
+            <!-- Sample Tab -->
+            <div class="input-content" id="tab-sample">
+                <div style="text-align: center; padding: 32px; color: var(--text-secondary);">
+                    <div style="font-size: 48px; margin-bottom: 16px;">📱</div>
+                    <div style="font-size: 1.1rem; font-weight: 600; color: white; margin-bottom: 8px;">ChatGPT Play Store Reviews</div>
+                    <div style="font-size: 0.9rem;" id="sample-status">Loading reviews...</div>
+                </div>
+            </div>
+
             <button class="analyze-btn" id="analyze-btn" onclick="analyzeReviews()">
                 <span id="btn-text">🔍 Analyze Reviews</span>
                 <span class="spinner" id="btn-spinner" style="display:none"></span>
-            </button>
-
-            <button class="analyze-btn" id="sample-btn" onclick="loadSampleAndAnalyze()" style="margin-top: 12px; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);">
-                <span id="sample-btn-text">🧪 Analyze Sample App (ChatGPT)</span>
-                <span class="spinner" id="sample-btn-spinner" style="display:none"></span>
             </button>
         </div>
 
@@ -327,8 +332,38 @@ Customer support was very helpful."></textarea>
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.input-content').forEach(content => content.classList.remove('active'));
 
-            document.querySelector(`[onclick="switchTab('${tab}')"]`).classList.add('active');
+            document.querySelector(`[onclick="switchTab('${tab}')"]`)?.classList.add('active');
             document.getElementById(`tab-${tab}`).classList.add('active');
+        }
+
+        // Sample reviews data
+        let sampleReviewsLoaded = false;
+        let sampleReviewsData = [];
+
+        // Load sample reviews and switch to sample tab
+        async function loadSampleReviews() {
+            // Switch to sample tab
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.input-content').forEach(content => content.classList.remove('active'));
+            document.querySelector('[onclick="loadSampleReviews()"]').classList.add('active');
+            document.getElementById('tab-sample').classList.add('active');
+
+            if (sampleReviewsLoaded) {
+                document.getElementById('sample-status').textContent = `${sampleReviewsData.length} reviews loaded — click Analyze to continue`;
+                return;
+            }
+
+            try {
+                document.getElementById('sample-status').textContent = 'Loading reviews...';
+                const response = await fetch('/chatgpt-reviews.txt');
+                const text = await response.text();
+                sampleReviewsData = parsePlayStoreReviews(text);
+                sampleReviewsLoaded = true;
+                document.getElementById('sample-status').textContent = `${sampleReviewsData.length} reviews loaded — click Analyze to continue`;
+            } catch (error) {
+                console.error('Failed to load sample reviews:', error);
+                document.getElementById('sample-status').textContent = 'Failed to load reviews. Please try again.';
+            }
         }
 
         // File handling
@@ -389,7 +424,7 @@ Customer support was very helpful."></textarea>
         async function analyzeReviews() {
             let reviews = [];
 
-            // Get reviews from file or paste area
+            // Get reviews from file, paste area, or sample data
             const activeTab = document.querySelector('.input-content.active').id;
 
             if (activeTab === 'tab-upload') {
@@ -399,6 +434,12 @@ Customer support was very helpful."></textarea>
                 }
                 const text = await uploadedFile.text();
                 reviews = parseCSV(text);
+            } else if (activeTab === 'tab-sample') {
+                if (!sampleReviewsLoaded || sampleReviewsData.length === 0) {
+                    alert('Sample reviews not loaded yet. Please wait or try again.');
+                    return;
+                }
+                reviews = sampleReviewsData;
             } else {
                 const text = document.getElementById('paste-area').value.trim();
                 if (!text) {
@@ -647,38 +688,6 @@ Customer support was very helpful."></textarea>
             return reviews.filter(r => r.length > 20);
         }
 
-        async function loadSampleAndAnalyze() {
-            // Show loading on sample button
-            const btn = document.getElementById('sample-btn');
-            const btnText = document.getElementById('sample-btn-text');
-            const spinner = document.getElementById('sample-btn-spinner');
-
-            btn.disabled = true;
-            btnText.style.display = 'none';
-            spinner.style.display = 'inline-block';
-
-            try {
-                // Fetch real ChatGPT reviews
-                const response = await fetch('/chatgpt-reviews.txt');
-                const text = await response.text();
-                const reviews = parsePlayStoreReviews(text);
-
-                // Switch to paste tab and load sample data
-                switchTab('paste');
-                document.getElementById('paste-area').value = reviews.join('\n');
-
-                // Trigger analysis
-                await analyzeReviews();
-            } catch (error) {
-                console.error('Failed to load sample reviews:', error);
-                alert('Failed to load sample reviews. Please try again.');
-            } finally {
-                // Reset button
-                btn.disabled = false;
-                btnText.style.display = 'inline';
-                spinner.style.display = 'none';
-            }
-        }
     </script>
 </body>
 </html>
