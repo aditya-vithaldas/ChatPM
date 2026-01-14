@@ -48,12 +48,50 @@
             background: linear-gradient(135deg, #ffffff 0%, #c7d2fe 100%);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
         }
-        .page-subtitle { color: var(--text-secondary); font-size: 1.1rem; margin-bottom: 40px; }
+        .page-subtitle { color: var(--text-secondary); font-size: 1.1rem; margin-bottom: 24px; }
+
+        /* Review Actions - Now at top */
+        .review-actions-top {
+            display: flex; gap: 12px; margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        .review-btn {
+            padding: 14px 28px;
+            border: none; border-radius: 12px;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 0.95rem; font-weight: 700;
+            cursor: pointer; transition: all 0.3s;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .review-btn:hover { transform: translateY(-2px); }
+        .review-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+        .review-btn.cfo {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+        }
+        .review-btn.cfo:hover { box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4); }
+
+        .review-btn.ceo {
+            background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+            color: white;
+        }
+        .review-btn.ceo:hover { box-shadow: 0 8px 24px rgba(139, 92, 246, 0.4); }
+
+        .review-btn.clear {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+        .review-btn.clear:hover { border-color: var(--text-secondary); color: white; }
+
+        .spinner { width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
         /* Main Layout */
         .main-layout {
             display: grid;
-            grid-template-columns: 1fr 320px;
+            grid-template-columns: 1fr 360px;
             gap: 24px;
         }
         @media (max-width: 1024px) {
@@ -140,45 +178,11 @@
         .comment-highlight.ceo:hover {
             background: rgba(139, 92, 246, 0.5);
         }
-
-        /* Review Actions */
-        .review-actions {
-            display: flex; gap: 12px; padding: 20px;
-            background: rgba(0, 0, 0, 0.2); border-top: 1px solid var(--border-color);
+        .comment-highlight.resolved {
+            background: rgba(34, 197, 94, 0.2);
+            border-bottom-color: var(--success);
+            opacity: 0.7;
         }
-        .review-btn {
-            flex: 1; padding: 14px 24px;
-            border: none; border-radius: 12px;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            font-size: 0.95rem; font-weight: 700;
-            cursor: pointer; transition: all 0.3s;
-            display: flex; align-items: center; justify-content: center; gap: 8px;
-        }
-        .review-btn:hover { transform: translateY(-2px); }
-        .review-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-
-        .review-btn.cfo {
-            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-            color: white;
-        }
-        .review-btn.cfo:hover { box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4); }
-
-        .review-btn.ceo {
-            background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
-            color: white;
-        }
-        .review-btn.ceo:hover { box-shadow: 0 8px 24px rgba(139, 92, 246, 0.4); }
-
-        .review-btn.clear {
-            background: transparent;
-            border: 1px solid var(--border-color);
-            color: var(--text-secondary);
-            flex: 0.5;
-        }
-        .review-btn.clear:hover { border-color: var(--text-secondary); color: white; }
-
-        .spinner { width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
 
         /* Comments Panel */
         .comments-panel {
@@ -197,10 +201,16 @@
             font-family: 'Plus Jakarta Sans', sans-serif;
             font-size: 1.1rem; font-weight: 700;
         }
+        .comments-stats {
+            display: flex; gap: 8px;
+        }
         .comments-count {
             background: var(--primary);
             padding: 4px 10px; border-radius: 20px;
-            font-size: 0.8rem; font-weight: 600;
+            font-size: 0.75rem; font-weight: 600;
+        }
+        .comments-count.resolved {
+            background: var(--success);
         }
         .comments-list { display: flex; flex-direction: column; gap: 16px; }
 
@@ -212,6 +222,15 @@
         }
         .comment-card:hover { background: rgba(0, 0, 0, 0.3); }
         .comment-card.ceo { border-left-color: var(--ceo-color); }
+        .comment-card.resolved {
+            border-left-color: var(--success);
+            opacity: 0.7;
+        }
+        .comment-card.resolved .comment-text,
+        .comment-card.resolved .comment-excerpt {
+            text-decoration: line-through;
+            color: var(--text-muted);
+        }
 
         .comment-author {
             display: flex; align-items: center; gap: 8px;
@@ -225,9 +244,19 @@
         }
         .comment-avatar.cfo { background: var(--cfo-color); }
         .comment-avatar.ceo { background: var(--ceo-color); }
+        .comment-avatar.resolved { background: var(--success); }
 
         .comment-name { font-weight: 600; font-size: 0.9rem; }
         .comment-role { color: var(--text-muted); font-size: 0.75rem; }
+        .resolved-badge {
+            background: var(--success);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-left: auto;
+        }
 
         .comment-excerpt {
             font-size: 0.85rem; color: var(--text-secondary);
@@ -303,7 +332,7 @@
         .feedback-submit:disabled { opacity: 0.6; cursor: not-allowed; }
         .feedback-success { color: var(--success); text-align: center; padding: 20px; font-size: 1.1rem; }
 
-        /* Comment Popover - appears when clicking highlighted text */
+        /* Comment Popover */
         .comment-popover {
             display: none;
             position: absolute;
@@ -348,6 +377,12 @@
             font-size: 1rem; padding: 4px;
         }
         .popover-close:hover { color: white; }
+        .popover-resolved {
+            display: flex; align-items: center; gap: 6px;
+            color: var(--success); font-size: 0.85rem;
+            margin-top: 12px; padding-top: 12px;
+            border-top: 1px solid var(--border-color);
+        }
     </style>
 </head>
 <body>
@@ -364,6 +399,21 @@
         <!-- Page Title -->
         <h1 class="page-title">Requirement Reviewer</h1>
         <p class="page-subtitle">Write or paste your requirements document, then get executive-level feedback with AI-powered review.</p>
+
+        <!-- Review Actions - Now at top -->
+        <div class="review-actions-top">
+            <button class="review-btn cfo" id="cfo-btn" onclick="reviewByExecutive('cfo')">
+                <span id="cfo-btn-text">💼 Review by CFO</span>
+                <span class="spinner" id="cfo-spinner" style="display:none"></span>
+            </button>
+            <button class="review-btn ceo" id="ceo-btn" onclick="reviewByExecutive('ceo')">
+                <span id="ceo-btn-text">👔 Review by CEO</span>
+                <span class="spinner" id="ceo-spinner" style="display:none"></span>
+            </button>
+            <button class="review-btn clear" onclick="clearComments()">
+                Clear All Comments
+            </button>
+        </div>
 
         <!-- Main Layout -->
         <div class="main-layout">
@@ -412,28 +462,16 @@
                 <div class="editor-wrapper">
                     <div class="editor" id="editor" contenteditable="true"></div>
                 </div>
-
-                <!-- Review Actions -->
-                <div class="review-actions">
-                    <button class="review-btn clear" onclick="clearComments()">
-                        Clear Comments
-                    </button>
-                    <button class="review-btn cfo" id="cfo-btn" onclick="reviewByCFO()">
-                        <span id="cfo-btn-text">💼 Review by CFO</span>
-                        <span class="spinner" id="cfo-spinner" style="display:none"></span>
-                    </button>
-                    <button class="review-btn ceo" id="ceo-btn" onclick="reviewByCEO()">
-                        <span id="ceo-btn-text">👔 Review by CEO</span>
-                        <span class="spinner" id="ceo-spinner" style="display:none"></span>
-                    </button>
-                </div>
             </div>
 
             <!-- Comments Panel -->
             <div class="comments-panel">
                 <div class="comments-header">
                     <h3 class="comments-title">Comments</h3>
-                    <span class="comments-count" id="comments-count">0</span>
+                    <div class="comments-stats">
+                        <span class="comments-count" id="comments-count-open">0 open</span>
+                        <span class="comments-count resolved" id="comments-count-resolved">0 resolved</span>
+                    </div>
                 </div>
                 <div class="comments-list" id="comments-list">
                     <div class="no-comments">
@@ -457,6 +495,9 @@
             </div>
         </div>
         <div class="popover-text" id="popover-text"></div>
+        <div class="popover-resolved" id="popover-resolved" style="display:none">
+            ✓ This concern has been addressed
+        </div>
     </div>
 
     <!-- Loading Overlay -->
@@ -481,7 +522,7 @@
                 </div>
             </div>
             <div id="feedback-success" class="feedback-success" style="display:none">
-                ✅ Thank you for your feedback!
+                ✓ Thank you for your feedback!
             </div>
         </div>
     </div>
@@ -505,7 +546,6 @@
 
         function applyFontSize() {
             const size = document.getElementById('font-size').value;
-            // fontSize command only accepts 1-7, so we use a workaround
             const selection = window.getSelection();
             if (selection.rangeCount > 0 && !selection.isCollapsed) {
                 const range = selection.getRangeAt(0);
@@ -539,8 +579,8 @@
             });
         }
 
-        // Review by CFO
-        async function reviewByCFO() {
+        // Review by Executive (CFO or CEO)
+        async function reviewByExecutive(reviewer) {
             const editor = document.getElementById('editor');
             const content = editor.innerText.trim();
 
@@ -549,9 +589,9 @@
                 return;
             }
 
-            const btn = document.getElementById('cfo-btn');
-            const btnText = document.getElementById('cfo-btn-text');
-            const spinner = document.getElementById('cfo-spinner');
+            const btn = document.getElementById(`${reviewer}-btn`);
+            const btnText = document.getElementById(`${reviewer}-btn-text`);
+            const spinner = document.getElementById(`${reviewer}-spinner`);
             const loading = document.getElementById('loading-overlay');
             const loadingText = document.getElementById('loading-text');
 
@@ -559,15 +599,29 @@
             btnText.style.display = 'none';
             spinner.style.display = 'inline-block';
             loading.classList.add('visible');
-            loadingText.textContent = 'CFO is reviewing your requirements...';
+
+            const reviewerName = reviewer === 'cfo' ? 'CFO' : 'CEO';
+            const isReReview = comments.filter(c => c.reviewer === reviewer && !c.resolved).length > 0;
+
+            if (isReReview) {
+                loadingText.textContent = `${reviewerName} is re-reviewing and checking resolved items...`;
+            } else {
+                loadingText.textContent = `${reviewerName} is reviewing your requirements...`;
+            }
 
             try {
+                // Get existing comments for this reviewer to check for resolution
+                const existingReviewerComments = comments
+                    .filter(c => c.reviewer === reviewer && !c.resolved)
+                    .map(c => ({ excerpt: c.excerpt, comment: c.comment }));
+
                 const response = await fetch(`${API_BASE}/review-requirements`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         content: content,
-                        reviewer: 'cfo'
+                        reviewer: reviewer,
+                        existingComments: existingReviewerComments
                     })
                 });
 
@@ -578,65 +632,37 @@
                     return;
                 }
 
-                // Add comments to the document
-                addCommentsToDocument(data.comments, 'cfo');
-
-            } catch (error) {
-                console.error('Review error:', error);
-                alert('Failed to get CFO review. Please try again.');
-            } finally {
-                btn.disabled = false;
-                btnText.style.display = 'inline';
-                spinner.style.display = 'none';
-                loading.classList.remove('visible');
-            }
-        }
-
-        // Review by CEO
-        async function reviewByCEO() {
-            const editor = document.getElementById('editor');
-            const content = editor.innerText.trim();
-
-            if (!content) {
-                alert('Please enter some requirements to review');
-                return;
-            }
-
-            const btn = document.getElementById('ceo-btn');
-            const btnText = document.getElementById('ceo-btn-text');
-            const spinner = document.getElementById('ceo-spinner');
-            const loading = document.getElementById('loading-overlay');
-            const loadingText = document.getElementById('loading-text');
-
-            btn.disabled = true;
-            btnText.style.display = 'none';
-            spinner.style.display = 'inline-block';
-            loading.classList.add('visible');
-            loadingText.textContent = 'CEO is reviewing your requirements...';
-
-            try {
-                const response = await fetch(`${API_BASE}/review-requirements`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        content: content,
-                        reviewer: 'ceo'
-                    })
-                });
-
-                const data = await response.json();
-
-                if (data.error) {
-                    alert(data.error);
-                    return;
+                // Handle resolved comments
+                if (data.resolvedComments && data.resolvedComments.length > 0) {
+                    const unresolvedComments = comments.filter(c => c.reviewer === reviewer && !c.resolved);
+                    data.resolvedComments.forEach(resolvedIndex => {
+                        const idx = resolvedIndex - 1; // Convert 1-based to 0-based
+                        if (unresolvedComments[idx]) {
+                            const commentToResolve = comments.find(c =>
+                                c.id === unresolvedComments[idx].id
+                            );
+                            if (commentToResolve) {
+                                commentToResolve.resolved = true;
+                                // Update highlight in editor
+                                const highlight = document.querySelector(`[data-comment-id="${commentToResolve.id}"]`);
+                                if (highlight) {
+                                    highlight.classList.add('resolved');
+                                }
+                            }
+                        }
+                    });
                 }
 
-                // Add comments to the document
-                addCommentsToDocument(data.comments, 'ceo');
+                // Add new comments to the document
+                if (data.comments && data.comments.length > 0) {
+                    addCommentsToDocument(data.comments, reviewer);
+                }
+
+                updateCommentsPanel();
 
             } catch (error) {
                 console.error('Review error:', error);
-                alert('Failed to get CEO review. Please try again.');
+                alert(`Failed to get ${reviewerName} review. Please try again.`);
             } finally {
                 btn.disabled = false;
                 btnText.style.display = 'inline';
@@ -648,16 +674,24 @@
         // Add comments to the document
         function addCommentsToDocument(newComments, reviewer) {
             const editor = document.getElementById('editor');
-            const editorText = editor.innerText;
 
             newComments.forEach(comment => {
+                // Check if this comment already exists (avoid duplicates)
+                const isDuplicate = comments.some(c =>
+                    c.reviewer === reviewer &&
+                    c.excerpt.toLowerCase().substring(0, 30) === comment.excerpt.toLowerCase().substring(0, 30)
+                );
+
+                if (isDuplicate) return;
+
                 const commentId = ++commentIdCounter;
                 const commentObj = {
                     id: commentId,
                     reviewer: reviewer,
                     excerpt: comment.excerpt,
                     comment: comment.comment,
-                    position: comment.position || 0
+                    position: comment.position || 0,
+                    resolved: false
                 };
                 comments.push(commentObj);
 
@@ -666,8 +700,6 @@
                     highlightExcerpt(comment.excerpt, commentId, reviewer);
                 }
             });
-
-            updateCommentsPanel();
         }
 
         // Highlight excerpt in editor
@@ -681,7 +713,6 @@
                 const index = text.toLowerCase().indexOf(excerpt.toLowerCase().substring(0, 50));
 
                 if (index !== -1) {
-                    // Find how much of the excerpt matches
                     let matchLength = 50;
                     for (let i = 50; i <= excerpt.length && i <= text.length - index; i++) {
                         if (text.substring(index, index + i).toLowerCase() === excerpt.substring(0, i).toLowerCase()) {
@@ -701,7 +732,6 @@
                     try {
                         range.surroundContents(highlight);
                     } catch (e) {
-                        // Range crosses element boundaries, skip this highlight
                         console.log('Could not highlight:', excerpt.substring(0, 30));
                     }
                     break;
@@ -712,9 +742,14 @@
         // Update comments panel
         function updateCommentsPanel() {
             const list = document.getElementById('comments-list');
-            const count = document.getElementById('comments-count');
+            const countOpen = document.getElementById('comments-count-open');
+            const countResolved = document.getElementById('comments-count-resolved');
 
-            count.textContent = comments.length;
+            const openComments = comments.filter(c => !c.resolved);
+            const resolvedComments = comments.filter(c => c.resolved);
+
+            countOpen.textContent = `${openComments.length} open`;
+            countResolved.textContent = `${resolvedComments.length} resolved`;
 
             if (comments.length === 0) {
                 list.innerHTML = `
@@ -727,20 +762,26 @@
                 return;
             }
 
-            list.innerHTML = comments.map(comment => {
+            // Sort: open comments first, then resolved
+            const sortedComments = [...openComments, ...resolvedComments];
+
+            list.innerHTML = sortedComments.map(comment => {
                 const isCFO = comment.reviewer === 'cfo';
-                const icon = isCFO ? '💼' : '👔';
+                const icon = comment.resolved ? '✓' : (isCFO ? '💼' : '👔');
                 const name = isCFO ? 'CFO' : 'CEO';
                 const role = isCFO ? 'Chief Financial Officer' : 'Chief Executive Officer';
+                const resolvedClass = comment.resolved ? 'resolved' : '';
+                const avatarClass = comment.resolved ? 'resolved' : comment.reviewer;
 
                 return `
-                    <div class="comment-card ${comment.reviewer}" onclick="scrollToComment(${comment.id})">
+                    <div class="comment-card ${comment.reviewer} ${resolvedClass}" onclick="scrollToComment(${comment.id})">
                         <div class="comment-author">
-                            <div class="comment-avatar ${comment.reviewer}">${icon}</div>
+                            <div class="comment-avatar ${avatarClass}">${icon}</div>
                             <div>
                                 <div class="comment-name">${name}</div>
                                 <div class="comment-role">${role}</div>
                             </div>
+                            ${comment.resolved ? '<span class="resolved-badge">Resolved</span>' : ''}
                         </div>
                         <div class="comment-excerpt">"${escapeHtml(comment.excerpt.substring(0, 60))}..."</div>
                         <div class="comment-text">${escapeHtml(comment.comment)}</div>
@@ -770,6 +811,7 @@
             const name = document.getElementById('popover-name');
             const role = document.getElementById('popover-role');
             const text = document.getElementById('popover-text');
+            const resolvedEl = document.getElementById('popover-resolved');
 
             const isCFO = comment.reviewer === 'cfo';
             avatar.className = `popover-avatar ${comment.reviewer}`;
@@ -777,6 +819,16 @@
             name.textContent = isCFO ? 'CFO' : 'CEO';
             role.textContent = isCFO ? 'Chief Financial Officer' : 'Chief Executive Officer';
             text.textContent = comment.comment;
+
+            if (comment.resolved) {
+                text.style.textDecoration = 'line-through';
+                text.style.color = 'var(--text-muted)';
+                resolvedEl.style.display = 'flex';
+            } else {
+                text.style.textDecoration = 'none';
+                text.style.color = 'var(--text-primary)';
+                resolvedEl.style.display = 'none';
+            }
 
             // Position popover near the clicked element
             const rect = event.target.getBoundingClientRect();

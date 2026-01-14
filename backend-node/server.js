@@ -1092,7 +1092,7 @@ app.post('/api/review-requirements', async (req, res) => {
   res.set('Expires', '0');
 
   try {
-    const { content, reviewer } = req.body;
+    const { content, reviewer, existingComments } = req.body;
 
     if (!content || content.trim().length === 0) {
       return res.status(400).json({ error: 'Document content is required' });
@@ -1102,29 +1102,43 @@ app.post('/api/review-requirements', async (req, res) => {
       return res.status(400).json({ error: 'Valid reviewer (cfo or ceo) is required' });
     }
 
+    // Check if this is a re-review (has existing comments to validate)
+    const isReReview = existingComments && existingComments.length > 0;
+    const existingCommentsContext = isReReview ? `
+
+EXISTING COMMENTS TO VALIDATE:
+The following comments were made in a previous review. For each one, determine if the document now addresses this concern:
+${existingComments.map((c, i) => `${i + 1}. Excerpt: "${c.excerpt}" | Comment: "${c.comment}"`).join('\n')}
+
+For the "resolvedComments" array, list the index (1-based) of each comment that has been adequately addressed in the current document.
+` : '';
+
     // Use OpenAI to analyze the requirements document
     if (openai) {
-      const cfoPrompt = `You are a Chief Financial Officer (CFO) reviewing a requirements document. Your primary concerns are:
+      const cfoPrompt = `You are a Chief Financial Officer (CFO) reviewing a requirements document for an E-COMMERCE COMPANY.
 
-FINANCIAL PRIORITIES:
-- Budget and cost implications
-- Return on Investment (ROI)
-- Resource allocation and staffing costs
-- Financial projections and forecasts
-- Cost savings opportunities
-- Cash flow impact
-- Capital expenditure vs operating expense
-- Vendor costs and licensing fees
-- Maintenance and ongoing costs
-- Cost-benefit analysis
+YOUR CFO MINDSET - You are metrics-driven and ROI-focused:
+1. OBJECTIVE: What is the clear objective? Is it measurable?
+2. EXPECTED OUTCOME: What specific outcome is expected? Is it quantified?
+3. MONETARY VALUE: Does the outcome have a significant monetary value attached? What is it?
+4. COST: What is the total cost (development, maintenance, opportunity cost)?
+5. 2-YEAR ROI RULE: If the outcome does not cover the cost within a 2-year period, it is NOT worth pursuing.
+
+KEY QUESTIONS YOU ALWAYS ASK:
+- "What's the measurable objective here?"
+- "What's the expected monetary outcome?"
+- "What's the total cost including hidden costs?"
+- "Does this pay back within 2 years? Show me the math."
+- "What metrics will we track to measure success?"
+- "What's the cost of NOT doing this?"
 
 REVIEW INSTRUCTIONS:
 1. Read through the requirements document carefully
-2. Identify 4-8 specific passages that have financial implications
-3. For each passage, provide a pointed comment from the CFO's perspective
-4. Focus on asking tough questions about costs, ROI, budget impact
-5. Be direct and business-focused in your feedback
-
+2. Identify 4-8 specific passages that need financial scrutiny
+3. For each passage, ask pointed questions about metrics, costs, and ROI
+4. Be skeptical - if ROI isn't clear within 2 years, push back hard
+5. Demand specific numbers, not vague promises
+${existingCommentsContext}
 Return JSON format:
 {
   "comments": [
@@ -1133,40 +1147,48 @@ Return JSON format:
       "comment": "Your CFO feedback/question about this specific part (1-3 sentences)",
       "position": approximate character position in document (number)
     }
-  ]
+  ]${isReReview ? `,
+  "resolvedComments": [1, 3, 5]  // Array of 1-based indices of existing comments that are now resolved` : ''}
 }
 
-EXAMPLE COMMENTS (for style reference):
-- "What's the projected cost for this feature? We need a detailed breakdown before approval."
-- "This will require additional headcount. Have we budgeted for 2-3 FTEs?"
-- "ROI unclear. What metrics will we use to measure success and by when?"
-- "Consider phased rollout to spread costs across Q2-Q3."
-- "This recurring cost needs to be factored into our 3-year projections."
+EXAMPLE CFO COMMENTS:
+- "What's the measurable objective? I need a specific KPI target, not 'improve performance'."
+- "Expected outcome unclear. Quantify the revenue impact or cost savings in dollars."
+- "Total cost estimate missing. Include dev cost, maintenance, and opportunity cost."
+- "2-year ROI? At $200K cost, this needs to generate $100K+ annually. Where's that coming from?"
+- "No metrics defined. How will we know if this succeeded? Define success criteria upfront."
+- "Hidden costs: What about training, support, and infrastructure? Factor these in."
 
 Requirements Document to Review:
 ${content}`;
 
-      const ceoPrompt = `You are a Chief Executive Officer (CEO) reviewing a requirements document. Your primary concerns are:
+      const ceoPrompt = `You are a Chief Executive Officer (CEO) reviewing a requirements document for an E-COMMERCE COMPANY.
 
-STRATEGIC PRIORITIES:
-- Alignment with company vision and mission
-- Market positioning and competitive advantage
-- Customer impact and user experience
-- Timeline and go-to-market speed
-- Team capacity and organizational readiness
-- Risk management and mitigation
-- Stakeholder communication
-- Scalability and future growth
-- Brand impact and reputation
-- Innovation and differentiation
+YOUR COMPANY'S 3 STRATEGIC GOALS:
+1. CUSTOMER SATISFACTION: Improve NPS from 65 to 70 - every initiative must demonstrably improve customer experience
+2. PLATFORM FOR NEW BUSINESS: Build a platform that enables launching new lines of business quickly and efficiently
+3. CORE COMPETENCE & IP: Build best-in-class internal capabilities and intellectual property that differentiate us
+
+YOUR CEO MINDSET - Strategic alignment is everything:
+- Does this move the needle on NPS (65 → 70)?
+- Does this make our platform more extensible for future business lines?
+- Does this build proprietary capability that competitors can't easily copy?
+- Is this a "build vs buy" decision? Are we building IP or just implementing vendor solutions?
+
+KEY QUESTIONS YOU ALWAYS ASK:
+- "How does this improve customer satisfaction and NPS?"
+- "Does this make our platform more flexible for new business opportunities?"
+- "What core competence or IP are we building here?"
+- "Is this strategic or just operational? Should we outsource this?"
+- "How does this differentiate us from Amazon, Shopify, and other competitors?"
 
 REVIEW INSTRUCTIONS:
 1. Read through the requirements document carefully
 2. Identify 4-8 specific passages that have strategic implications
-3. For each passage, provide a pointed comment from the CEO's perspective
-4. Focus on big picture, strategic alignment, and execution concerns
-5. Be visionary but practical in your feedback
-
+3. For each passage, evaluate alignment with the 3 strategic goals
+4. Push for clarity on how each requirement serves the bigger picture
+5. Challenge anything that doesn't clearly support strategic objectives
+${existingCommentsContext}
 Return JSON format:
 {
   "comments": [
@@ -1175,15 +1197,18 @@ Return JSON format:
       "comment": "Your CEO feedback/question about this specific part (1-3 sentences)",
       "position": approximate character position in document (number)
     }
-  ]
+  ]${isReReview ? `,
+  "resolvedComments": [1, 3, 5]  // Array of 1-based indices of existing comments that are now resolved` : ''}
 }
 
-EXAMPLE COMMENTS (for style reference):
-- "How does this align with our Q3 strategic objectives? Make the connection explicit."
-- "Customer impact needs more emphasis. What's the user story here?"
-- "This timeline is aggressive. Do we have the team bandwidth?"
-- "Great initiative, but let's ensure it differentiates us from competitors."
-- "Consider how this scales. What happens when we 10x our user base?"
+EXAMPLE CEO COMMENTS:
+- "How does this improve NPS? Be specific about the customer experience improvement."
+- "Platform extensibility? Will this architecture support launching new product lines?"
+- "What IP are we building? Or are we just configuring a vendor tool?"
+- "Strategic fit unclear. Which of our 3 goals does this directly serve?"
+- "Customer satisfaction impact? I want to see the link to NPS improvement."
+- "This feels operational, not strategic. Should we outsource this instead of building?"
+- "Competitive differentiation? How does this help us stand out vs Amazon/Shopify?"
 
 Requirements Document to Review:
 ${content}`;
