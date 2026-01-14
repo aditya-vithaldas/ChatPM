@@ -1079,6 +1079,184 @@ app.get('/compare-reviews', (req, res) => {
   res.sendFile(path.join(FRONTEND_PATH, 'compare-reviews.html'));
 });
 
+// Serve requirement-reviewer page
+app.get('/requirement-reviewer', (req, res) => {
+  res.sendFile(path.join(FRONTEND_PATH, 'requirement-reviewer.html'));
+});
+
+// Requirement Review endpoint - CFO and CEO personas
+app.post('/api/review-requirements', async (req, res) => {
+  // Prevent caching of API responses
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.set('Pragma', 'no-cache');
+  res.set('Expires', '0');
+
+  try {
+    const { content, reviewer } = req.body;
+
+    if (!content || content.trim().length === 0) {
+      return res.status(400).json({ error: 'Document content is required' });
+    }
+
+    if (!reviewer || !['cfo', 'ceo'].includes(reviewer)) {
+      return res.status(400).json({ error: 'Valid reviewer (cfo or ceo) is required' });
+    }
+
+    // Use OpenAI to analyze the requirements document
+    if (openai) {
+      const cfoPrompt = `You are a Chief Financial Officer (CFO) reviewing a requirements document. Your primary concerns are:
+
+FINANCIAL PRIORITIES:
+- Budget and cost implications
+- Return on Investment (ROI)
+- Resource allocation and staffing costs
+- Financial projections and forecasts
+- Cost savings opportunities
+- Cash flow impact
+- Capital expenditure vs operating expense
+- Vendor costs and licensing fees
+- Maintenance and ongoing costs
+- Cost-benefit analysis
+
+REVIEW INSTRUCTIONS:
+1. Read through the requirements document carefully
+2. Identify 4-8 specific passages that have financial implications
+3. For each passage, provide a pointed comment from the CFO's perspective
+4. Focus on asking tough questions about costs, ROI, budget impact
+5. Be direct and business-focused in your feedback
+
+Return JSON format:
+{
+  "comments": [
+    {
+      "excerpt": "The exact text from the document you're commenting on (30-100 characters)",
+      "comment": "Your CFO feedback/question about this specific part (1-3 sentences)",
+      "position": approximate character position in document (number)
+    }
+  ]
+}
+
+EXAMPLE COMMENTS (for style reference):
+- "What's the projected cost for this feature? We need a detailed breakdown before approval."
+- "This will require additional headcount. Have we budgeted for 2-3 FTEs?"
+- "ROI unclear. What metrics will we use to measure success and by when?"
+- "Consider phased rollout to spread costs across Q2-Q3."
+- "This recurring cost needs to be factored into our 3-year projections."
+
+Requirements Document to Review:
+${content}`;
+
+      const ceoPrompt = `You are a Chief Executive Officer (CEO) reviewing a requirements document. Your primary concerns are:
+
+STRATEGIC PRIORITIES:
+- Alignment with company vision and mission
+- Market positioning and competitive advantage
+- Customer impact and user experience
+- Timeline and go-to-market speed
+- Team capacity and organizational readiness
+- Risk management and mitigation
+- Stakeholder communication
+- Scalability and future growth
+- Brand impact and reputation
+- Innovation and differentiation
+
+REVIEW INSTRUCTIONS:
+1. Read through the requirements document carefully
+2. Identify 4-8 specific passages that have strategic implications
+3. For each passage, provide a pointed comment from the CEO's perspective
+4. Focus on big picture, strategic alignment, and execution concerns
+5. Be visionary but practical in your feedback
+
+Return JSON format:
+{
+  "comments": [
+    {
+      "excerpt": "The exact text from the document you're commenting on (30-100 characters)",
+      "comment": "Your CEO feedback/question about this specific part (1-3 sentences)",
+      "position": approximate character position in document (number)
+    }
+  ]
+}
+
+EXAMPLE COMMENTS (for style reference):
+- "How does this align with our Q3 strategic objectives? Make the connection explicit."
+- "Customer impact needs more emphasis. What's the user story here?"
+- "This timeline is aggressive. Do we have the team bandwidth?"
+- "Great initiative, but let's ensure it differentiates us from competitors."
+- "Consider how this scales. What happens when we 10x our user base?"
+
+Requirements Document to Review:
+${content}`;
+
+      const prompt = reviewer === 'cfo' ? cfoPrompt : ceoPrompt;
+
+      try {
+        const response = await openai.chat.completions.create({
+          model: 'gpt-4o-mini',
+          messages: [{ role: 'user', content: prompt }],
+          temperature: 0.7,
+          response_format: { type: 'json_object' }
+        });
+
+        const result = JSON.parse(response.choices[0].message.content);
+        return res.json(result);
+      } catch (aiError) {
+        console.error('OpenAI error:', aiError);
+        // Fall back to mock comments if AI fails
+      }
+    }
+
+    // Fallback: Generate mock comments if no AI available
+    console.log('Using fallback review (no AI available)');
+
+    const sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 20);
+    const mockComments = [];
+
+    const cfoMockResponses = [
+      "What's the budget allocation for this? We need specific cost estimates.",
+      "ROI needs to be quantified. What metrics will measure success?",
+      "Have we factored in ongoing maintenance costs?",
+      "This requires additional resources. Is this in our hiring plan?",
+      "Consider the licensing costs implications here.",
+      "What's the payback period for this investment?",
+      "We should get 3 vendor quotes before committing.",
+      "This impacts our cash flow projections for Q3."
+    ];
+
+    const ceoMockResponses = [
+      "How does this align with our strategic vision?",
+      "What's the customer impact? Make it more explicit.",
+      "Timeline seems aggressive. Ensure we have capacity.",
+      "This could be a competitive differentiator. Emphasize it.",
+      "Consider scalability for future growth.",
+      "Who are the key stakeholders we need to align?",
+      "What's the risk mitigation plan?",
+      "How will this affect our market positioning?"
+    ];
+
+    const responses = reviewer === 'cfo' ? cfoMockResponses : ceoMockResponses;
+    const numComments = Math.min(Math.floor(sentences.length / 2), 5);
+
+    for (let i = 0; i < numComments; i++) {
+      const sentenceIndex = Math.floor((i / numComments) * sentences.length);
+      const sentence = sentences[sentenceIndex]?.trim();
+      if (sentence && sentence.length > 20) {
+        mockComments.push({
+          excerpt: sentence.substring(0, 80),
+          comment: responses[i % responses.length],
+          position: content.indexOf(sentence)
+        });
+      }
+    }
+
+    res.json({ comments: mockComments });
+
+  } catch (error) {
+    console.error('Review error:', error);
+    res.status(500).json({ error: 'Failed to review requirements' });
+  }
+});
+
 // Health check
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' });

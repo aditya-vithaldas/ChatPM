@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Requirement Reviewer - DecisionOS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Merriweather:wght@400;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #6366f1; --primary-dark: #4f46e5; --primary-light: #818cf8;
+            --accent: #f97316; --accent-light: #fb923c;
+            --bg-dark: #0f172a; --bg-darker: #020617;
+            --text-primary: #f8fafc; --text-secondary: #94a3b8; --text-muted: #64748b;
+            --success: #22c55e; --error: #ef4444; --warning: #f59e0b;
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --cfo-color: #3b82f6;
+            --ceo-color: #8b5cf6;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .container { max-width: 1400px; margin: 0 auto; padding: 40px 24px; }
+
+        /* Header */
+        .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 48px; }
+        .logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+        .logo-icon {
+            width: 48px; height: 48px;
+            background: linear-gradient(135deg, #f97316 0%, #ec4899 100%);
+            border-radius: 12px; display: flex; align-items: center; justify-content: center;
+            font-size: 24px; box-shadow: 0 4px 16px rgba(249, 115, 22, 0.3);
+        }
+        .logo-text { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.5rem; font-weight: 800; color: white; }
+        .back-link { color: var(--text-secondary); text-decoration: none; font-size: 0.9rem; display: flex; align-items: center; gap: 8px; }
+        .back-link:hover { color: white; }
+
+        /* Page Title */
+        .page-title {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 2.5rem; font-weight: 800; margin-bottom: 12px;
+            background: linear-gradient(135deg, #ffffff 0%, #c7d2fe 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .page-subtitle { color: var(--text-secondary); font-size: 1.1rem; margin-bottom: 40px; }
+
+        /* Main Layout */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 24px;
+        }
+        @media (max-width: 1024px) {
+            .main-layout { grid-template-columns: 1fr; }
+            .comments-panel { display: none; }
+        }
+
+        /* Editor Section */
+        .editor-section {
+            background: var(--card-bg); border: 1px solid var(--border-color);
+            border-radius: 20px; overflow: hidden;
+        }
+
+        /* Toolbar */
+        .toolbar {
+            display: flex; flex-wrap: wrap; gap: 8px; padding: 16px 20px;
+            background: rgba(0, 0, 0, 0.2); border-bottom: 1px solid var(--border-color);
+            align-items: center;
+        }
+        .toolbar-group {
+            display: flex; gap: 4px; padding-right: 12px;
+            border-right: 1px solid var(--border-color);
+        }
+        .toolbar-group:last-child { border-right: none; padding-right: 0; }
+
+        .toolbar-btn {
+            width: 36px; height: 36px;
+            background: transparent; border: 1px solid transparent;
+            border-radius: 8px; color: var(--text-secondary);
+            cursor: pointer; font-size: 1rem;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s;
+        }
+        .toolbar-btn:hover { background: rgba(255, 255, 255, 0.1); color: white; }
+        .toolbar-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+        .toolbar-select {
+            padding: 8px 12px; background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color); border-radius: 8px;
+            color: var(--text-primary); font-size: 0.85rem;
+            cursor: pointer; min-width: 120px;
+        }
+        .toolbar-select:focus { outline: none; border-color: var(--primary); }
+        .toolbar-select option { background: #1e1b4b; color: white; }
+
+        /* Editor */
+        .editor-wrapper {
+            padding: 32px;
+            min-height: 600px;
+            background: rgba(255, 255, 255, 0.02);
+        }
+        .editor {
+            min-height: 500px;
+            outline: none;
+            color: var(--text-primary);
+            font-size: 16px;
+            line-height: 1.8;
+        }
+        .editor:empty::before {
+            content: "Start typing your requirements here, or paste from Google Docs...";
+            color: var(--text-muted);
+        }
+        .editor h1 { font-size: 2rem; font-weight: 700; margin: 1em 0 0.5em; color: white; }
+        .editor h2 { font-size: 1.5rem; font-weight: 600; margin: 1em 0 0.5em; color: white; }
+        .editor h3 { font-size: 1.25rem; font-weight: 600; margin: 1em 0 0.5em; color: white; }
+        .editor p { margin: 0.5em 0; }
+        .editor ul, .editor ol { margin: 0.5em 0 0.5em 1.5em; }
+        .editor li { margin: 0.25em 0; }
+
+        /* Highlighted text with comment */
+        .comment-highlight {
+            background: rgba(59, 130, 246, 0.3);
+            border-bottom: 2px solid var(--cfo-color);
+            cursor: pointer;
+            position: relative;
+        }
+        .comment-highlight.ceo {
+            background: rgba(139, 92, 246, 0.3);
+            border-bottom-color: var(--ceo-color);
+        }
+        .comment-highlight:hover {
+            background: rgba(59, 130, 246, 0.5);
+        }
+        .comment-highlight.ceo:hover {
+            background: rgba(139, 92, 246, 0.5);
+        }
+
+        /* Review Actions */
+        .review-actions {
+            display: flex; gap: 12px; padding: 20px;
+            background: rgba(0, 0, 0, 0.2); border-top: 1px solid var(--border-color);
+        }
+        .review-btn {
+            flex: 1; padding: 14px 24px;
+            border: none; border-radius: 12px;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 0.95rem; font-weight: 700;
+            cursor: pointer; transition: all 0.3s;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .review-btn:hover { transform: translateY(-2px); }
+        .review-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+        .review-btn.cfo {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+        }
+        .review-btn.cfo:hover { box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4); }
+
+        .review-btn.ceo {
+            background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+            color: white;
+        }
+        .review-btn.ceo:hover { box-shadow: 0 8px 24px rgba(139, 92, 246, 0.4); }
+
+        .review-btn.clear {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            flex: 0.5;
+        }
+        .review-btn.clear:hover { border-color: var(--text-secondary); color: white; }
+
+        .spinner { width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Comments Panel */
+        .comments-panel {
+            background: var(--card-bg); border: 1px solid var(--border-color);
+            border-radius: 20px; padding: 24px;
+            height: fit-content;
+            position: sticky; top: 24px;
+            max-height: calc(100vh - 48px);
+            overflow-y: auto;
+        }
+        .comments-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .comments-title {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1.1rem; font-weight: 700;
+        }
+        .comments-count {
+            background: var(--primary);
+            padding: 4px 10px; border-radius: 20px;
+            font-size: 0.8rem; font-weight: 600;
+        }
+        .comments-list { display: flex; flex-direction: column; gap: 16px; }
+
+        .comment-card {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px; padding: 16px;
+            border-left: 3px solid var(--cfo-color);
+            cursor: pointer; transition: all 0.2s;
+        }
+        .comment-card:hover { background: rgba(0, 0, 0, 0.3); }
+        .comment-card.ceo { border-left-color: var(--ceo-color); }
+
+        .comment-author {
+            display: flex; align-items: center; gap: 8px;
+            margin-bottom: 8px;
+        }
+        .comment-avatar {
+            width: 28px; height: 28px;
+            border-radius: 50%; display: flex;
+            align-items: center; justify-content: center;
+            font-size: 14px;
+        }
+        .comment-avatar.cfo { background: var(--cfo-color); }
+        .comment-avatar.ceo { background: var(--ceo-color); }
+
+        .comment-name { font-weight: 600; font-size: 0.9rem; }
+        .comment-role { color: var(--text-muted); font-size: 0.75rem; }
+
+        .comment-excerpt {
+            font-size: 0.85rem; color: var(--text-secondary);
+            margin-bottom: 8px;
+            display: -webkit-box; -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical; overflow: hidden;
+        }
+        .comment-text {
+            font-size: 0.9rem; color: var(--text-primary);
+            line-height: 1.5;
+        }
+
+        .no-comments {
+            text-align: center; padding: 40px 20px;
+            color: var(--text-muted);
+        }
+        .no-comments-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.5; }
+
+        /* Loading Overlay */
+        .loading-overlay {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.7); z-index: 1000;
+            align-items: center; justify-content: center; flex-direction: column; gap: 16px;
+        }
+        .loading-overlay.visible { display: flex; }
+        .loading-text { color: white; font-size: 1.1rem; }
+
+        /* Feedback Button */
+        .feedback-btn {
+            position: fixed; bottom: 24px; right: 24px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            border: none; border-radius: 50px; padding: 12px 20px;
+            color: white; font-size: 0.9rem; font-weight: 600;
+            cursor: pointer; box-shadow: 0 4px 16px rgba(99, 102, 241, 0.4);
+            display: flex; align-items: center; gap: 8px;
+            transition: all 0.3s; z-index: 100;
+        }
+        .feedback-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5); }
+
+        /* Feedback Modal */
+        .feedback-modal {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.8); z-index: 1000;
+            align-items: center; justify-content: center; padding: 24px;
+        }
+        .feedback-modal.visible { display: flex; }
+        .feedback-content {
+            background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+            border: 1px solid var(--border-color); border-radius: 20px;
+            padding: 32px; max-width: 500px; width: 100%;
+        }
+        .feedback-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.5rem; font-weight: 700; margin-bottom: 8px; }
+        .feedback-subtitle { color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 24px; }
+        .feedback-textarea {
+            width: 100%; min-height: 150px; padding: 16px;
+            background: rgba(0, 0, 0, 0.3); border: 1px solid var(--border-color);
+            border-radius: 12px; color: white; font-family: inherit; font-size: 0.95rem;
+            resize: vertical; margin-bottom: 16px;
+        }
+        .feedback-textarea::placeholder { color: var(--text-muted); }
+        .feedback-textarea:focus { outline: none; border-color: var(--primary); }
+        .feedback-actions { display: flex; gap: 12px; justify-content: flex-end; }
+        .feedback-cancel {
+            padding: 10px 20px; background: transparent; border: 1px solid var(--border-color);
+            border-radius: 8px; color: var(--text-secondary); cursor: pointer; font-size: 0.9rem;
+        }
+        .feedback-cancel:hover { border-color: var(--text-secondary); color: white; }
+        .feedback-submit {
+            padding: 10px 20px; background: var(--primary); border: none;
+            border-radius: 8px; color: white; cursor: pointer; font-size: 0.9rem; font-weight: 600;
+        }
+        .feedback-submit:hover { background: var(--primary-dark); }
+        .feedback-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+        .feedback-success { color: var(--success); text-align: center; padding: 20px; font-size: 1.1rem; }
+
+        /* Comment Popover - appears when clicking highlighted text */
+        .comment-popover {
+            display: none;
+            position: absolute;
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            width: 300px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            z-index: 500;
+        }
+        .comment-popover.visible { display: block; }
+        .comment-popover::before {
+            content: '';
+            position: absolute;
+            top: -8px; left: 20px;
+            width: 16px; height: 16px;
+            background: #1e293b;
+            border-left: 1px solid var(--border-color);
+            border-top: 1px solid var(--border-color);
+            transform: rotate(45deg);
+        }
+        .popover-header {
+            display: flex; align-items: center; gap: 10px;
+            margin-bottom: 12px;
+        }
+        .popover-avatar {
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px;
+        }
+        .popover-avatar.cfo { background: var(--cfo-color); }
+        .popover-avatar.ceo { background: var(--ceo-color); }
+        .popover-name { font-weight: 600; font-size: 0.95rem; }
+        .popover-role { color: var(--text-muted); font-size: 0.75rem; }
+        .popover-text { font-size: 0.9rem; line-height: 1.6; color: var(--text-primary); }
+        .popover-close {
+            position: absolute; top: 8px; right: 8px;
+            background: transparent; border: none;
+            color: var(--text-muted); cursor: pointer;
+            font-size: 1rem; padding: 4px;
+        }
+        .popover-close:hover { color: white; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <a href="/" class="logo">
+                <span class="logo-icon">📋</span>
+                <span class="logo-text">DecisionOS</span>
+            </a>
+            <a href="/" class="back-link">← Back to Home</a>
+        </header>
+
+        <!-- Page Title -->
+        <h1 class="page-title">Requirement Reviewer</h1>
+        <p class="page-subtitle">Write or paste your requirements document, then get executive-level feedback with AI-powered review.</p>
+
+        <!-- Main Layout -->
+        <div class="main-layout">
+            <!-- Editor Section -->
+            <div class="editor-section">
+                <!-- Toolbar -->
+                <div class="toolbar">
+                    <div class="toolbar-group">
+                        <select class="toolbar-select" id="font-family" onchange="applyFontFamily()">
+                            <option value="Inter">Inter</option>
+                            <option value="Plus Jakarta Sans">Jakarta Sans</option>
+                            <option value="Merriweather">Merriweather</option>
+                            <option value="Roboto Mono">Roboto Mono</option>
+                        </select>
+                    </div>
+                    <div class="toolbar-group">
+                        <select class="toolbar-select" id="font-size" onchange="applyFontSize()" style="min-width: 80px;">
+                            <option value="12px">12</option>
+                            <option value="14px">14</option>
+                            <option value="16px" selected>16</option>
+                            <option value="18px">18</option>
+                            <option value="20px">20</option>
+                            <option value="24px">24</option>
+                        </select>
+                    </div>
+                    <div class="toolbar-group">
+                        <select class="toolbar-select" id="heading" onchange="applyHeading()" style="min-width: 100px;">
+                            <option value="p">Normal</option>
+                            <option value="h1">Heading 1</option>
+                            <option value="h2">Heading 2</option>
+                            <option value="h3">Heading 3</option>
+                        </select>
+                    </div>
+                    <div class="toolbar-group">
+                        <button class="toolbar-btn" onclick="execCommand('bold')" title="Bold"><b>B</b></button>
+                        <button class="toolbar-btn" onclick="execCommand('italic')" title="Italic"><i>I</i></button>
+                        <button class="toolbar-btn" onclick="execCommand('underline')" title="Underline"><u>U</u></button>
+                    </div>
+                    <div class="toolbar-group">
+                        <button class="toolbar-btn" onclick="execCommand('insertUnorderedList')" title="Bullet List">•</button>
+                        <button class="toolbar-btn" onclick="execCommand('insertOrderedList')" title="Numbered List">1.</button>
+                    </div>
+                </div>
+
+                <!-- Editor -->
+                <div class="editor-wrapper">
+                    <div class="editor" id="editor" contenteditable="true"></div>
+                </div>
+
+                <!-- Review Actions -->
+                <div class="review-actions">
+                    <button class="review-btn clear" onclick="clearComments()">
+                        Clear Comments
+                    </button>
+                    <button class="review-btn cfo" id="cfo-btn" onclick="reviewByCFO()">
+                        <span id="cfo-btn-text">💼 Review by CFO</span>
+                        <span class="spinner" id="cfo-spinner" style="display:none"></span>
+                    </button>
+                    <button class="review-btn ceo" id="ceo-btn" onclick="reviewByCEO()">
+                        <span id="ceo-btn-text">👔 Review by CEO</span>
+                        <span class="spinner" id="ceo-spinner" style="display:none"></span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Comments Panel -->
+            <div class="comments-panel">
+                <div class="comments-header">
+                    <h3 class="comments-title">Comments</h3>
+                    <span class="comments-count" id="comments-count">0</span>
+                </div>
+                <div class="comments-list" id="comments-list">
+                    <div class="no-comments">
+                        <div class="no-comments-icon">💬</div>
+                        <p>No comments yet</p>
+                        <p style="font-size: 0.8rem; margin-top: 8px;">Click "Review by CFO" or "Review by CEO" to get executive feedback</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Comment Popover -->
+    <div class="comment-popover" id="comment-popover">
+        <button class="popover-close" onclick="closePopover()">×</button>
+        <div class="popover-header">
+            <div class="popover-avatar cfo" id="popover-avatar">💼</div>
+            <div>
+                <div class="popover-name" id="popover-name">CFO</div>
+                <div class="popover-role" id="popover-role">Chief Financial Officer</div>
+            </div>
+        </div>
+        <div class="popover-text" id="popover-text"></div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="spinner" style="width:40px;height:40px;border-width:3px"></div>
+        <div class="loading-text" id="loading-text">Analyzing document...</div>
+    </div>
+
+    <!-- Feedback Button -->
+    <button class="feedback-btn" onclick="openFeedback()">💬 Feedback</button>
+
+    <!-- Feedback Modal -->
+    <div class="feedback-modal" id="feedback-modal" onclick="if(event.target===this)closeFeedback()">
+        <div class="feedback-content">
+            <div id="feedback-form">
+                <h3 class="feedback-title">Share Your Feedback</h3>
+                <p class="feedback-subtitle">Help us improve! Tell us what you think about this tool.</p>
+                <textarea class="feedback-textarea" id="feedback-text" placeholder="What's working well? What could be better? Any feature requests?"></textarea>
+                <div class="feedback-actions">
+                    <button class="feedback-cancel" onclick="closeFeedback()">Cancel</button>
+                    <button class="feedback-submit" id="feedback-submit-btn" onclick="submitFeedback()">Submit</button>
+                </div>
+            </div>
+            <div id="feedback-success" class="feedback-success" style="display:none">
+                ✅ Thank you for your feedback!
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '/api';
+        let comments = [];
+        let commentIdCounter = 0;
+
+        // Editor commands
+        function execCommand(command, value = null) {
+            document.execCommand(command, false, value);
+            document.getElementById('editor').focus();
+        }
+
+        function applyFontFamily() {
+            const font = document.getElementById('font-family').value;
+            document.execCommand('fontName', false, font);
+            document.getElementById('editor').focus();
+        }
+
+        function applyFontSize() {
+            const size = document.getElementById('font-size').value;
+            // fontSize command only accepts 1-7, so we use a workaround
+            const selection = window.getSelection();
+            if (selection.rangeCount > 0 && !selection.isCollapsed) {
+                const range = selection.getRangeAt(0);
+                const span = document.createElement('span');
+                span.style.fontSize = size;
+                range.surroundContents(span);
+            }
+            document.getElementById('editor').focus();
+        }
+
+        function applyHeading() {
+            const heading = document.getElementById('heading').value;
+            document.execCommand('formatBlock', false, heading);
+            document.getElementById('editor').focus();
+        }
+
+        // Clear all comments
+        function clearComments() {
+            comments = [];
+            updateCommentsPanel();
+
+            // Remove all highlights from editor
+            const editor = document.getElementById('editor');
+            const highlights = editor.querySelectorAll('.comment-highlight');
+            highlights.forEach(highlight => {
+                const parent = highlight.parentNode;
+                while (highlight.firstChild) {
+                    parent.insertBefore(highlight.firstChild, highlight);
+                }
+                parent.removeChild(highlight);
+            });
+        }
+
+        // Review by CFO
+        async function reviewByCFO() {
+            const editor = document.getElementById('editor');
+            const content = editor.innerText.trim();
+
+            if (!content) {
+                alert('Please enter some requirements to review');
+                return;
+            }
+
+            const btn = document.getElementById('cfo-btn');
+            const btnText = document.getElementById('cfo-btn-text');
+            const spinner = document.getElementById('cfo-spinner');
+            const loading = document.getElementById('loading-overlay');
+            const loadingText = document.getElementById('loading-text');
+
+            btn.disabled = true;
+            btnText.style.display = 'none';
+            spinner.style.display = 'inline-block';
+            loading.classList.add('visible');
+            loadingText.textContent = 'CFO is reviewing your requirements...';
+
+            try {
+                const response = await fetch(`${API_BASE}/review-requirements`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        content: content,
+                        reviewer: 'cfo'
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+
+                // Add comments to the document
+                addCommentsToDocument(data.comments, 'cfo');
+
+            } catch (error) {
+                console.error('Review error:', error);
+                alert('Failed to get CFO review. Please try again.');
+            } finally {
+                btn.disabled = false;
+                btnText.style.display = 'inline';
+                spinner.style.display = 'none';
+                loading.classList.remove('visible');
+            }
+        }
+
+        // Review by CEO
+        async function reviewByCEO() {
+            const editor = document.getElementById('editor');
+            const content = editor.innerText.trim();
+
+            if (!content) {
+                alert('Please enter some requirements to review');
+                return;
+            }
+
+            const btn = document.getElementById('ceo-btn');
+            const btnText = document.getElementById('ceo-btn-text');
+            const spinner = document.getElementById('ceo-spinner');
+            const loading = document.getElementById('loading-overlay');
+            const loadingText = document.getElementById('loading-text');
+
+            btn.disabled = true;
+            btnText.style.display = 'none';
+            spinner.style.display = 'inline-block';
+            loading.classList.add('visible');
+            loadingText.textContent = 'CEO is reviewing your requirements...';
+
+            try {
+                const response = await fetch(`${API_BASE}/review-requirements`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        content: content,
+                        reviewer: 'ceo'
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+
+                // Add comments to the document
+                addCommentsToDocument(data.comments, 'ceo');
+
+            } catch (error) {
+                console.error('Review error:', error);
+                alert('Failed to get CEO review. Please try again.');
+            } finally {
+                btn.disabled = false;
+                btnText.style.display = 'inline';
+                spinner.style.display = 'none';
+                loading.classList.remove('visible');
+            }
+        }
+
+        // Add comments to the document
+        function addCommentsToDocument(newComments, reviewer) {
+            const editor = document.getElementById('editor');
+            const editorText = editor.innerText;
+
+            newComments.forEach(comment => {
+                const commentId = ++commentIdCounter;
+                const commentObj = {
+                    id: commentId,
+                    reviewer: reviewer,
+                    excerpt: comment.excerpt,
+                    comment: comment.comment,
+                    position: comment.position || 0
+                };
+                comments.push(commentObj);
+
+                // Try to find and highlight the excerpt in the editor
+                if (comment.excerpt && comment.excerpt.length > 10) {
+                    highlightExcerpt(comment.excerpt, commentId, reviewer);
+                }
+            });
+
+            updateCommentsPanel();
+        }
+
+        // Highlight excerpt in editor
+        function highlightExcerpt(excerpt, commentId, reviewer) {
+            const editor = document.getElementById('editor');
+            const walker = document.createTreeWalker(editor, NodeFilter.SHOW_TEXT, null, false);
+
+            let node;
+            while (node = walker.nextNode()) {
+                const text = node.textContent;
+                const index = text.toLowerCase().indexOf(excerpt.toLowerCase().substring(0, 50));
+
+                if (index !== -1) {
+                    // Find how much of the excerpt matches
+                    let matchLength = 50;
+                    for (let i = 50; i <= excerpt.length && i <= text.length - index; i++) {
+                        if (text.substring(index, index + i).toLowerCase() === excerpt.substring(0, i).toLowerCase()) {
+                            matchLength = i;
+                        }
+                    }
+
+                    const range = document.createRange();
+                    range.setStart(node, index);
+                    range.setEnd(node, Math.min(index + matchLength, text.length));
+
+                    const highlight = document.createElement('span');
+                    highlight.className = `comment-highlight ${reviewer}`;
+                    highlight.dataset.commentId = commentId;
+                    highlight.onclick = (e) => showPopover(e, commentId);
+
+                    try {
+                        range.surroundContents(highlight);
+                    } catch (e) {
+                        // Range crosses element boundaries, skip this highlight
+                        console.log('Could not highlight:', excerpt.substring(0, 30));
+                    }
+                    break;
+                }
+            }
+        }
+
+        // Update comments panel
+        function updateCommentsPanel() {
+            const list = document.getElementById('comments-list');
+            const count = document.getElementById('comments-count');
+
+            count.textContent = comments.length;
+
+            if (comments.length === 0) {
+                list.innerHTML = `
+                    <div class="no-comments">
+                        <div class="no-comments-icon">💬</div>
+                        <p>No comments yet</p>
+                        <p style="font-size: 0.8rem; margin-top: 8px;">Click "Review by CFO" or "Review by CEO" to get executive feedback</p>
+                    </div>
+                `;
+                return;
+            }
+
+            list.innerHTML = comments.map(comment => {
+                const isCFO = comment.reviewer === 'cfo';
+                const icon = isCFO ? '💼' : '👔';
+                const name = isCFO ? 'CFO' : 'CEO';
+                const role = isCFO ? 'Chief Financial Officer' : 'Chief Executive Officer';
+
+                return `
+                    <div class="comment-card ${comment.reviewer}" onclick="scrollToComment(${comment.id})">
+                        <div class="comment-author">
+                            <div class="comment-avatar ${comment.reviewer}">${icon}</div>
+                            <div>
+                                <div class="comment-name">${name}</div>
+                                <div class="comment-role">${role}</div>
+                            </div>
+                        </div>
+                        <div class="comment-excerpt">"${escapeHtml(comment.excerpt.substring(0, 60))}..."</div>
+                        <div class="comment-text">${escapeHtml(comment.comment)}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Scroll to comment in editor
+        function scrollToComment(commentId) {
+            const highlight = document.querySelector(`[data-comment-id="${commentId}"]`);
+            if (highlight) {
+                highlight.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                highlight.style.animation = 'pulse 0.5s';
+                setTimeout(() => highlight.style.animation = '', 500);
+            }
+        }
+
+        // Show popover for comment
+        function showPopover(event, commentId) {
+            event.stopPropagation();
+            const comment = comments.find(c => c.id === commentId);
+            if (!comment) return;
+
+            const popover = document.getElementById('comment-popover');
+            const avatar = document.getElementById('popover-avatar');
+            const name = document.getElementById('popover-name');
+            const role = document.getElementById('popover-role');
+            const text = document.getElementById('popover-text');
+
+            const isCFO = comment.reviewer === 'cfo';
+            avatar.className = `popover-avatar ${comment.reviewer}`;
+            avatar.textContent = isCFO ? '💼' : '👔';
+            name.textContent = isCFO ? 'CFO' : 'CEO';
+            role.textContent = isCFO ? 'Chief Financial Officer' : 'Chief Executive Officer';
+            text.textContent = comment.comment;
+
+            // Position popover near the clicked element
+            const rect = event.target.getBoundingClientRect();
+            popover.style.top = (rect.bottom + window.scrollY + 10) + 'px';
+            popover.style.left = Math.max(10, rect.left + window.scrollX - 100) + 'px';
+            popover.classList.add('visible');
+        }
+
+        function closePopover() {
+            document.getElementById('comment-popover').classList.remove('visible');
+        }
+
+        // Close popover when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.comment-popover') && !e.target.closest('.comment-highlight')) {
+                closePopover();
+            }
+        });
+
+        // Escape HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Feedback functions
+        function openFeedback() {
+            document.getElementById('feedback-modal').classList.add('visible');
+            document.getElementById('feedback-text').value = '';
+            document.getElementById('feedback-form').style.display = 'block';
+            document.getElementById('feedback-success').style.display = 'none';
+        }
+
+        function closeFeedback() {
+            document.getElementById('feedback-modal').classList.remove('visible');
+        }
+
+        async function submitFeedback() {
+            const text = document.getElementById('feedback-text').value.trim();
+            if (!text) {
+                alert('Please enter your feedback');
+                return;
+            }
+
+            const btn = document.getElementById('feedback-submit-btn');
+            btn.disabled = true;
+            btn.textContent = 'Sending...';
+
+            try {
+                const response = await fetch('/api/feedback', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        page: 'requirement-reviewer',
+                        feedback: text,
+                        timestamp: new Date().toISOString()
+                    })
+                });
+
+                if (response.ok) {
+                    document.getElementById('feedback-form').style.display = 'none';
+                    document.getElementById('feedback-success').style.display = 'block';
+                    setTimeout(closeFeedback, 2000);
+                } else {
+                    alert('Failed to submit feedback. Please try again.');
+                }
+            } catch (error) {
+                console.error('Feedback error:', error);
+                alert('Failed to submit feedback. Please try again.');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Submit';
+            }
+        }
+
+        // Add pulse animation for highlighting
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes pulse {
+                0% { background: rgba(59, 130, 246, 0.3); }
+                50% { background: rgba(59, 130, 246, 0.6); }
+                100% { background: rgba(59, 130, 246, 0.3); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
