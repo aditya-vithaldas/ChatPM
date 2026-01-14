@@ -1134,10 +1134,11 @@ KEY QUESTIONS YOU ALWAYS ASK:
 
 REVIEW INSTRUCTIONS:
 1. Read through the requirements document carefully
-2. Identify 4-8 specific passages that need financial scrutiny
+2. Identify the 2-3 MOST IMPORTANT passages that need financial scrutiny (no more than 3 comments)
 3. For each passage, ask pointed questions about metrics, costs, and ROI
 4. Be skeptical - if ROI isn't clear within 2 years, push back hard
 5. Demand specific numbers, not vague promises
+6. IMPORTANT: Provide only 2-3 high-impact comments, not more
 ${existingCommentsContext}
 Return JSON format:
 {
@@ -1184,10 +1185,11 @@ KEY QUESTIONS YOU ALWAYS ASK:
 
 REVIEW INSTRUCTIONS:
 1. Read through the requirements document carefully
-2. Identify 4-8 specific passages that have strategic implications
+2. Identify the 2-3 MOST IMPORTANT passages that have strategic implications (no more than 3 comments)
 3. For each passage, evaluate alignment with the 3 strategic goals
 4. Push for clarity on how each requirement serves the bigger picture
 5. Challenge anything that doesn't clearly support strategic objectives
+6. IMPORTANT: Provide only 2-3 high-impact comments, not more
 ${existingCommentsContext}
 Return JSON format:
 {
