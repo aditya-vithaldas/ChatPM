@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Metrics View - DecisionOS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #6366f1;
+            --bg-main: #0f172a;
+            --bg-card: #1e293b;
+            --bg-card-hover: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border-color: #334155;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --strategy-color: #8b5cf6;
+            --goal-color: #3b82f6;
+            --requirement-color: #f97316;
+            --metric-color: #22c55e;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-main);
+            color: var(--text-primary);
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            z-index: 100;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .back-btn:hover {
+            background: var(--bg-card);
+            color: var(--text-primary);
+        }
+
+        .header-title {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .breadcrumb {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .breadcrumb a {
+            color: var(--strategy-color);
+            text-decoration: none;
+        }
+
+        .breadcrumb .goal-link { color: var(--goal-color); }
+        .breadcrumb .req-link { color: var(--requirement-color); }
+
+        .header-center {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .level-indicator {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: var(--bg-card);
+            padding: 6px 12px;
+            border-radius: 20px;
+        }
+
+        .level-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--border-color);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .level-dot.active { transform: scale(1.3); }
+        .level-dot.strategy { background: var(--strategy-color); }
+        .level-dot.goal { background: var(--goal-color); }
+        .level-dot.requirement { background: var(--requirement-color); }
+        .level-dot.metric { background: var(--metric-color); }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .zoom-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: 25px;
+            border: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        .zoom-out-btn {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .zoom-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .zoom-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .main-container {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            right: 320px;
+            bottom: 0;
+            overflow: hidden;
+        }
+
+        .view-container {
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease;
+        }
+
+        .view-container.zooming-out {
+            transform: scale(0.8);
+            opacity: 0;
+        }
+
+        .content-scroll {
+            width: 100%;
+            height: 100%;
+            overflow-x: auto;
+            overflow-y: hidden;
+            display: flex;
+            align-items: center;
+            padding: 40px;
+            gap: 24px;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Metric Card */
+        .metric-card {
+            flex: 0 0 400px;
+            height: calc(100% - 80px);
+            max-height: 500px;
+            background: linear-gradient(145deg, var(--bg-card), #252f3f);
+            border-radius: 24px;
+            border: 1px solid var(--border-color);
+            padding: 24px;
+            scroll-snap-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--metric-color), #10b981);
+        }
+
+        .metric-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 60px rgba(34, 197, 94, 0.2);
+            border-color: var(--metric-color);
+        }
+
+        .metric-card.selected {
+            border-color: var(--metric-color);
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.3);
+        }
+
+        .card-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 14px;
+            width: fit-content;
+        }
+
+        .card-badge.metric {
+            background: rgba(34, 197, 94, 0.2);
+            color: #4ade80;
+        }
+
+        .card-title {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        /* Value display */
+        .metric-values {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .value-box {
+            background: var(--bg-main);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .value-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .value-number {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+        }
+
+        .value-number.current {
+            color: var(--metric-color);
+        }
+
+        .value-unit {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        /* Progress */
+        .metric-progress {
+            margin-bottom: 16px;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .progress-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .progress-percent {
+            font-size: 0.9rem;
+            font-weight: 700;
+        }
+
+        .progress-percent.green { color: var(--success); }
+        .progress-percent.amber { color: var(--warning); }
+        .progress-percent.red { color: var(--error); }
+
+        .progress-bar {
+            height: 8px;
+            background: var(--bg-main);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+        }
+
+        .progress-fill.green { background: linear-gradient(90deg, var(--success), #4ade80); }
+        .progress-fill.amber { background: linear-gradient(90deg, var(--warning), #fbbf24); }
+        .progress-fill.red { background: linear-gradient(90deg, var(--error), #f87171); }
+
+        /* Chart */
+        .chart-container {
+            flex: 1;
+            min-height: 150px;
+            background: var(--bg-main);
+            border-radius: 12px;
+            padding: 16px;
+        }
+
+        /* Q&A Sidebar */
+        .qa-sidebar {
+            position: fixed;
+            top: 60px;
+            right: 0;
+            width: 320px;
+            bottom: 0;
+            background: var(--bg-card);
+            border-left: 1px solid var(--border-color);
+            padding: 24px;
+            overflow-y: auto;
+            z-index: 50;
+        }
+
+        .qa-sidebar-title {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .qa-sidebar-subtitle {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+        }
+
+        .qa-item {
+            background: var(--bg-main);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .qa-item:hover {
+            border-color: var(--primary);
+        }
+
+        .qa-item.expanded {
+            border-color: var(--metric-color);
+        }
+
+        .qa-question {
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .qa-icon {
+            color: var(--metric-color);
+            flex-shrink: 0;
+        }
+
+        .qa-answer {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-color);
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            display: none;
+        }
+
+        .qa-item.expanded .qa-answer {
+            display: block;
+        }
+
+        .qa-empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+        }
+
+        .qa-empty-icon {
+            font-size: 2rem;
+            margin-bottom: 12px;
+        }
+
+        /* Stats highlight */
+        .stat-highlight {
+            background: rgba(34, 197, 94, 0.1);
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 8px;
+            text-align: center;
+        }
+
+        .stat-highlight-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--metric-color);
+        }
+
+        .stat-highlight-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .zoom-hint {
+            position: fixed;
+            bottom: 30px;
+            left: calc(50% - 160px);
+            transform: translateX(-50%);
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 14px 28px;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 50;
+            border: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 1024px) {
+            .qa-sidebar { display: none; }
+            .main-container { right: 0; }
+            .zoom-hint { left: 50%; }
+        }
+
+        @media (max-width: 768px) {
+            .metric-card { flex: 0 0 320px; }
+            .header-center { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-left">
+            <button class="back-btn" onclick="zoomOut()">&#8592;</button>
+            <div>
+                <h1 class="header-title">Metrics</h1>
+                <p class="breadcrumb">
+                    <a href="view-strategy.html" id="strategy-link">Strategy</a> &gt;
+                    <a href="view-goals.html" class="goal-link" id="goal-link">Goal</a> &gt;
+                    <a href="view-requirements.html" class="req-link" id="req-link">Requirement</a> &gt;
+                    Metrics
+                </p>
+            </div>
+        </div>
+        <div class="header-center">
+            <div class="level-indicator">
+                <div class="level-dot strategy" onclick="goToLevel('strategy')"></div>
+                <div class="level-dot goal" onclick="goToLevel('goal')"></div>
+                <div class="level-dot requirement" onclick="zoomOut()"></div>
+                <div class="level-dot metric active"></div>
+            </div>
+        </div>
+        <div class="header-right">
+            <button class="zoom-btn zoom-out-btn" onclick="zoomOut()">
+                <span>&#8722;</span> Zoom Out
+            </button>
+            <button class="zoom-btn zoom-out-btn" disabled>
+                Zoom In <span>&#43;</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="main-container">
+        <div class="view-container" id="view-container">
+            <div class="content-scroll" id="content-scroll">
+                <!-- Metric cards populated by JS -->
+            </div>
+        </div>
+    </main>
+
+    <aside class="qa-sidebar">
+        <h3 class="qa-sidebar-title">&#128200; Metric Analysis</h3>
+        <p class="qa-sidebar-subtitle" id="qa-subtitle">Select a metric to analyze</p>
+        <div id="qa-content">
+            <!-- Q&A populated by JS -->
+        </div>
+    </aside>
+
+    <div class="zoom-hint">
+        <span>&#128200;</span>
+        <span>This is the deepest level. <strong>Zoom Out</strong> to go back.</span>
+    </div>
+
+    <script>
+        // Load data
+        const fullData = JSON.parse(localStorage.getItem('strategyMapData')) || { strategies: [] };
+        const selectedStrategyId = sessionStorage.getItem('selectedStrategyId');
+        const selectedGoalId = sessionStorage.getItem('selectedGoalId');
+        const selectedRequirementId = sessionStorage.getItem('selectedRequirementId');
+
+        let currentStrategy = fullData.strategies.find(s => s.id === selectedStrategyId) || fullData.strategies[0];
+        let currentGoal = currentStrategy?.goals?.find(g => g.id === selectedGoalId) || currentStrategy?.goals?.[0];
+        let currentRequirement = currentGoal?.initiatives?.find(i => i.id === selectedRequirementId) || currentGoal?.initiatives?.[0];
+        let selectedMetric = null;
+
+        // Update breadcrumbs
+        document.getElementById('strategy-link').textContent = currentStrategy?.title?.substring(0, 15) + '...' || 'Strategy';
+        document.getElementById('goal-link').textContent = currentGoal?.title?.substring(0, 15) + '...' || 'Goal';
+        document.getElementById('req-link').textContent = currentRequirement?.title?.substring(0, 15) + '...' || 'Requirement';
+
+        function getProgressColor(current, target) {
+            const percent = (current / target) * 100;
+            if (percent >= 80) return 'green';
+            if (percent >= 50) return 'amber';
+            return 'red';
+        }
+
+        function renderMetrics() {
+            const container = document.getElementById('content-scroll');
+            if (!currentRequirement || !currentRequirement.metrics || currentRequirement.metrics.length === 0) {
+                container.innerHTML = '<div style="text-align: center; padding: 60px; color: var(--text-muted);">No metrics defined for this requirement</div>';
+                return;
+            }
+
+            container.innerHTML = currentRequirement.metrics.map((metric, index) => {
+                const percent = Math.round((metric.current / metric.target) * 100);
+                const color = getProgressColor(metric.current, metric.target);
+                const chartId = `chart-${index}`;
+
+                return `
+                    <div class="metric-card ${selectedMetric?.id === metric.id ? 'selected' : ''}"
+                         data-id="${metric.id}"
+                         data-index="${index}"
+                         onclick="selectMetric('${metric.id}', ${index})">
+                        <span class="card-badge metric">&#128200; Metric</span>
+                        <h2 class="card-title">${metric.name}</h2>
+
+                        <div class="metric-values">
+                            <div class="value-box">
+                                <div class="value-label">Current</div>
+                                <div class="value-number current">${metric.current}<span class="value-unit">${metric.unit}</span></div>
+                            </div>
+                            <div class="value-box">
+                                <div class="value-label">Target</div>
+                                <div class="value-number">${metric.target}<span class="value-unit">${metric.unit}</span></div>
+                            </div>
+                        </div>
+
+                        <div class="metric-progress">
+                            <div class="progress-header">
+                                <span class="progress-label">Progress to Target</span>
+                                <span class="progress-percent ${color}">${Math.min(percent, 100)}%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill ${color}" style="width: ${Math.min(percent, 100)}%"></div>
+                            </div>
+                        </div>
+
+                        <div class="chart-container">
+                            <canvas id="${chartId}"></canvas>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Render charts
+            setTimeout(() => {
+                currentRequirement.metrics.forEach((metric, index) => {
+                    renderChart(`chart-${index}`, metric);
+                });
+            }, 100);
+        }
+
+        function renderChart(canvasId, metric) {
+            const ctx = document.getElementById(canvasId);
+            if (!ctx) return;
+
+            const trend = metric.trend || [0, 0, 0, 0, 0, 0];
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [
+                        {
+                            label: metric.name,
+                            data: trend,
+                            borderColor: '#22c55e',
+                            backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 4,
+                            pointBackgroundColor: '#22c55e'
+                        },
+                        {
+                            label: 'Target',
+                            data: Array(6).fill(metric.target),
+                            borderColor: '#64748b',
+                            borderDash: [5, 5],
+                            pointRadius: 0,
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#64748b', font: { size: 10 } }
+                        },
+                        y: {
+                            grid: { color: 'rgba(100, 116, 139, 0.2)' },
+                            ticks: { color: '#64748b', font: { size: 10 } }
+                        }
+                    }
+                }
+            });
+        }
+
+        function selectMetric(id, index) {
+            selectedMetric = currentRequirement.metrics.find(m => m.id === id) || currentRequirement.metrics[index];
+            renderMetrics();
+            renderQA();
+
+            // Re-render charts after selection update
+            setTimeout(() => {
+                currentRequirement.metrics.forEach((metric, i) => {
+                    renderChart(`chart-${i}`, metric);
+                });
+            }, 100);
+        }
+
+        function renderQA() {
+            const container = document.getElementById('qa-content');
+            const subtitle = document.getElementById('qa-subtitle');
+
+            if (!selectedMetric) {
+                subtitle.textContent = 'Select a metric to analyze';
+                container.innerHTML = `
+                    <div class="qa-empty">
+                        <div class="qa-empty-icon">&#128200;</div>
+                        <p>Select a metric to see analysis</p>
+                    </div>
+                `;
+                return;
+            }
+
+            subtitle.textContent = selectedMetric.name;
+
+            const percent = Math.round((selectedMetric.current / selectedMetric.target) * 100);
+            const trend = selectedMetric.trend || [];
+            const growthRate = trend.length >= 2
+                ? ((trend[trend.length - 1] - trend[0]) / trend[0] * 100).toFixed(1)
+                : 'N/A';
+            const isOnTrack = percent >= 70;
+
+            const questions = [
+                {
+                    q: 'Is this metric on track?',
+                    icon: '&#127919;',
+                    a: `<div class="stat-highlight">
+                            <div class="stat-highlight-value">${percent}%</div>
+                            <div class="stat-highlight-label">of target achieved</div>
+                        </div>
+                        <br><strong>Status:</strong> ${isOnTrack ? 'On Track &#9989;' : 'Needs Attention &#9888;'}
+                        <br><br>${isOnTrack
+                            ? 'This metric is progressing well toward its target. Continue current efforts.'
+                            : 'This metric is below expected progress. Consider reviewing resources and blockers.'}`
+                },
+                {
+                    q: 'What is the growth trend?',
+                    icon: '&#128200;',
+                    a: `<strong>6-Month Growth Rate:</strong> ${growthRate}%<br><br>
+                        Current value: ${selectedMetric.current}${selectedMetric.unit}<br>
+                        Starting value: ${trend[0] || 'N/A'}${selectedMetric.unit}<br>
+                        Target: ${selectedMetric.target}${selectedMetric.unit}<br><br>
+                        ${parseFloat(growthRate) > 0 ? 'Positive trajectory - maintain momentum.' : 'Needs acceleration to hit targets.'}`
+                },
+                {
+                    q: 'How does this compare to other metrics?',
+                    icon: '&#9878;',
+                    a: `This is metric #${currentRequirement.metrics.indexOf(selectedMetric) + 1} of ${currentRequirement.metrics.length} for "${currentRequirement.title}".<br><br>
+                        <strong>Relative Performance:</strong><br>
+                        ${currentRequirement.metrics.map(m => {
+                            const p = Math.round((m.current / m.target) * 100);
+                            return `• ${m.name}: ${p}% ${m.id === selectedMetric.id ? '(current)' : ''}`;
+                        }).join('<br>')}`
+                },
+                {
+                    q: 'What actions are recommended?',
+                    icon: '&#128161;',
+                    a: percent >= 80
+                        ? `<strong>Excellent progress!</strong><br><br>Recommendations:<ul>
+                            <li>Document what's working well</li>
+                            <li>Consider setting stretch targets</li>
+                            <li>Share learnings with other teams</li></ul>`
+                        : percent >= 50
+                        ? `<strong>Good progress, room for improvement.</strong><br><br>Recommendations:<ul>
+                            <li>Review resource allocation</li>
+                            <li>Identify and remove blockers</li>
+                            <li>Increase measurement frequency</li></ul>`
+                        : `<strong>Needs immediate attention.</strong><br><br>Recommendations:<ul>
+                            <li>Conduct root cause analysis</li>
+                            <li>Escalate to stakeholders</li>
+                            <li>Consider scope adjustments</li>
+                            <li>Add resources if available</li></ul>`
+                }
+            ];
+
+            container.innerHTML = questions.map(item => `
+                <div class="qa-item" onclick="toggleQA(this)">
+                    <div class="qa-question">
+                        <span class="qa-icon">${item.icon}</span>
+                        <span>${item.q}</span>
+                    </div>
+                    <div class="qa-answer">${item.a}</div>
+                </div>
+            `).join('');
+        }
+
+        function toggleQA(el) {
+            el.classList.toggle('expanded');
+        }
+
+        function zoomOut() {
+            document.getElementById('view-container').classList.add('zooming-out');
+            setTimeout(() => {
+                window.location.href = 'view-requirements.html';
+            }, 400);
+        }
+
+        function goToLevel(level) {
+            document.getElementById('view-container').classList.add('zooming-out');
+            setTimeout(() => {
+                if (level === 'strategy') {
+                    window.location.href = 'view-strategy.html';
+                } else if (level === 'goal') {
+                    window.location.href = 'view-goals.html';
+                }
+            }, 400);
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' || e.key === 'Backspace') {
+                e.preventDefault();
+                zoomOut();
+            }
+            if (e.key === 'ArrowRight') navigateCard(1);
+            if (e.key === 'ArrowLeft') navigateCard(-1);
+        });
+
+        function navigateCard(direction) {
+            const metrics = currentRequirement?.metrics || [];
+            const currentIndex = selectedMetric
+                ? metrics.findIndex(m => m.id === selectedMetric.id)
+                : -1;
+            const newIndex = Math.max(0, Math.min(metrics.length - 1, currentIndex + direction));
+            selectMetric(metrics[newIndex].id, newIndex);
+
+            const card = document.querySelector(`[data-index="${newIndex}"]`);
+            if (card) card.scrollIntoView({ behavior: 'smooth', inline: 'center' });
+        }
+
+        // Initialize
+        renderMetrics();
+        renderQA();
+    </script>
+</body>
+</html>

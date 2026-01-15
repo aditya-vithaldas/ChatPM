@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Requirements View - DecisionOS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #6366f1;
+            --bg-main: #0f172a;
+            --bg-card: #1e293b;
+            --bg-card-hover: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border-color: #334155;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --strategy-color: #8b5cf6;
+            --goal-color: #3b82f6;
+            --requirement-color: #f97316;
+            --metric-color: #22c55e;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-main);
+            color: var(--text-primary);
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            z-index: 100;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .back-btn:hover {
+            background: var(--bg-card);
+            color: var(--text-primary);
+        }
+
+        .header-title {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .breadcrumb {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .breadcrumb a {
+            color: var(--strategy-color);
+            text-decoration: none;
+        }
+
+        .breadcrumb .goal-link {
+            color: var(--goal-color);
+        }
+
+        .header-center {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .level-indicator {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: var(--bg-card);
+            padding: 6px 12px;
+            border-radius: 20px;
+        }
+
+        .level-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--border-color);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .level-dot.active { transform: scale(1.3); }
+        .level-dot.strategy { background: var(--strategy-color); }
+        .level-dot.goal { background: var(--goal-color); }
+        .level-dot.requirement { background: var(--requirement-color); }
+        .level-dot.metric { background: var(--metric-color); }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .zoom-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: 25px;
+            border: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        .zoom-in-btn {
+            background: linear-gradient(135deg, var(--metric-color), #10b981);
+            color: white;
+        }
+
+        .zoom-out-btn {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .zoom-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .main-container {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            right: 320px;
+            bottom: 0;
+            overflow: hidden;
+        }
+
+        .view-container {
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease;
+        }
+
+        .view-container.zooming-out {
+            transform: scale(0.8);
+            opacity: 0;
+        }
+
+        .view-container.zooming-in {
+            transform: scale(1.2);
+            opacity: 0;
+        }
+
+        .content-scroll {
+            width: 100%;
+            height: 100%;
+            overflow-x: auto;
+            overflow-y: hidden;
+            display: flex;
+            align-items: center;
+            padding: 40px;
+            gap: 24px;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Requirement Card */
+        .requirement-card {
+            flex: 0 0 360px;
+            height: calc(100% - 80px);
+            max-height: 520px;
+            background: linear-gradient(145deg, var(--bg-card), #252f3f);
+            border-radius: 24px;
+            border: 1px solid var(--border-color);
+            padding: 24px;
+            scroll-snap-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .requirement-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--requirement-color), #f59e0b);
+        }
+
+        .requirement-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 60px rgba(249, 115, 22, 0.2);
+            border-color: var(--requirement-color);
+        }
+
+        .requirement-card.selected {
+            border-color: var(--requirement-color);
+            box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.3);
+        }
+
+        .card-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 14px;
+            width: fit-content;
+        }
+
+        .card-badge.requirement {
+            background: rgba(249, 115, 22, 0.2);
+            color: #fb923c;
+        }
+
+        .card-title {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            line-height: 1.3;
+            margin-bottom: 10px;
+        }
+
+        .card-description {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Impact section */
+        .impact-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .impact-box {
+            background: var(--bg-main);
+            border-radius: 12px;
+            padding: 14px;
+        }
+
+        .impact-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 6px;
+        }
+
+        .impact-value {
+            font-size: 0.95rem;
+            font-weight: 700;
+        }
+
+        .impact-value.upside { color: var(--success); }
+        .impact-value.downside { color: var(--error); }
+
+        /* Metrics preview */
+        .metrics-preview {
+            margin-top: 16px;
+            padding: 14px;
+            background: rgba(34, 197, 94, 0.1);
+            border-radius: 12px;
+        }
+
+        .metrics-preview-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+            color: var(--metric-color);
+            font-weight: 600;
+        }
+
+        .metrics-mini {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .metric-tag {
+            background: var(--bg-main);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        /* Q&A Sidebar */
+        .qa-sidebar {
+            position: fixed;
+            top: 60px;
+            right: 0;
+            width: 320px;
+            bottom: 0;
+            background: var(--bg-card);
+            border-left: 1px solid var(--border-color);
+            padding: 24px;
+            overflow-y: auto;
+            z-index: 50;
+        }
+
+        .qa-sidebar-title {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .qa-sidebar-subtitle {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+        }
+
+        .qa-item {
+            background: var(--bg-main);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .qa-item:hover {
+            border-color: var(--primary);
+        }
+
+        .qa-item.expanded {
+            border-color: var(--requirement-color);
+        }
+
+        .qa-question {
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .qa-icon {
+            color: var(--requirement-color);
+            flex-shrink: 0;
+            font-size: 1rem;
+        }
+
+        .qa-answer {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-color);
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            display: none;
+        }
+
+        .qa-item.expanded .qa-answer {
+            display: block;
+        }
+
+        .qa-answer ul {
+            margin-top: 8px;
+            margin-left: 16px;
+        }
+
+        .qa-answer li {
+            margin-bottom: 4px;
+        }
+
+        .qa-empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+        }
+
+        .qa-empty-icon {
+            font-size: 2rem;
+            margin-bottom: 12px;
+        }
+
+        /* Similar projects highlight */
+        .similar-project {
+            background: rgba(139, 92, 246, 0.1);
+            padding: 8px 12px;
+            border-radius: 8px;
+            margin-top: 8px;
+            font-size: 0.8rem;
+            border-left: 3px solid var(--strategy-color);
+        }
+
+        .zoom-hint {
+            position: fixed;
+            bottom: 30px;
+            left: calc(50% - 160px);
+            transform: translateX(-50%);
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 14px 28px;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 50;
+            border: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 1024px) {
+            .qa-sidebar {
+                display: none;
+            }
+            .main-container {
+                right: 0;
+            }
+            .zoom-hint {
+                left: 50%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .requirement-card {
+                flex: 0 0 300px;
+            }
+            .header-center {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-left">
+            <button class="back-btn" onclick="zoomOut()">&#8592;</button>
+            <div>
+                <h1 class="header-title">Requirements</h1>
+                <p class="breadcrumb">
+                    <a href="view-strategy.html" id="strategy-link">Strategy</a> &gt;
+                    <a href="view-goals.html" class="goal-link" id="goal-link">Goal</a> &gt;
+                    Requirements
+                </p>
+            </div>
+        </div>
+        <div class="header-center">
+            <div class="level-indicator">
+                <div class="level-dot strategy" onclick="goToStrategy()"></div>
+                <div class="level-dot goal" onclick="zoomOut()"></div>
+                <div class="level-dot requirement active"></div>
+                <div class="level-dot metric"></div>
+            </div>
+        </div>
+        <div class="header-right">
+            <button class="zoom-btn zoom-out-btn" onclick="zoomOut()">
+                <span>&#8722;</span> Zoom Out
+            </button>
+            <button class="zoom-btn zoom-in-btn" onclick="zoomIn()">
+                Zoom In <span>&#43;</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="main-container">
+        <div class="view-container" id="view-container">
+            <div class="content-scroll" id="content-scroll">
+                <!-- Requirement cards populated by JS -->
+            </div>
+        </div>
+    </main>
+
+    <aside class="qa-sidebar">
+        <h3 class="qa-sidebar-title">&#128161; Project Insights</h3>
+        <p class="qa-sidebar-subtitle" id="qa-subtitle">Select a requirement to explore</p>
+        <div id="qa-content">
+            <!-- Q&A populated by JS -->
+        </div>
+    </aside>
+
+    <div class="zoom-hint">
+        <span>&#128269;</span>
+        <span>Select a requirement and <strong>Zoom In</strong> for Metrics</span>
+    </div>
+
+    <script>
+        // Load data
+        const fullData = JSON.parse(localStorage.getItem('strategyMapData')) || { strategies: [] };
+        const selectedStrategyId = sessionStorage.getItem('selectedStrategyId');
+        const selectedGoalId = sessionStorage.getItem('selectedGoalId');
+
+        let currentStrategy = fullData.strategies.find(s => s.id === selectedStrategyId) || fullData.strategies[0];
+        let currentGoal = currentStrategy?.goals?.find(g => g.id === selectedGoalId) || currentStrategy?.goals?.[0];
+        let selectedRequirement = null;
+
+        // Update breadcrumbs
+        document.getElementById('strategy-link').textContent = currentStrategy?.title?.substring(0, 20) + '...' || 'Strategy';
+        document.getElementById('goal-link').textContent = currentGoal?.title?.substring(0, 20) + '...' || 'Goal';
+
+        function renderRequirements() {
+            const container = document.getElementById('content-scroll');
+            if (!currentGoal || !currentGoal.initiatives || currentGoal.initiatives.length === 0) {
+                container.innerHTML = '<div style="text-align: center; padding: 60px; color: var(--text-muted);">No requirements found for this goal</div>';
+                return;
+            }
+
+            container.innerHTML = currentGoal.initiatives.map(req => {
+                const metricsCount = req.metrics?.length || 0;
+
+                return `
+                    <div class="requirement-card ${selectedRequirement?.id === req.id ? 'selected' : ''}"
+                         data-id="${req.id}"
+                         onclick="selectRequirement('${req.id}')"
+                         ondblclick="zoomIn()">
+                        <span class="card-badge requirement">&#128640; Requirement</span>
+                        <h2 class="card-title">${req.title}</h2>
+                        <p class="card-description">${req.description || 'No description'}</p>
+
+                        <div class="impact-section">
+                            <div class="impact-box">
+                                <div class="impact-label">Potential Upside</div>
+                                <div class="impact-value upside">${req.upside || 'TBD'}</div>
+                            </div>
+                            <div class="impact-box">
+                                <div class="impact-label">Risk / Downside</div>
+                                <div class="impact-value downside">${req.downside || 'TBD'}</div>
+                            </div>
+                        </div>
+
+                        <div class="metrics-preview">
+                            <div class="metrics-preview-header">
+                                <span>&#128200;</span>
+                                <span>${metricsCount} Metric${metricsCount !== 1 ? 's' : ''}</span>
+                            </div>
+                            ${metricsCount > 0 ? `
+                                <div class="metrics-mini">
+                                    ${req.metrics.slice(0, 3).map(m => `
+                                        <span class="metric-tag">${m.name}</span>
+                                    `).join('')}
+                                    ${metricsCount > 3 ? `<span class="metric-tag">+${metricsCount - 3}</span>` : ''}
+                                </div>
+                            ` : '<div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 8px;">No metrics defined</div>'}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function selectRequirement(id) {
+            selectedRequirement = currentGoal.initiatives.find(i => i.id === id);
+            sessionStorage.setItem('selectedRequirementId', id);
+            renderRequirements();
+            renderQA();
+        }
+
+        function renderQA() {
+            const container = document.getElementById('qa-content');
+            const subtitle = document.getElementById('qa-subtitle');
+
+            if (!selectedRequirement) {
+                subtitle.textContent = 'Select a requirement to explore';
+                container.innerHTML = `
+                    <div class="qa-empty">
+                        <div class="qa-empty-icon">&#128072;</div>
+                        <p>Select a requirement to see project insights</p>
+                    </div>
+                `;
+                return;
+            }
+
+            subtitle.textContent = selectedRequirement.title;
+
+            // Generate dynamic competing projects
+            const competingProjects = generateCompetingProjects(selectedRequirement);
+            const roiScore = calculateROI(selectedRequirement);
+            const rank = currentGoal.initiatives.indexOf(selectedRequirement) + 1;
+
+            const questions = [
+                {
+                    q: 'What are competing projects?',
+                    icon: '&#9876;',
+                    a: `Based on similar scope and resources, these projects compete for priority:<ul>${competingProjects.map(p => `<li>${p}</li>`).join('')}</ul>
+                    <div class="similar-project"><strong>Historical:</strong> ${selectedRequirement.similarProjects?.[0] || 'No similar past projects recorded'}</div>`
+                },
+                {
+                    q: 'What is the ROI score?',
+                    icon: '&#128176;',
+                    a: `<strong>ROI Score: ${roiScore.score}/100</strong><br><br>
+                    This is calculated based on:<ul>
+                    <li>Upside potential: ${selectedRequirement.upside || 'Not quantified'}</li>
+                    <li>Risk factor: ${selectedRequirement.downside || 'Not quantified'}</li>
+                    <li>Strategic alignment: High</li>
+                    </ul>
+                    <strong>Recommendation:</strong> ${roiScore.recommendation}`
+                },
+                {
+                    q: 'What is the priority rank?',
+                    icon: '&#127942;',
+                    a: `This requirement is ranked <strong>#${rank} of ${currentGoal.initiatives.length}</strong> within the "${currentGoal.title}" goal.<br><br>
+                    Ranking factors:<ul>
+                    <li>Impact on goal metric</li>
+                    <li>Resource requirements</li>
+                    <li>Dependencies & blockers</li>
+                    </ul>`
+                },
+                {
+                    q: 'What customer insight supports this?',
+                    icon: '&#128101;',
+                    a: `<strong>Research Finding:</strong><br>${selectedRequirement.customerInsight || 'No customer insight documented yet.'}<br><br>
+                    <strong>Goal Connection:</strong><br>${selectedRequirement.goalConnection || 'Connection to goal not documented.'}`
+                }
+            ];
+
+            container.innerHTML = questions.map((item, i) => `
+                <div class="qa-item" onclick="toggleQA(this)">
+                    <div class="qa-question">
+                        <span class="qa-icon">${item.icon}</span>
+                        <span>${item.q}</span>
+                    </div>
+                    <div class="qa-answer">${item.a}</div>
+                </div>
+            `).join('');
+        }
+
+        function generateCompetingProjects(req) {
+            // Simulate competing projects based on similar initiatives
+            const allInitiatives = currentStrategy.goals
+                .flatMap(g => g.initiatives || [])
+                .filter(i => i.id !== req.id);
+
+            return allInitiatives
+                .slice(0, 3)
+                .map(i => `${i.title} (${i.upside || 'Impact TBD'})`);
+        }
+
+        function calculateROI(req) {
+            // Simple ROI calculation based on upside text
+            let score = 60;
+            if (req.upside?.includes('$') || req.upside?.includes('%')) score += 20;
+            if (req.customerInsight) score += 10;
+            if (req.metrics?.length > 0) score += 10;
+
+            const recommendation = score >= 80 ? 'High priority - strong business case'
+                : score >= 60 ? 'Medium priority - needs more validation'
+                : 'Lower priority - consider deferring';
+
+            return { score: Math.min(score, 100), recommendation };
+        }
+
+        function toggleQA(el) {
+            el.classList.toggle('expanded');
+        }
+
+        function zoomIn() {
+            if (!selectedRequirement && currentGoal.initiatives?.length > 0) {
+                selectRequirement(currentGoal.initiatives[0].id);
+            }
+
+            if (selectedRequirement) {
+                document.getElementById('view-container').classList.add('zooming-in');
+                setTimeout(() => {
+                    window.location.href = 'view-metrics.html';
+                }, 400);
+            }
+        }
+
+        function zoomOut() {
+            document.getElementById('view-container').classList.add('zooming-out');
+            setTimeout(() => {
+                window.location.href = 'view-goals.html';
+            }, 400);
+        }
+
+        function goToStrategy() {
+            document.getElementById('view-container').classList.add('zooming-out');
+            setTimeout(() => {
+                window.location.href = 'view-strategy.html';
+            }, 400);
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                zoomIn();
+            }
+            if (e.key === 'Escape' || e.key === 'Backspace') {
+                e.preventDefault();
+                zoomOut();
+            }
+            if (e.key === 'ArrowRight') navigateCard(1);
+            if (e.key === 'ArrowLeft') navigateCard(-1);
+        });
+
+        function navigateCard(direction) {
+            const items = currentGoal.initiatives || [];
+            const currentIndex = selectedRequirement ? items.findIndex(i => i.id === selectedRequirement.id) : -1;
+            const newIndex = Math.max(0, Math.min(items.length - 1, currentIndex + direction));
+            selectRequirement(items[newIndex].id);
+
+            const card = document.querySelector(`[data-id="${items[newIndex].id}"]`);
+            if (card) card.scrollIntoView({ behavior: 'smooth', inline: 'center' });
+        }
+
+        // Initialize
+        renderRequirements();
+        renderQA();
+
+        // Restore selection
+        const savedReqId = sessionStorage.getItem('selectedRequirementId');
+        if (savedReqId && currentGoal.initiatives?.find(i => i.id === savedReqId)) {
+            selectRequirement(savedReqId);
+        }
+    </script>
+</body>
+</html>
