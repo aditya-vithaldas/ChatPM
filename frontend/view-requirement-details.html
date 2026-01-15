@@ -58,11 +58,19 @@
         }
         .back-btn:hover { background: var(--bg-card); color: var(--text-primary); }
         .header-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.25rem; font-weight: 700; }
-        .breadcrumb { font-size: 0.75rem; color: var(--text-muted); }
-        .breadcrumb a { text-decoration: none; }
-        .breadcrumb .strategy-link { color: var(--strategy-color); }
-        .breadcrumb .goal-link { color: var(--goal-color); }
-        .breadcrumb .req-link { color: var(--requirement-color); }
+        /* Parent goal tag under title */
+        .parent-goal-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            color: var(--goal-color);
+            margin-bottom: 16px;
+        }
+
+        .parent-goal-tag span {
+            color: var(--text-muted);
+        }
 
         .header-right { display: flex; align-items: center; gap: 12px; }
         .zoom-btn {
@@ -162,64 +170,6 @@
             margin-top: 4px;
         }
 
-        /* Context Section */
-        .context-section {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 24px;
-            margin-bottom: 30px;
-        }
-
-        .context-card {
-            background: var(--bg-card);
-            border-radius: 16px;
-            padding: 24px;
-            border: 1px solid var(--border-color);
-        }
-
-        .context-card.goal-context {
-            border-color: rgba(59, 130, 246, 0.3);
-        }
-
-        .context-card.strategy-context {
-            border-color: rgba(139, 92, 246, 0.3);
-        }
-
-        .context-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-
-        .context-icon {
-            width: 36px; height: 36px;
-            border-radius: 10px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1rem;
-        }
-
-        .context-icon.goal { background: rgba(59, 130, 246, 0.2); color: var(--goal-color); }
-        .context-icon.strategy { background: rgba(139, 92, 246, 0.2); color: var(--strategy-color); }
-
-        .context-label {
-            font-size: 0.7rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .context-title {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            font-size: 1rem;
-            font-weight: 600;
-        }
-
-        .context-body {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            line-height: 1.6;
-        }
 
         /* Details Section */
         .details-section {
@@ -254,10 +204,10 @@
             color: var(--text-primary);
         }
 
-        /* Key Outcomes */
+        /* Key Outcomes with Metrics */
         .outcomes-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 16px;
             margin-top: 24px;
         }
@@ -267,12 +217,61 @@
             border-radius: 12px;
             padding: 20px;
             border-left: 3px solid var(--requirement-color);
+            position: relative;
+        }
+
+        .outcome-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
         }
 
         .outcome-title {
             font-weight: 600;
-            margin-bottom: 8px;
             color: var(--text-primary);
+        }
+
+        .outcome-metric {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--success);
+            cursor: help;
+            position: relative;
+        }
+
+        .outcome-metric .tooltip {
+            position: absolute;
+            bottom: 100%;
+            right: 0;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 12px 16px;
+            width: 280px;
+            font-size: 0.75rem;
+            font-weight: 400;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s;
+            z-index: 50;
+            margin-bottom: 8px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+        }
+
+        .outcome-metric:hover .tooltip {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .tooltip-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            font-size: 0.8rem;
         }
 
         .outcome-desc {
@@ -280,6 +279,98 @@
             color: var(--text-secondary);
             line-height: 1.5;
         }
+
+        /* Workflow Section */
+        .workflow-section {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+        }
+
+        .workflow-title {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .workflow-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .workflow-card {
+            background: var(--bg-main);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .workflow-card:hover {
+            border-color: var(--strategy-color);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(139, 92, 246, 0.2);
+        }
+
+        .workflow-preview {
+            height: 180px;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(59, 130, 246, 0.1));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: var(--strategy-color);
+        }
+
+        .workflow-info {
+            padding: 20px;
+        }
+
+        .workflow-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 6px;
+        }
+
+        .workflow-name {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .workflow-meta {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .workflow-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.7rem;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+
+        .workflow-status.ready { background: rgba(34, 197, 94, 0.2); color: var(--success); }
+        .workflow-status.draft { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
+        .workflow-status.in-progress { background: rgba(59, 130, 246, 0.2); color: var(--goal-color); }
 
         /* Metrics Preview */
         .metrics-section {
@@ -422,12 +513,6 @@
             <button class="back-btn" onclick="goBack()">&#8592;</button>
             <div>
                 <h1 class="header-title">Requirement Details</h1>
-                <p class="breadcrumb">
-                    <a href="view-strategy.html" class="strategy-link" id="strategy-link">Strategy</a> &gt;
-                    <a href="view-goals.html" class="goal-link" id="goal-link">Goal</a> &gt;
-                    <a href="view-requirements.html" class="req-link" id="req-link">Requirements</a> &gt;
-                    <span id="current-req">Details</span>
-                </p>
             </div>
         </div>
         <div class="header-right">
@@ -456,24 +541,60 @@
         let currentGoal = currentStrategy?.goals?.find(g => g.id === selectedGoalId) || currentStrategy?.goals?.[0];
         let currentRequirement = currentGoal?.initiatives?.find(i => i.id === selectedRequirementId) || currentGoal?.initiatives?.[0];
 
-        // Update breadcrumbs
-        document.getElementById('strategy-link').textContent = currentStrategy?.title?.substring(0, 20) + '...' || 'Strategy';
-        document.getElementById('goal-link').textContent = currentGoal?.title?.substring(0, 20) + '...' || 'Goal';
-        document.getElementById('req-link').textContent = 'Requirements';
-        document.getElementById('current-req').textContent = currentRequirement?.title?.substring(0, 25) + '...' || 'Details';
-
         // Requirement detailed write-ups
         const requirementWriteups = {
             default: `This requirement represents a key initiative that directly contributes to achieving our strategic goals. It has been carefully scoped to deliver measurable impact while managing risk and resource allocation effectively. The success criteria are clearly defined, and the team has identified the key dependencies and milestones needed for successful delivery.`
         };
 
-        // Key outcomes data
-        const keyOutcomes = [
-            { title: 'Revenue Impact', desc: 'Direct contribution to top-line growth through new capabilities or market expansion.' },
-            { title: 'Cost Efficiency', desc: 'Operational improvements that reduce ongoing costs or prevent future expenses.' },
-            { title: 'Customer Experience', desc: 'Enhanced user satisfaction leading to improved retention and advocacy.' },
-            { title: 'Competitive Position', desc: 'Strengthened market differentiation against key competitors.' }
-        ];
+        // Key outcomes with specific metrics and assumptions
+        const keyOutcomesData = {
+            default: [
+                {
+                    title: 'Revenue Growth',
+                    metric: '$12M',
+                    desc: 'Top-line revenue contribution through expanded transaction volume and new merchant acquisition.',
+                    assumptions: 'Based on 15% increase in merchant base, $80 avg monthly revenue per merchant, and 8% transaction growth rate over 12 months.'
+                },
+                {
+                    title: 'Market Share',
+                    metric: '+2.5%',
+                    desc: 'Increased market penetration in target segments, capturing share from legacy processors.',
+                    assumptions: 'Assumes 40% win rate on competitive deals, targeting 200 enterprise accounts in addressable market.'
+                },
+                {
+                    title: 'Cost Savings',
+                    metric: '$3.2M',
+                    desc: 'Operational efficiency gains through automation and reduced manual processing.',
+                    assumptions: 'Based on 60% reduction in manual review time, $85/hr fully loaded cost, 15 FTE equivalent savings.'
+                },
+                {
+                    title: 'NPS Improvement',
+                    metric: '+8 pts',
+                    desc: 'Enhanced customer satisfaction driving retention and organic referrals.',
+                    assumptions: 'Historical correlation: every 5 pt NPS increase = 12% improvement in retention rate.'
+                }
+            ]
+        };
+
+        // Workflow assets data
+        const workflowData = {
+            default: {
+                prototype: {
+                    name: 'Interactive Prototype',
+                    tool: 'Lovable',
+                    status: 'ready',
+                    lastUpdated: 'Jan 12, 2025',
+                    url: '#'
+                },
+                design: {
+                    name: 'UI/UX Design Specs',
+                    tool: 'Figma',
+                    status: 'ready',
+                    lastUpdated: 'Jan 10, 2025',
+                    url: '#'
+                }
+            }
+        };
 
         function getProgressColor(current, target) {
             const percent = (current / target) * 100;
@@ -492,12 +613,18 @@
 
             const metricsCount = currentRequirement.metrics?.length || 0;
             const writeup = requirementWriteups[currentRequirement.id] || requirementWriteups.default;
+            const keyOutcomes = keyOutcomesData[currentRequirement.id] || keyOutcomesData.default;
+            const workflow = workflowData[currentRequirement.id] || workflowData.default;
 
             container.innerHTML = `
                 <!-- Requirement Hero -->
                 <div class="requirement-hero">
                     <span class="hero-badge">&#128640; Requirement</span>
                     <h1 class="hero-title">${currentRequirement.title}</h1>
+                    <div class="parent-goal-tag">
+                        <span>Part of</span>
+                        <strong>&#127919; ${currentGoal?.title || 'Goal'}</strong>
+                    </div>
                     <p class="hero-description">${currentRequirement.description || 'This requirement is a key initiative designed to deliver measurable business value. It aligns with our strategic objectives and has clear success metrics defined.'}</p>
                     <div class="hero-metrics">
                         <div class="hero-metric">
@@ -515,36 +642,6 @@
                     </div>
                 </div>
 
-                <!-- Context Section -->
-                <div class="context-section">
-                    <div class="context-card goal-context">
-                        <div class="context-header">
-                            <div class="context-icon goal">&#127919;</div>
-                            <div>
-                                <div class="context-label">Parent Goal</div>
-                                <div class="context-title">${currentGoal?.title || 'Goal'}</div>
-                            </div>
-                        </div>
-                        <div class="context-body">
-                            ${currentGoal?.description || 'This goal defines the key objectives we are working toward.'}
-                            <br><br><strong>Progress:</strong> ${currentGoal?.targetProgress || 0}% complete
-                        </div>
-                    </div>
-                    <div class="context-card strategy-context">
-                        <div class="context-header">
-                            <div class="context-icon strategy">&#9733;</div>
-                            <div>
-                                <div class="context-label">Strategy</div>
-                                <div class="context-title">${currentStrategy?.title || 'Strategy'}</div>
-                            </div>
-                        </div>
-                        <div class="context-body">
-                            ${currentStrategy?.description || 'This strategy guides our organizational direction.'}
-                            <br><br><strong>Investment:</strong> ${currentStrategy?.cost || 'TBD'}
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Details Section -->
                 <div class="details-section">
                     <h2 class="details-title">&#128203; Requirement Overview</h2>
@@ -557,10 +654,48 @@
                     <div class="outcomes-grid">
                         ${keyOutcomes.map(o => `
                             <div class="outcome-item">
-                                <div class="outcome-title">${o.title}</div>
+                                <div class="outcome-header">
+                                    <div class="outcome-title">${o.title}</div>
+                                    <div class="outcome-metric">
+                                        ${o.metric}
+                                        <div class="tooltip">
+                                            <div class="tooltip-title">Calculation Assumptions</div>
+                                            ${o.assumptions}
+                                        </div>
+                                    </div>
+                                </div>
                                 <div class="outcome-desc">${o.desc}</div>
                             </div>
                         `).join('')}
+                    </div>
+                </div>
+
+                <!-- Workflow Section -->
+                <div class="workflow-section">
+                    <h2 class="workflow-title">&#128736; Workflow</h2>
+                    <div class="workflow-grid">
+                        <div class="workflow-card" onclick="window.open('${workflow.prototype.url}', '_blank')">
+                            <div class="workflow-preview">&#128187;</div>
+                            <div class="workflow-info">
+                                <div class="workflow-label">${workflow.prototype.tool} Prototype</div>
+                                <div class="workflow-name">${workflow.prototype.name}</div>
+                                <div class="workflow-meta">
+                                    <span class="workflow-status ${workflow.prototype.status}">${workflow.prototype.status === 'ready' ? '&#10003; Ready' : workflow.prototype.status === 'draft' ? '&#9998; Draft' : '&#8635; In Progress'}</span>
+                                    <span>Updated ${workflow.prototype.lastUpdated}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="workflow-card" onclick="window.open('${workflow.design.url}', '_blank')">
+                            <div class="workflow-preview">&#127912;</div>
+                            <div class="workflow-info">
+                                <div class="workflow-label">${workflow.design.tool} Design</div>
+                                <div class="workflow-name">${workflow.design.name}</div>
+                                <div class="workflow-meta">
+                                    <span class="workflow-status ${workflow.design.status}">${workflow.design.status === 'ready' ? '&#10003; Ready' : workflow.design.status === 'draft' ? '&#9998; Draft' : '&#8635; In Progress'}</span>
+                                    <span>Updated ${workflow.design.lastUpdated}</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
