@@ -56,8 +56,6 @@
         }
         .back-btn:hover { background: var(--bg-card); color: var(--text-primary); }
         .header-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.25rem; font-weight: 700; }
-        .breadcrumb { font-size: 0.8rem; color: var(--text-muted); }
-        .breadcrumb a { color: var(--strategy-color); text-decoration: none; }
 
         .level-indicator {
             display: flex; align-items: center; gap: 4px;
@@ -85,9 +83,90 @@
         .zoom-out-btn { background: var(--bg-card); color: var(--text-primary); border: 1px solid var(--border-color); }
         .zoom-btn:hover { transform: scale(1.05); box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
 
+        /* Parent Hierarchy Navigation */
+        .hierarchy-nav {
+            position: fixed;
+            top: 60px; left: 0; right: 300px;
+            height: 80px;
+            background: linear-gradient(180deg, rgba(15, 23, 42, 0.98), rgba(15, 23, 42, 0.9));
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            padding: 0 40px;
+            gap: 16px;
+            z-index: 90;
+            overflow-x: auto;
+        }
+
+        .hierarchy-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            background: var(--bg-card);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: all 0.3s;
+            flex-shrink: 0;
+            opacity: 0.5;
+        }
+
+        .hierarchy-item.active {
+            opacity: 1;
+            border-color: var(--strategy-color);
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(139, 92, 246, 0.1));
+            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.2);
+        }
+
+        .hierarchy-item:hover {
+            opacity: 0.8;
+            border-color: var(--strategy-color);
+        }
+
+        .hierarchy-item.active:hover {
+            opacity: 1;
+        }
+
+        .hierarchy-icon {
+            width: 36px; height: 36px;
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1rem;
+            background: rgba(139, 92, 246, 0.2);
+            color: var(--strategy-color);
+        }
+
+        .hierarchy-content {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .hierarchy-label {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .hierarchy-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            max-width: 200px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .hierarchy-arrow {
+            color: var(--text-muted);
+            font-size: 1.2rem;
+        }
+
         .main-container {
             position: fixed;
-            top: 60px; left: 0; right: 300px; bottom: 0;
+            top: 140px; left: 0; right: 300px; bottom: 0;
             overflow: hidden;
             perspective: 2000px;
         }
@@ -112,16 +191,17 @@
             width: 100%; height: 100%;
             overflow-x: auto; overflow-y: hidden;
             display: flex; align-items: center;
-            padding: 40px; gap: 24px;
+            padding: 30px 40px;
+            gap: 24px;
             scroll-snap-type: x mandatory;
             -webkit-overflow-scrolling: touch;
         }
 
         /* Goal Card */
         .goal-card {
-            flex: 0 0 380px;
-            height: calc(100% - 80px);
-            max-height: 560px;
+            flex: 0 0 360px;
+            height: calc(100% - 60px);
+            max-height: 500px;
             background: linear-gradient(145deg, var(--bg-card), #252f3f);
             border-radius: 24px;
             border: 1px solid var(--border-color);
@@ -167,99 +247,145 @@
             padding: 6px 14px; border-radius: 20px;
             font-size: 0.7rem; font-weight: 700;
             text-transform: uppercase; letter-spacing: 0.05em;
-            margin-bottom: 14px; width: fit-content;
+            margin-bottom: 12px; width: fit-content;
         }
         .card-badge.goal { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
 
         .card-title {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            font-size: 1.3rem; font-weight: 700;
-            line-height: 1.3; margin-bottom: 10px;
+            font-size: 1.2rem; font-weight: 700;
+            line-height: 1.3; margin-bottom: 8px;
         }
 
         .card-description {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: var(--text-secondary);
-            line-height: 1.6;
-            margin-bottom: 14px;
+            line-height: 1.5;
+            margin-bottom: 12px;
+            flex: 1;
+            overflow: hidden;
         }
 
-        /* Value section */
         .value-section {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 14px;
+            gap: 8px;
+            margin-bottom: 12px;
         }
 
         .value-box {
             background: var(--bg-main);
-            border-radius: 10px;
-            padding: 12px;
+            border-radius: 8px;
+            padding: 10px;
             text-align: center;
         }
 
         .value-label {
-            font-size: 0.65rem;
+            font-size: 0.6rem;
             color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            margin-bottom: 4px;
+            margin-bottom: 2px;
         }
 
         .value-amount {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: 700;
         }
 
         .value-amount.upside { color: var(--success); }
         .value-amount.cost { color: var(--error); }
 
-        .target-metric {
-            display: flex; align-items: center; gap: 10px;
-            padding: 12px 14px;
+        .progress-section { margin-top: auto; }
+
+        .coverage-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .coverage-item {
             background: var(--bg-main);
             border-radius: 10px;
-            margin-bottom: 14px;
+            padding: 10px 12px;
         }
-        .target-icon { font-size: 1.1rem; }
-        .target-label { font-size: 0.7rem; color: var(--text-muted); }
-        .target-value { font-size: 0.95rem; font-weight: 700; color: var(--goal-color); }
 
-        .progress-section { margin-top: auto; }
+        .coverage-item.actual {
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .coverage-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        .coverage-label {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .coverage-value {
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        .coverage-value.green { color: var(--success); }
+        .coverage-value.amber { color: var(--warning); }
+        .coverage-value.red { color: var(--error); }
+
         .progress-header {
             display: flex; justify-content: space-between;
-            align-items: center; margin-bottom: 8px;
+            align-items: center; margin-bottom: 6px;
         }
-        .progress-label { font-size: 0.75rem; color: var(--text-muted); }
-        .progress-value { font-size: 1rem; font-weight: 700; }
+        .progress-label { font-size: 0.7rem; color: var(--text-muted); }
+        .progress-value { font-size: 0.9rem; font-weight: 700; }
         .progress-value.green { color: var(--success); }
         .progress-value.amber { color: var(--warning); }
         .progress-value.red { color: var(--error); }
 
         .progress-bar {
-            height: 10px;
+            height: 6px;
             background: var(--bg-main);
-            border-radius: 5px;
+            border-radius: 3px;
             overflow: hidden;
         }
         .progress-fill {
             height: 100%;
-            border-radius: 5px;
+            border-radius: 3px;
             transition: width 0.5s ease;
         }
         .progress-fill.green { background: linear-gradient(90deg, var(--success), #4ade80); }
         .progress-fill.amber { background: linear-gradient(90deg, var(--warning), #fbbf24); }
         .progress-fill.red { background: linear-gradient(90deg, var(--error), #f87171); }
 
+        .coverage-comparison {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.7rem;
+            margin-top: 6px;
+        }
+
+        .coverage-delta {
+            font-weight: 600;
+        }
+
+        .coverage-delta.positive { color: var(--success); }
+        .coverage-delta.negative { color: var(--error); }
+
         .requirements-count {
             display: flex; align-items: center; gap: 8px;
-            margin-top: 14px; padding: 12px 14px;
+            margin-top: 12px; padding: 10px 12px;
             background: rgba(249, 115, 22, 0.1);
-            border-radius: 10px;
+            border-radius: 8px;
             color: var(--requirement-color);
-            font-size: 0.85rem; font-weight: 500;
+            font-size: 0.8rem; font-weight: 500;
         }
 
         /* Q&A Sidebar */
@@ -329,12 +455,14 @@
         @media (max-width: 1024px) {
             .qa-sidebar { display: none; }
             .main-container { right: 0; }
+            .hierarchy-nav { right: 0; }
             .zoom-hint { left: 50%; }
         }
 
         @media (max-width: 768px) {
             .goal-card { flex: 0 0 300px; }
             .header-center { display: none; }
+            .hierarchy-nav { padding: 0 20px; }
         }
     </style>
 </head>
@@ -344,7 +472,6 @@
             <button class="back-btn" onclick="zoomOut()">&#8592;</button>
             <div>
                 <h1 class="header-title">Goals</h1>
-                <p class="breadcrumb"><a href="view-strategy.html" id="strategy-link">Strategy</a> &gt; Goals</p>
             </div>
         </div>
         <div class="header-center">
@@ -360,6 +487,11 @@
             <button class="zoom-btn zoom-in-btn" onclick="zoomIn()">Zoom In &#43;</button>
         </div>
     </header>
+
+    <!-- Parent Hierarchy Navigation -->
+    <nav class="hierarchy-nav" id="hierarchy-nav">
+        <!-- Populated by JS -->
+    </nav>
 
     <main class="main-container">
         <div class="view-container" id="view-container">
@@ -383,12 +515,32 @@
         let currentStrategy = fullData.strategies.find(s => s.id === selectedStrategyId) || fullData.strategies[0];
         let selectedGoal = null;
 
-        document.getElementById('strategy-link').textContent = currentStrategy?.title?.substring(0, 30) + '...' || 'Strategy';
-
         function getProgressColor(p) { return p >= 80 ? 'green' : p >= 50 ? 'amber' : 'red'; }
 
+        function renderHierarchy() {
+            const nav = document.getElementById('hierarchy-nav');
+            nav.innerHTML = fullData.strategies.map(strategy => `
+                <div class="hierarchy-item ${strategy.id === currentStrategy?.id ? 'active' : ''}"
+                     onclick="switchStrategy('${strategy.id}')">
+                    <div class="hierarchy-icon">&#9733;</div>
+                    <div class="hierarchy-content">
+                        <span class="hierarchy-label">Strategy</span>
+                        <span class="hierarchy-title">${strategy.title}</span>
+                    </div>
+                </div>
+            `).join('<span class="hierarchy-arrow" style="opacity:0.3">|</span>');
+        }
+
+        function switchStrategy(id) {
+            currentStrategy = fullData.strategies.find(s => s.id === id);
+            sessionStorage.setItem('selectedStrategyId', id);
+            selectedGoal = null;
+            renderHierarchy();
+            renderGoals();
+            renderQA();
+        }
+
         function calculateGoalValue(goal) {
-            // Aggregate from initiatives
             let upside = 0, cost = 0;
             if (goal.initiatives) {
                 goal.initiatives.forEach(i => {
@@ -414,6 +566,13 @@
             };
         }
 
+        function calculateActualCoverage(goal) {
+            // Calculate actual coverage based on requirements with metrics
+            if (!goal.initiatives || goal.initiatives.length === 0) return 0;
+            const withMetrics = goal.initiatives.filter(i => i.metrics && i.metrics.length > 0).length;
+            return Math.round((withMetrics / goal.initiatives.length) * 100);
+        }
+
         function renderGoals() {
             const container = document.getElementById('content-scroll');
             if (!currentStrategy?.goals) {
@@ -422,9 +581,14 @@
             }
 
             container.innerHTML = currentStrategy.goals.map(goal => {
-                const color = getProgressColor(goal.targetProgress);
+                const plannedProgress = goal.targetProgress || 0;
+                const actualProgress = goal.actualProgress || calculateActualCoverage(goal);
+                const plannedColor = getProgressColor(plannedProgress);
+                const actualColor = getProgressColor(actualProgress);
                 const count = goal.initiatives?.length || 0;
                 const values = calculateGoalValue(goal);
+                const delta = actualProgress - plannedProgress;
+                const deltaClass = delta >= 0 ? 'positive' : 'negative';
 
                 return `
                     <div class="goal-card ${selectedGoal?.id === goal.id ? 'selected' : ''}"
@@ -437,30 +601,40 @@
 
                         <div class="value-section">
                             <div class="value-box">
-                                <div class="value-label">Potential Upside</div>
+                                <div class="value-label">Upside</div>
                                 <div class="value-amount upside">${values.upside}</div>
                             </div>
                             <div class="value-box">
-                                <div class="value-label">Est. Cost</div>
+                                <div class="value-label">Cost</div>
                                 <div class="value-amount cost">${values.cost}</div>
                             </div>
                         </div>
 
-                        <div class="target-metric">
-                            <span class="target-icon">&#127919;</span>
-                            <div>
-                                <div class="target-label">Target</div>
-                                <div class="target-value">${goal.metric || 'Not set'}</div>
-                            </div>
-                        </div>
-
                         <div class="progress-section">
-                            <div class="progress-header">
-                                <span class="progress-label">Progress</span>
-                                <span class="progress-value ${color}">${goal.targetProgress}%</span>
+                            <div class="coverage-grid">
+                                <div class="coverage-item">
+                                    <div class="coverage-header">
+                                        <span class="coverage-label">Planned</span>
+                                        <span class="coverage-value ${plannedColor}">${plannedProgress}%</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill ${plannedColor}" style="width: ${plannedProgress}%"></div>
+                                    </div>
+                                </div>
+                                <div class="coverage-item actual">
+                                    <div class="coverage-header">
+                                        <span class="coverage-label">Actual</span>
+                                        <span class="coverage-value ${actualColor}">${actualProgress}%</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill ${actualColor}" style="width: ${actualProgress}%"></div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill ${color}" style="width: ${goal.targetProgress}%"></div>
+                            <div class="coverage-comparison">
+                                <span style="color: var(--text-muted)">Delta:</span>
+                                <span class="coverage-delta ${deltaClass}">${delta >= 0 ? '+' : ''}${delta}%</span>
+                                <span style="color: var(--text-muted)">${delta >= 0 ? 'ahead of plan' : 'behind plan'}</span>
                             </div>
                         </div>
 
@@ -489,10 +663,10 @@
 
             const values = calculateGoalValue(selectedGoal);
             const questions = [
-                { q: 'What strategies does this goal support?', a: `This goal supports "${currentStrategy.title}". It contributes ${selectedGoal.targetProgress}% progress toward strategic objectives.` },
-                { q: 'What is the ROI projection?', a: `Upside: ${values.upside}<br>Cost: ${values.cost}<br><br>Based on ${selectedGoal.initiatives?.length || 0} requirements, projected ROI is ${(Math.random() * 3 + 1.5).toFixed(1)}x.` },
-                { q: 'How does this rank among goals?', a: `Ranked #${currentStrategy.goals.indexOf(selectedGoal) + 1} of ${currentStrategy.goals.length} goals based on ${selectedGoal.targetProgress}% progress.` },
-                { q: 'What are the key risks?', a: selectedGoal.targetProgress < 50 ? 'Below 50% progress. Review blockers and resource allocation.' : selectedGoal.targetProgress < 80 ? 'Good progress. Monitor to stay on track.' : 'Excellent progress. Maintain momentum.' }
+                { q: 'What strategies does this support?', a: `This goal supports "${currentStrategy.title}". Progress: ${selectedGoal.targetProgress}%.` },
+                { q: 'What is the ROI projection?', a: `Upside: ${values.upside}<br>Cost: ${values.cost}<br>ROI: ${(Math.random() * 3 + 1.5).toFixed(1)}x` },
+                { q: 'How does this rank?', a: `#${currentStrategy.goals.indexOf(selectedGoal) + 1} of ${currentStrategy.goals.length} goals` },
+                { q: 'Key risks?', a: selectedGoal.targetProgress < 50 ? 'Below 50%. Review blockers.' : 'On track.' }
             ];
 
             container.innerHTML = questions.map(item => `
@@ -535,6 +709,7 @@
             document.querySelector(`[data-id="${goals[newIdx].id}"]`)?.scrollIntoView({ behavior: 'smooth', inline: 'center' });
         }
 
+        renderHierarchy();
         renderGoals();
         renderQA();
         const savedGoalId = sessionStorage.getItem('selectedGoalId');
