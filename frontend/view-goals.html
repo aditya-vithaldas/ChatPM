@@ -86,7 +86,7 @@
         /* Parent Hierarchy Navigation */
         .hierarchy-nav {
             position: fixed;
-            top: 60px; left: 0; right: 300px;
+            top: 60px; left: 0; right: 0;
             height: 80px;
             background: linear-gradient(180deg, rgba(15, 23, 42, 0.98), rgba(15, 23, 42, 0.9));
             border-bottom: 1px solid var(--border-color);
@@ -164,9 +164,175 @@
             font-size: 1.2rem;
         }
 
+        /* Strategic Context Panel */
+        .strategy-context {
+            position: fixed;
+            top: 140px;
+            left: 0;
+            right: 0;
+            height: 140px;
+            background: linear-gradient(180deg, var(--bg-main), rgba(15, 23, 42, 0.95));
+            border-bottom: 1px solid var(--border-color);
+            padding: 16px 40px;
+            display: flex;
+            gap: 20px;
+            z-index: 80;
+            overflow-x: auto;
+        }
+
+        .context-card {
+            flex: 0 0 auto;
+            min-width: 280px;
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 14px 18px;
+            border: 1px solid var(--border-color);
+        }
+
+        .context-card.strategy-summary {
+            min-width: 320px;
+            border-color: rgba(139, 92, 246, 0.3);
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(139, 92, 246, 0.05));
+        }
+
+        .context-card.competitive {
+            border-color: rgba(249, 115, 22, 0.3);
+        }
+
+        .context-card.customer {
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+
+        .context-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .context-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+        }
+
+        .context-icon.strategy { background: rgba(139, 92, 246, 0.2); color: var(--strategy-color); }
+        .context-icon.competitive { background: rgba(249, 115, 22, 0.2); color: var(--requirement-color); }
+        .context-icon.customer { background: rgba(59, 130, 246, 0.2); color: var(--goal-color); }
+
+        .context-title {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .context-content {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .context-highlight {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .context-metrics {
+            display: flex;
+            gap: 16px;
+            margin-top: 8px;
+        }
+
+        .context-metric {
+            text-align: center;
+        }
+
+        .context-metric-value {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+        }
+
+        .context-metric-value.positive { color: var(--success); }
+        .context-metric-value.negative { color: var(--error); }
+
+        .context-metric-label {
+            font-size: 0.6rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .competitive-rank {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .rank-badge {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .rank-badge.first { background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #0f172a; }
+        .rank-badge.second { background: linear-gradient(135deg, #94a3b8, #64748b); color: #0f172a; }
+        .rank-badge.third { background: linear-gradient(135deg, #cd7f32, #8b5a2b); color: white; }
+        .rank-badge.other { background: var(--bg-main); color: var(--text-secondary); }
+
+        .rank-details {
+            flex: 1;
+        }
+
+        .rank-position {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .rank-trend {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+
+        .customer-quote {
+            font-style: italic;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .customer-source {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            margin-top: 6px;
+        }
+
+        .sentiment-badge {
+            display: inline-block;
+            font-size: 0.6rem;
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .sentiment-badge.positive { background: rgba(34, 197, 94, 0.2); color: var(--success); }
+        .sentiment-badge.neutral { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
+
         .main-container {
             position: fixed;
-            top: 140px; left: 0; right: 300px; bottom: 0;
+            top: 280px; left: 0; right: 0; bottom: 0;
             overflow: hidden;
             perspective: 2000px;
         }
@@ -388,56 +554,6 @@
             font-size: 0.8rem; font-weight: 500;
         }
 
-        /* Q&A Sidebar */
-        .qa-sidebar {
-            position: fixed;
-            top: 60px; right: 0; width: 300px; bottom: 0;
-            background: var(--bg-card);
-            border-left: 1px solid var(--border-color);
-            padding: 24px;
-            overflow-y: auto;
-            z-index: 50;
-        }
-
-        .qa-sidebar-title {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            font-size: 1rem; font-weight: 700;
-            margin-bottom: 20px;
-            display: flex; align-items: center; gap: 8px;
-        }
-
-        .qa-item {
-            background: var(--bg-main);
-            border-radius: 12px;
-            padding: 14px;
-            margin-bottom: 10px;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: 1px solid transparent;
-        }
-        .qa-item:hover { border-color: var(--primary); }
-        .qa-item.expanded { border-color: var(--goal-color); }
-
-        .qa-question {
-            font-size: 0.85rem; font-weight: 600;
-            display: flex; align-items: flex-start; gap: 8px;
-        }
-        .qa-icon { color: var(--goal-color); flex-shrink: 0; }
-
-        .qa-answer {
-            margin-top: 12px; padding-top: 12px;
-            border-top: 1px solid var(--border-color);
-            font-size: 0.8rem; color: var(--text-secondary);
-            line-height: 1.6; display: none;
-        }
-        .qa-item.expanded .qa-answer { display: block; }
-
-        .qa-empty {
-            text-align: center;
-            padding: 40px 20px;
-            color: var(--text-muted);
-        }
-        .qa-empty-icon { font-size: 2rem; margin-bottom: 12px; }
 
         .zoom-hint {
             position: fixed;
@@ -452,17 +568,13 @@
             border: 1px solid var(--border-color);
         }
 
-        @media (max-width: 1024px) {
-            .qa-sidebar { display: none; }
-            .main-container { right: 0; }
-            .hierarchy-nav { right: 0; }
-            .zoom-hint { left: 50%; }
-        }
-
         @media (max-width: 768px) {
             .goal-card { flex: 0 0 300px; }
             .header-center { display: none; }
             .hierarchy-nav { padding: 0 20px; }
+            .strategy-context { padding: 12px 20px; height: 120px; }
+            .main-container { top: 260px; }
+            .context-card { min-width: 240px; }
         }
     </style>
 </head>
@@ -493,16 +605,16 @@
         <!-- Populated by JS -->
     </nav>
 
+    <!-- Strategic Context Panel -->
+    <div class="strategy-context" id="strategy-context">
+        <!-- Populated by JS -->
+    </div>
+
     <main class="main-container">
         <div class="view-container" id="view-container">
             <div class="content-scroll" id="content-scroll"></div>
         </div>
     </main>
-
-    <aside class="qa-sidebar">
-        <h3 class="qa-sidebar-title">&#128161; Quick Insights</h3>
-        <div id="qa-content"></div>
-    </aside>
 
     <div class="zoom-hint">
         <span>&#128269;</span>
@@ -514,6 +626,22 @@
         const selectedStrategyId = sessionStorage.getItem('selectedStrategyId');
         let currentStrategy = fullData.strategies.find(s => s.id === selectedStrategyId) || fullData.strategies[0];
         let selectedGoal = null;
+
+        // Customer feedback data for strategies
+        const customerFeedback = {
+            'str-1': { quote: 'Payment speeds have dramatically improved. This is exactly what we needed for our high-volume operations.', source: 'Fortune 500 Client', sentiment: 'positive' },
+            'str-2': { quote: 'Having lending and payments in one place would save us significant time and operational costs.', source: 'Mid-Market Client', sentiment: 'positive' },
+            'str-3': { quote: 'The 99.99% uptime target exceeds our requirements. Critical for our 24/7 operations.', source: 'Global Retailer', sentiment: 'positive' },
+            'str-4': { quote: 'AI-powered insights have transformed how we understand customer behavior.', source: 'Marketing Director', sentiment: 'positive' }
+        };
+
+        // Competitive data for strategies
+        const competitiveData = {
+            'str-1': { position: 2, leader: 'Stripe', gap: '-15%', trend: 'Improving' },
+            'str-2': { position: 3, leader: 'Square', gap: '-25%', trend: 'Growing' },
+            'str-3': { position: 1, leader: 'Us', gap: '+8%', trend: 'Leading' },
+            'str-4': { position: 4, leader: 'Visa', gap: '-30%', trend: 'Accelerating' }
+        };
 
         function getProgressColor(p) { return p >= 80 ? 'green' : p >= 50 ? 'amber' : 'red'; }
 
@@ -531,13 +659,78 @@
             `).join('<span class="hierarchy-arrow" style="opacity:0.3">|</span>');
         }
 
+        function renderStrategyContext() {
+            const container = document.getElementById('strategy-context');
+            if (!currentStrategy) {
+                container.innerHTML = '';
+                return;
+            }
+
+            const feedback = customerFeedback[currentStrategy.id] || { quote: 'No feedback yet', source: 'N/A', sentiment: 'neutral' };
+            const competitive = competitiveData[currentStrategy.id] || { position: 4, leader: 'Unknown', gap: 'N/A', trend: 'N/A' };
+            const rankClass = competitive.position === 1 ? 'first' : competitive.position === 2 ? 'second' : competitive.position === 3 ? 'third' : 'other';
+
+            container.innerHTML = `
+                <!-- Strategy Summary -->
+                <div class="context-card strategy-summary">
+                    <div class="context-header">
+                        <span class="context-icon strategy">&#9733;</span>
+                        <span class="context-title">Strategy Context</span>
+                    </div>
+                    <div class="context-content">
+                        <span class="context-highlight">${currentStrategy.title}</span>
+                    </div>
+                    <div class="context-metrics">
+                        <div class="context-metric">
+                            <div class="context-metric-value positive">${currentStrategy.upside || 'TBD'}</div>
+                            <div class="context-metric-label">Upside</div>
+                        </div>
+                        <div class="context-metric">
+                            <div class="context-metric-value negative">${currentStrategy.cost || 'TBD'}</div>
+                            <div class="context-metric-label">Investment</div>
+                        </div>
+                        <div class="context-metric">
+                            <div class="context-metric-value">${currentStrategy.goals?.length || 0}</div>
+                            <div class="context-metric-label">Goals</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Competitive Position -->
+                <div class="context-card competitive">
+                    <div class="context-header">
+                        <span class="context-icon competitive">&#9876;</span>
+                        <span class="context-title">Competitive Position</span>
+                    </div>
+                    <div class="competitive-rank">
+                        <div class="rank-badge ${rankClass}">#${competitive.position}</div>
+                        <div class="rank-details">
+                            <div class="rank-position">${competitive.position === 1 ? 'Market Leader' : `${competitive.gap} vs ${competitive.leader}`}</div>
+                            <div class="rank-trend">Trend: ${competitive.trend}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Customer Feedback -->
+                <div class="context-card customer">
+                    <div class="context-header">
+                        <span class="context-icon customer">&#128101;</span>
+                        <span class="context-title">Customer Voice</span>
+                        <span class="sentiment-badge ${feedback.sentiment}">${feedback.sentiment === 'positive' ? '&#128077;' : '&#128528;'}</span>
+                    </div>
+                    <div class="customer-quote">"${feedback.quote}"</div>
+                    <div class="customer-source">— ${feedback.source}</div>
+                </div>
+            `;
+        }
+
         function switchStrategy(id) {
             currentStrategy = fullData.strategies.find(s => s.id === id);
             sessionStorage.setItem('selectedStrategyId', id);
             selectedGoal = null;
             renderHierarchy();
+            renderStrategyContext();
             renderGoals();
-            renderQA();
         }
 
         function calculateGoalValue(goal) {
@@ -651,30 +844,6 @@
             selectedGoal = currentStrategy.goals.find(g => g.id === id);
             sessionStorage.setItem('selectedGoalId', id);
             renderGoals();
-            renderQA();
-        }
-
-        function renderQA() {
-            const container = document.getElementById('qa-content');
-            if (!selectedGoal) {
-                container.innerHTML = '<div class="qa-empty"><div class="qa-empty-icon">&#128072;</div><p>Select a goal to see insights</p></div>';
-                return;
-            }
-
-            const values = calculateGoalValue(selectedGoal);
-            const questions = [
-                { q: 'What strategies does this support?', a: `This goal supports "${currentStrategy.title}". Progress: ${selectedGoal.targetProgress}%.` },
-                { q: 'What is the ROI projection?', a: `Upside: ${values.upside}<br>Cost: ${values.cost}<br>ROI: ${(Math.random() * 3 + 1.5).toFixed(1)}x` },
-                { q: 'How does this rank?', a: `#${currentStrategy.goals.indexOf(selectedGoal) + 1} of ${currentStrategy.goals.length} goals` },
-                { q: 'Key risks?', a: selectedGoal.targetProgress < 50 ? 'Below 50%. Review blockers.' : 'On track.' }
-            ];
-
-            container.innerHTML = questions.map(item => `
-                <div class="qa-item" onclick="this.classList.toggle('expanded')">
-                    <div class="qa-question"><span class="qa-icon">&#10067;</span><span>${item.q}</span></div>
-                    <div class="qa-answer">${item.a}</div>
-                </div>
-            `).join('');
         }
 
         function zoomIn() {
@@ -710,8 +879,8 @@
         }
 
         renderHierarchy();
+        renderStrategyContext();
         renderGoals();
-        renderQA();
         const savedGoalId = sessionStorage.getItem('selectedGoalId');
         if (savedGoalId && currentStrategy.goals?.find(g => g.id === savedGoalId)) selectGoal(savedGoalId);
     </script>
