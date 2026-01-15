@@ -11,7 +11,6 @@
             --primary: #6366f1;
             --bg-main: #0f172a;
             --bg-card: #1e293b;
-            --bg-card-hover: #334155;
             --text-primary: #f8fafc;
             --text-secondary: #94a3b8;
             --text-muted: #64748b;
@@ -35,9 +34,7 @@
 
         .header {
             position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
+            top: 0; left: 0; right: 0;
             height: 60px;
             background: rgba(15, 23, 42, 0.95);
             backdrop-filter: blur(10px);
@@ -49,151 +46,73 @@
             z-index: 100;
         }
 
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
+        .header-left { display: flex; align-items: center; gap: 16px; }
         .back-btn {
-            background: none;
-            border: none;
+            background: none; border: none;
             color: var(--text-secondary);
-            font-size: 1.5rem;
-            cursor: pointer;
-            padding: 8px;
-            border-radius: 8px;
+            font-size: 1.5rem; cursor: pointer;
+            padding: 8px; border-radius: 8px;
             transition: all 0.2s;
-            text-decoration: none;
-            display: flex;
         }
-
-        .back-btn:hover {
-            background: var(--bg-card);
-            color: var(--text-primary);
-        }
-
-        .header-title {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            font-size: 1.25rem;
-            font-weight: 700;
-        }
-
-        .header-subtitle {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-        }
-
-        .breadcrumb {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-        }
-
-        .breadcrumb a {
-            color: var(--strategy-color);
-            text-decoration: none;
-        }
-
-        .header-center {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+        .back-btn:hover { background: var(--bg-card); color: var(--text-primary); }
+        .header-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.25rem; font-weight: 700; }
+        .breadcrumb { font-size: 0.8rem; color: var(--text-muted); }
+        .breadcrumb a { color: var(--strategy-color); text-decoration: none; }
 
         .level-indicator {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            background: var(--bg-card);
-            padding: 6px 12px;
-            border-radius: 20px;
+            display: flex; align-items: center; gap: 4px;
+            background: var(--bg-card); padding: 6px 12px; border-radius: 20px;
         }
-
         .level-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--border-color);
-            cursor: pointer;
-            transition: all 0.3s;
+            width: 8px; height: 8px; border-radius: 50%;
+            background: var(--border-color); cursor: pointer; transition: all 0.3s;
         }
-
         .level-dot.active { transform: scale(1.3); }
         .level-dot.strategy { background: var(--strategy-color); }
         .level-dot.goal { background: var(--goal-color); }
         .level-dot.requirement { background: var(--requirement-color); }
         .level-dot.metric { background: var(--metric-color); }
 
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
+        .header-right { display: flex; align-items: center; gap: 12px; }
         .zoom-btn {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px 20px;
-            border-radius: 25px;
-            border: none;
-            font-size: 0.9rem;
-            font-weight: 600;
-            cursor: pointer;
+            display: flex; align-items: center; gap: 8px;
+            padding: 10px 20px; border-radius: 25px; border: none;
+            font-size: 0.9rem; font-weight: 600; cursor: pointer;
             transition: all 0.3s ease;
             font-family: 'Plus Jakarta Sans', sans-serif;
         }
-
-        .zoom-in-btn {
-            background: linear-gradient(135deg, var(--requirement-color), #f59e0b);
-            color: white;
-        }
-
-        .zoom-out-btn {
-            background: var(--bg-card);
-            color: var(--text-primary);
-            border: 1px solid var(--border-color);
-        }
-
-        .zoom-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-        }
+        .zoom-in-btn { background: linear-gradient(135deg, var(--requirement-color), #f59e0b); color: white; }
+        .zoom-out-btn { background: var(--bg-card); color: var(--text-primary); border: 1px solid var(--border-color); }
+        .zoom-btn:hover { transform: scale(1.05); box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
 
         .main-container {
             position: fixed;
-            top: 60px;
-            left: 0;
-            right: 300px;
-            bottom: 0;
+            top: 60px; left: 0; right: 300px; bottom: 0;
             overflow: hidden;
+            perspective: 2000px;
         }
 
         .view-container {
-            width: 100%;
-            height: 100%;
-            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease;
+            width: 100%; height: 100%;
+            transition: all 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d;
         }
 
         .view-container.zooming-out {
-            transform: scale(0.8);
+            transform: scale(0.5) translateZ(-500px);
             opacity: 0;
         }
 
-        .view-container.zooming-in {
-            transform: scale(1.2);
+        .view-container.drilling-in {
+            transform: scale(3) translateZ(500px);
             opacity: 0;
         }
 
         .content-scroll {
-            width: 100%;
-            height: 100%;
-            overflow-x: auto;
-            overflow-y: hidden;
-            display: flex;
-            align-items: center;
-            padding: 40px;
-            gap: 24px;
+            width: 100%; height: 100%;
+            overflow-x: auto; overflow-y: hidden;
+            display: flex; align-items: center;
+            padding: 40px; gap: 24px;
             scroll-snap-type: x mandatory;
             -webkit-overflow-scrolling: touch;
         }
@@ -202,122 +121,119 @@
         .goal-card {
             flex: 0 0 380px;
             height: calc(100% - 80px);
-            max-height: 550px;
+            max-height: 560px;
             background: linear-gradient(145deg, var(--bg-card), #252f3f);
             border-radius: 24px;
             border: 1px solid var(--border-color);
-            padding: 28px;
+            padding: 24px;
             scroll-snap-align: center;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.4s ease;
             display: flex;
             flex-direction: column;
             position: relative;
             overflow: hidden;
+            transform-style: preserve-3d;
         }
 
         .goal-card::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
+            top: 0; left: 0; right: 0;
             height: 4px;
             background: linear-gradient(90deg, var(--goal-color), #06b6d4);
         }
 
         .goal-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 20px 60px rgba(59, 130, 246, 0.2);
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 25px 80px rgba(59, 130, 246, 0.25);
             border-color: var(--goal-color);
         }
 
         .goal-card.selected {
             border-color: var(--goal-color);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.4), 0 25px 80px rgba(59, 130, 246, 0.3);
+            transform: scale(1.02);
+        }
+
+        .goal-card.drilling {
+            transform: scale(1.5) translateZ(200px);
+            z-index: 1000;
+            box-shadow: 0 0 100px rgba(59, 130, 246, 0.5);
         }
 
         .card-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 0.7rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-bottom: 16px;
-            width: fit-content;
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 6px 14px; border-radius: 20px;
+            font-size: 0.7rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.05em;
+            margin-bottom: 14px; width: fit-content;
         }
-
-        .card-badge.goal {
-            background: rgba(59, 130, 246, 0.2);
-            color: #60a5fa;
-        }
+        .card-badge.goal { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
 
         .card-title {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            font-size: 1.35rem;
-            font-weight: 700;
-            line-height: 1.3;
-            margin-bottom: 12px;
+            font-size: 1.3rem; font-weight: 700;
+            line-height: 1.3; margin-bottom: 10px;
         }
 
         .card-description {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             color: var(--text-secondary);
             line-height: 1.6;
+            margin-bottom: 14px;
         }
 
-        .target-metric {
-            display: flex;
-            align-items: center;
+        /* Value section */
+        .value-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
             gap: 10px;
-            margin-top: 16px;
-            padding: 12px 16px;
+            margin-bottom: 14px;
+        }
+
+        .value-box {
             background: var(--bg-main);
-            border-radius: 12px;
+            border-radius: 10px;
+            padding: 12px;
+            text-align: center;
         }
 
-        .target-icon {
-            font-size: 1.2rem;
-        }
-
-        .target-label {
-            font-size: 0.75rem;
+        .value-label {
+            font-size: 0.65rem;
             color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 4px;
         }
 
-        .target-value {
+        .value-amount {
+            font-family: 'Plus Jakarta Sans', sans-serif;
             font-size: 1rem;
             font-weight: 700;
-            color: var(--goal-color);
         }
 
-        /* Progress section */
-        .progress-section {
-            margin-top: auto;
-            padding-top: 20px;
-        }
+        .value-amount.upside { color: var(--success); }
+        .value-amount.cost { color: var(--error); }
 
+        .target-metric {
+            display: flex; align-items: center; gap: 10px;
+            padding: 12px 14px;
+            background: var(--bg-main);
+            border-radius: 10px;
+            margin-bottom: 14px;
+        }
+        .target-icon { font-size: 1.1rem; }
+        .target-label { font-size: 0.7rem; color: var(--text-muted); }
+        .target-value { font-size: 0.95rem; font-weight: 700; color: var(--goal-color); }
+
+        .progress-section { margin-top: auto; }
         .progress-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
+            display: flex; justify-content: space-between;
+            align-items: center; margin-bottom: 8px;
         }
-
-        .progress-label {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-        }
-
-        .progress-value {
-            font-size: 1.1rem;
-            font-weight: 700;
-        }
-
+        .progress-label { font-size: 0.75rem; color: var(--text-muted); }
+        .progress-value { font-size: 1rem; font-weight: 700; }
         .progress-value.green { color: var(--success); }
         .progress-value.amber { color: var(--warning); }
         .progress-value.red { color: var(--error); }
@@ -328,38 +244,28 @@
             border-radius: 5px;
             overflow: hidden;
         }
-
         .progress-fill {
             height: 100%;
             border-radius: 5px;
             transition: width 0.5s ease;
         }
-
         .progress-fill.green { background: linear-gradient(90deg, var(--success), #4ade80); }
         .progress-fill.amber { background: linear-gradient(90deg, var(--warning), #fbbf24); }
         .progress-fill.red { background: linear-gradient(90deg, var(--error), #f87171); }
 
-        /* Initiative preview */
-        .initiatives-count {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-top: 16px;
-            padding: 12px 16px;
+        .requirements-count {
+            display: flex; align-items: center; gap: 8px;
+            margin-top: 14px; padding: 12px 14px;
             background: rgba(249, 115, 22, 0.1);
-            border-radius: 12px;
+            border-radius: 10px;
             color: var(--requirement-color);
-            font-size: 0.85rem;
-            font-weight: 500;
+            font-size: 0.85rem; font-weight: 500;
         }
 
         /* Q&A Sidebar */
         .qa-sidebar {
             position: fixed;
-            top: 60px;
-            right: 0;
-            width: 300px;
-            bottom: 0;
+            top: 60px; right: 0; width: 300px; bottom: 0;
             background: var(--bg-card);
             border-left: 1px solid var(--border-color);
             padding: 24px;
@@ -369,107 +275,66 @@
 
         .qa-sidebar-title {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            font-size: 1rem;
-            font-weight: 700;
+            font-size: 1rem; font-weight: 700;
             margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            display: flex; align-items: center; gap: 8px;
         }
 
         .qa-item {
             background: var(--bg-main);
             border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 12px;
+            padding: 14px;
+            margin-bottom: 10px;
             cursor: pointer;
             transition: all 0.2s;
             border: 1px solid transparent;
         }
-
-        .qa-item:hover {
-            border-color: var(--primary);
-        }
-
-        .qa-item.expanded {
-            border-color: var(--goal-color);
-        }
+        .qa-item:hover { border-color: var(--primary); }
+        .qa-item.expanded { border-color: var(--goal-color); }
 
         .qa-question {
-            font-size: 0.85rem;
-            font-weight: 600;
-            display: flex;
-            align-items: flex-start;
-            gap: 8px;
+            font-size: 0.85rem; font-weight: 600;
+            display: flex; align-items: flex-start; gap: 8px;
         }
-
-        .qa-icon {
-            color: var(--goal-color);
-            flex-shrink: 0;
-        }
+        .qa-icon { color: var(--goal-color); flex-shrink: 0; }
 
         .qa-answer {
-            margin-top: 12px;
-            padding-top: 12px;
+            margin-top: 12px; padding-top: 12px;
             border-top: 1px solid var(--border-color);
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            line-height: 1.6;
-            display: none;
+            font-size: 0.8rem; color: var(--text-secondary);
+            line-height: 1.6; display: none;
         }
-
-        .qa-item.expanded .qa-answer {
-            display: block;
-        }
+        .qa-item.expanded .qa-answer { display: block; }
 
         .qa-empty {
             text-align: center;
             padding: 40px 20px;
             color: var(--text-muted);
         }
-
-        .qa-empty-icon {
-            font-size: 2rem;
-            margin-bottom: 12px;
-        }
+        .qa-empty-icon { font-size: 2rem; margin-bottom: 12px; }
 
         .zoom-hint {
             position: fixed;
-            bottom: 30px;
-            left: calc(50% - 150px);
+            bottom: 30px; left: calc(50% - 150px);
             transform: translateX(-50%);
             background: rgba(30, 41, 59, 0.95);
             backdrop-filter: blur(10px);
-            padding: 14px 28px;
-            border-radius: 30px;
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            display: flex;
-            align-items: center;
-            gap: 12px;
+            padding: 14px 28px; border-radius: 30px;
+            font-size: 0.9rem; color: var(--text-secondary);
+            display: flex; align-items: center; gap: 12px;
             z-index: 50;
             border: 1px solid var(--border-color);
         }
 
         @media (max-width: 1024px) {
-            .qa-sidebar {
-                display: none;
-            }
-            .main-container {
-                right: 0;
-            }
-            .zoom-hint {
-                left: 50%;
-            }
+            .qa-sidebar { display: none; }
+            .main-container { right: 0; }
+            .zoom-hint { left: 50%; }
         }
 
         @media (max-width: 768px) {
-            .goal-card {
-                flex: 0 0 300px;
-            }
-            .header-center {
-                display: none;
-            }
+            .goal-card { flex: 0 0 300px; }
+            .header-center { display: none; }
         }
     </style>
 </head>
@@ -491,28 +356,20 @@
             </div>
         </div>
         <div class="header-right">
-            <button class="zoom-btn zoom-out-btn" onclick="zoomOut()">
-                <span>&#8722;</span> Zoom Out
-            </button>
-            <button class="zoom-btn zoom-in-btn" onclick="zoomIn()">
-                Zoom In <span>&#43;</span>
-            </button>
+            <button class="zoom-btn zoom-out-btn" onclick="zoomOut()">&#8722; Zoom Out</button>
+            <button class="zoom-btn zoom-in-btn" onclick="zoomIn()">Zoom In &#43;</button>
         </div>
     </header>
 
     <main class="main-container">
         <div class="view-container" id="view-container">
-            <div class="content-scroll" id="content-scroll">
-                <!-- Goal cards populated by JS -->
-            </div>
+            <div class="content-scroll" id="content-scroll"></div>
         </div>
     </main>
 
     <aside class="qa-sidebar">
         <h3 class="qa-sidebar-title">&#128161; Quick Insights</h3>
-        <div id="qa-content">
-            <!-- Q&A populated by JS -->
-        </div>
+        <div id="qa-content"></div>
     </aside>
 
     <div class="zoom-hint">
@@ -521,31 +378,53 @@
     </div>
 
     <script>
-        // Load data
         const fullData = JSON.parse(localStorage.getItem('strategyMapData')) || { strategies: [] };
         const selectedStrategyId = sessionStorage.getItem('selectedStrategyId');
         let currentStrategy = fullData.strategies.find(s => s.id === selectedStrategyId) || fullData.strategies[0];
         let selectedGoal = null;
 
-        // Update breadcrumb
         document.getElementById('strategy-link').textContent = currentStrategy?.title?.substring(0, 30) + '...' || 'Strategy';
 
-        function getProgressColor(progress) {
-            if (progress >= 80) return 'green';
-            if (progress >= 50) return 'amber';
-            return 'red';
+        function getProgressColor(p) { return p >= 80 ? 'green' : p >= 50 ? 'amber' : 'red'; }
+
+        function calculateGoalValue(goal) {
+            // Aggregate from initiatives
+            let upside = 0, cost = 0;
+            if (goal.initiatives) {
+                goal.initiatives.forEach(i => {
+                    const uMatch = i.upside?.match(/\$?([\d.]+)([BMK])?/);
+                    if (uMatch) {
+                        let val = parseFloat(uMatch[1]);
+                        if (uMatch[2] === 'B') val *= 1000;
+                        else if (uMatch[2] === 'K') val /= 1000;
+                        upside += val;
+                    }
+                    const cMatch = i.downside?.match(/\$?([\d.]+)([BMK])?/);
+                    if (cMatch) {
+                        let val = parseFloat(cMatch[1]);
+                        if (cMatch[2] === 'B') val *= 1000;
+                        else if (cMatch[2] === 'K') val /= 1000;
+                        cost += val;
+                    }
+                });
+            }
+            return {
+                upside: upside > 0 ? (upside >= 1000 ? `$${(upside/1000).toFixed(1)}B` : `$${upside.toFixed(0)}M`) : goal.upside || 'TBD',
+                cost: cost > 0 ? (cost >= 1000 ? `$${(cost/1000).toFixed(1)}B` : `$${cost.toFixed(0)}M`) : goal.cost || 'TBD'
+            };
         }
 
         function renderGoals() {
             const container = document.getElementById('content-scroll');
-            if (!currentStrategy || !currentStrategy.goals) {
-                container.innerHTML = '<div style="text-align: center; padding: 60px; color: var(--text-muted);">No goals found for this strategy</div>';
+            if (!currentStrategy?.goals) {
+                container.innerHTML = '<div style="text-align:center;padding:60px;color:var(--text-muted);">No goals found</div>';
                 return;
             }
 
             container.innerHTML = currentStrategy.goals.map(goal => {
                 const color = getProgressColor(goal.targetProgress);
-                const initiativeCount = goal.initiatives?.length || 0;
+                const count = goal.initiatives?.length || 0;
+                const values = calculateGoalValue(goal);
 
                 return `
                     <div class="goal-card ${selectedGoal?.id === goal.id ? 'selected' : ''}"
@@ -555,6 +434,17 @@
                         <span class="card-badge goal">&#127919; Goal</span>
                         <h2 class="card-title">${goal.title}</h2>
                         <p class="card-description">${goal.description || 'No description available'}</p>
+
+                        <div class="value-section">
+                            <div class="value-box">
+                                <div class="value-label">Potential Upside</div>
+                                <div class="value-amount upside">${values.upside}</div>
+                            </div>
+                            <div class="value-box">
+                                <div class="value-label">Est. Cost</div>
+                                <div class="value-amount cost">${values.cost}</div>
+                            </div>
+                        </div>
 
                         <div class="target-metric">
                             <span class="target-icon">&#127919;</span>
@@ -574,9 +464,9 @@
                             </div>
                         </div>
 
-                        <div class="initiatives-count">
+                        <div class="requirements-count">
                             <span>&#128640;</span>
-                            <span>${initiativeCount} Requirement${initiativeCount !== 1 ? 's' : ''}</span>
+                            <span>${count} Requirement${count !== 1 ? 's' : ''}</span>
                         </div>
                     </div>
                 `;
@@ -592,108 +482,63 @@
 
         function renderQA() {
             const container = document.getElementById('qa-content');
-
             if (!selectedGoal) {
-                container.innerHTML = `
-                    <div class="qa-empty">
-                        <div class="qa-empty-icon">&#128072;</div>
-                        <p>Select a goal to see insights</p>
-                    </div>
-                `;
+                container.innerHTML = '<div class="qa-empty"><div class="qa-empty-icon">&#128072;</div><p>Select a goal to see insights</p></div>';
                 return;
             }
 
+            const values = calculateGoalValue(selectedGoal);
             const questions = [
-                {
-                    q: 'What strategies does this goal support?',
-                    a: `This goal directly supports "${currentStrategy.title}". It contributes to the overall strategic objective by ${selectedGoal.description?.toLowerCase() || 'driving key outcomes'}.`
-                },
-                {
-                    q: 'What is the ROI projection?',
-                    a: `Based on the ${selectedGoal.initiatives?.length || 0} requirements linked to this goal, the projected ROI is estimated at ${(Math.random() * 3 + 1.5).toFixed(1)}x. Target metric: ${selectedGoal.metric || 'TBD'}.`
-                },
-                {
-                    q: 'How does this rank among goals?',
-                    a: `This goal is ranked #${currentStrategy.goals.indexOf(selectedGoal) + 1} of ${currentStrategy.goals.length} goals in this strategy based on progress (${selectedGoal.targetProgress}%).`
-                },
-                {
-                    q: 'What are the key blockers?',
-                    a: selectedGoal.targetProgress < 50
-                        ? 'Progress is below 50%. Key blockers may include resource constraints, dependency delays, or scope changes. Review requirements for details.'
-                        : selectedGoal.targetProgress < 80
-                        ? 'Making good progress. Some requirements may need acceleration to hit targets on time.'
-                        : 'On track! Continue monitoring to maintain momentum.'
-                }
+                { q: 'What strategies does this goal support?', a: `This goal supports "${currentStrategy.title}". It contributes ${selectedGoal.targetProgress}% progress toward strategic objectives.` },
+                { q: 'What is the ROI projection?', a: `Upside: ${values.upside}<br>Cost: ${values.cost}<br><br>Based on ${selectedGoal.initiatives?.length || 0} requirements, projected ROI is ${(Math.random() * 3 + 1.5).toFixed(1)}x.` },
+                { q: 'How does this rank among goals?', a: `Ranked #${currentStrategy.goals.indexOf(selectedGoal) + 1} of ${currentStrategy.goals.length} goals based on ${selectedGoal.targetProgress}% progress.` },
+                { q: 'What are the key risks?', a: selectedGoal.targetProgress < 50 ? 'Below 50% progress. Review blockers and resource allocation.' : selectedGoal.targetProgress < 80 ? 'Good progress. Monitor to stay on track.' : 'Excellent progress. Maintain momentum.' }
             ];
 
-            container.innerHTML = questions.map((item, i) => `
-                <div class="qa-item" onclick="toggleQA(this)">
-                    <div class="qa-question">
-                        <span class="qa-icon">&#10067;</span>
-                        <span>${item.q}</span>
-                    </div>
+            container.innerHTML = questions.map(item => `
+                <div class="qa-item" onclick="this.classList.toggle('expanded')">
+                    <div class="qa-question"><span class="qa-icon">&#10067;</span><span>${item.q}</span></div>
                     <div class="qa-answer">${item.a}</div>
                 </div>
             `).join('');
         }
 
-        function toggleQA(el) {
-            el.classList.toggle('expanded');
-        }
-
         function zoomIn() {
-            if (!selectedGoal && currentStrategy.goals.length > 0) {
+            if (!selectedGoal && currentStrategy.goals?.length > 0) {
                 selectGoal(currentStrategy.goals[0].id);
             }
-
             if (selectedGoal) {
-                document.getElementById('view-container').classList.add('zooming-in');
-                setTimeout(() => {
-                    window.location.href = 'view-requirements.html';
-                }, 400);
+                const card = document.querySelector(`[data-id="${selectedGoal.id}"]`);
+                if (card) card.classList.add('drilling');
+                document.getElementById('view-container').classList.add('drilling-in');
+                setTimeout(() => { window.location.href = 'view-requirements.html'; }, 500);
             }
         }
 
         function zoomOut() {
             document.getElementById('view-container').classList.add('zooming-out');
-            setTimeout(() => {
-                window.location.href = 'view-strategy.html';
-            }, 400);
+            setTimeout(() => { window.location.href = 'view-strategy.html'; }, 500);
         }
 
-        // Keyboard navigation
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                zoomIn();
-            }
-            if (e.key === 'Escape' || e.key === 'Backspace') {
-                e.preventDefault();
-                zoomOut();
-            }
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); zoomIn(); }
+            if (e.key === 'Escape' || e.key === 'Backspace') { e.preventDefault(); zoomOut(); }
             if (e.key === 'ArrowRight') navigateCard(1);
             if (e.key === 'ArrowLeft') navigateCard(-1);
         });
 
-        function navigateCard(direction) {
-            const goals = currentStrategy.goals;
-            const currentIndex = selectedGoal ? goals.findIndex(g => g.id === selectedGoal.id) : -1;
-            const newIndex = Math.max(0, Math.min(goals.length - 1, currentIndex + direction));
-            selectGoal(goals[newIndex].id);
-
-            const card = document.querySelector(`[data-id="${goals[newIndex].id}"]`);
-            if (card) card.scrollIntoView({ behavior: 'smooth', inline: 'center' });
+        function navigateCard(dir) {
+            const goals = currentStrategy.goals || [];
+            const idx = selectedGoal ? goals.findIndex(g => g.id === selectedGoal.id) : -1;
+            const newIdx = Math.max(0, Math.min(goals.length - 1, idx + dir));
+            selectGoal(goals[newIdx].id);
+            document.querySelector(`[data-id="${goals[newIdx].id}"]`)?.scrollIntoView({ behavior: 'smooth', inline: 'center' });
         }
 
-        // Initialize
         renderGoals();
         renderQA();
-
-        // Restore selection
         const savedGoalId = sessionStorage.getItem('selectedGoalId');
-        if (savedGoalId && currentStrategy.goals.find(g => g.id === savedGoalId)) {
-            selectGoal(savedGoalId);
-        }
+        if (savedGoalId && currentStrategy.goals?.find(g => g.id === savedGoalId)) selectGoal(savedGoalId);
     </script>
 </body>
 </html>

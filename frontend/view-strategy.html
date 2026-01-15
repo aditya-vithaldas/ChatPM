@@ -9,10 +9,8 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
             --primary: #6366f1;
-            --primary-dark: #4f46e5;
             --bg-main: #0f172a;
             --bg-card: #1e293b;
-            --bg-card-hover: #334155;
             --text-primary: #f8fafc;
             --text-secondary: #94a3b8;
             --text-muted: #64748b;
@@ -34,12 +32,9 @@
             color: var(--text-primary);
         }
 
-        /* Header */
         .header {
             position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
+            top: 0; left: 0; right: 0;
             height: 60px;
             background: rgba(15, 23, 42, 0.95);
             backdrop-filter: blur(10px);
@@ -51,152 +46,70 @@
             z-index: 100;
         }
 
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
+        .header-left { display: flex; align-items: center; gap: 16px; }
         .back-btn {
-            background: none;
-            border: none;
+            background: none; border: none;
             color: var(--text-secondary);
-            font-size: 1.5rem;
-            cursor: pointer;
-            padding: 8px;
-            border-radius: 8px;
+            font-size: 1.5rem; cursor: pointer;
+            padding: 8px; border-radius: 8px;
             transition: all 0.2s;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
+            text-decoration: none; display: flex;
         }
-
-        .back-btn:hover {
-            background: var(--bg-card);
-            color: var(--text-primary);
-        }
-
-        .header-title {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            font-size: 1.25rem;
-            font-weight: 700;
-        }
-
-        .header-subtitle {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-        }
-
-        .header-center {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+        .back-btn:hover { background: var(--bg-card); color: var(--text-primary); }
+        .header-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.25rem; font-weight: 700; }
+        .header-subtitle { font-size: 0.8rem; color: var(--text-muted); }
 
         .level-indicator {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            background: var(--bg-card);
-            padding: 6px 12px;
-            border-radius: 20px;
+            display: flex; align-items: center; gap: 4px;
+            background: var(--bg-card); padding: 6px 12px; border-radius: 20px;
         }
-
         .level-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--border-color);
-            transition: all 0.3s;
+            width: 8px; height: 8px; border-radius: 50%;
+            background: var(--border-color); transition: all 0.3s;
         }
-
         .level-dot.active { transform: scale(1.3); }
         .level-dot.strategy { background: var(--strategy-color); }
         .level-dot.goal { background: var(--goal-color); }
         .level-dot.requirement { background: var(--requirement-color); }
         .level-dot.metric { background: var(--metric-color); }
 
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
+        .header-right { display: flex; align-items: center; gap: 12px; }
         .zoom-btn {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px 20px;
-            border-radius: 25px;
-            border: none;
-            font-size: 0.9rem;
-            font-weight: 600;
-            cursor: pointer;
+            display: flex; align-items: center; gap: 8px;
+            padding: 10px 20px; border-radius: 25px; border: none;
+            font-size: 0.9rem; font-weight: 600; cursor: pointer;
             transition: all 0.3s ease;
             font-family: 'Plus Jakarta Sans', sans-serif;
         }
+        .zoom-in-btn { background: linear-gradient(135deg, var(--goal-color), #06b6d4); color: white; }
+        .zoom-out-btn { background: var(--bg-card); color: var(--text-primary); border: 1px solid var(--border-color); }
+        .zoom-btn:hover { transform: scale(1.05); box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+        .zoom-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
-        .zoom-in-btn {
-            background: linear-gradient(135deg, var(--goal-color), #06b6d4);
-            color: white;
-        }
-
-        .zoom-out-btn {
-            background: var(--bg-card);
-            color: var(--text-primary);
-            border: 1px solid var(--border-color);
-        }
-
-        .zoom-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-        }
-
-        .zoom-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        /* Main container */
         .main-container {
             position: fixed;
-            top: 60px;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            top: 60px; left: 0; right: 0; bottom: 0;
             overflow: hidden;
-            perspective: 1000px;
+            perspective: 2000px;
         }
 
-        /* View container for zoom animations */
         .view-container {
-            width: 100%;
-            height: 100%;
-            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease;
-            transform-origin: center center;
+            width: 100%; height: 100%;
+            transition: all 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d;
         }
 
-        .view-container.zooming-out {
-            transform: scale(0.8);
+        /* Drill-in zoom effect - zooms into selected card */
+        .view-container.drilling-in {
+            transform: scale(3) translateZ(500px);
             opacity: 0;
         }
 
-        .view-container.zooming-in {
-            transform: scale(1.2);
-            opacity: 0;
-        }
-
-        /* Content grid */
         .content-scroll {
-            width: 100%;
-            height: 100%;
-            overflow-x: auto;
-            overflow-y: hidden;
-            display: flex;
-            align-items: center;
-            padding: 40px;
-            gap: 24px;
+            width: 100%; height: 100%;
+            overflow-x: auto; overflow-y: hidden;
+            display: flex; align-items: center;
+            padding: 40px; gap: 24px;
             scroll-snap-type: x mandatory;
             -webkit-overflow-scrolling: touch;
         }
@@ -205,189 +118,176 @@
         .strategy-card {
             flex: 0 0 400px;
             height: calc(100% - 80px);
-            max-height: 600px;
+            max-height: 620px;
             background: linear-gradient(145deg, var(--bg-card), #252f3f);
             border-radius: 24px;
             border: 1px solid var(--border-color);
-            padding: 32px;
+            padding: 28px;
             scroll-snap-align: center;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.4s ease;
             display: flex;
             flex-direction: column;
             position: relative;
             overflow: hidden;
+            transform-style: preserve-3d;
         }
 
         .strategy-card::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
+            top: 0; left: 0; right: 0;
             height: 4px;
             background: linear-gradient(90deg, var(--strategy-color), #a78bfa);
         }
 
         .strategy-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 20px 60px rgba(139, 92, 246, 0.2);
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 25px 80px rgba(139, 92, 246, 0.25);
             border-color: var(--strategy-color);
         }
 
         .strategy-card.selected {
             border-color: var(--strategy-color);
-            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.3);
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.4), 0 25px 80px rgba(139, 92, 246, 0.3);
+            transform: scale(1.02);
+        }
+
+        /* When drilling in, the selected card expands */
+        .strategy-card.drilling {
+            transform: scale(1.5) translateZ(200px);
+            z-index: 1000;
+            box-shadow: 0 0 100px rgba(139, 92, 246, 0.5);
         }
 
         .card-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 0.7rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-bottom: 20px;
-            width: fit-content;
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 6px 14px; border-radius: 20px;
+            font-size: 0.7rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.05em;
+            margin-bottom: 16px; width: fit-content;
         }
-
-        .card-badge.strategy {
-            background: rgba(139, 92, 246, 0.2);
-            color: #a78bfa;
-        }
+        .card-badge.strategy { background: rgba(139, 92, 246, 0.2); color: #a78bfa; }
 
         .card-title {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            font-size: 1.5rem;
-            font-weight: 700;
-            line-height: 1.3;
-            margin-bottom: 16px;
+            font-size: 1.4rem; font-weight: 700;
+            line-height: 1.3; margin-bottom: 12px;
         }
 
         .card-description {
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             color: var(--text-secondary);
-            line-height: 1.7;
-            flex: 1;
+            line-height: 1.6;
+            margin-bottom: 16px;
         }
 
-        .card-stats {
+        /* Upside/Cost Section */
+        .value-section {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-top: 24px;
-            padding-top: 24px;
-            border-top: 1px solid var(--border-color);
+            gap: 10px;
+            margin-bottom: 16px;
         }
 
-        .stat-item {
+        .value-box {
             background: var(--bg-main);
-            border-radius: 12px;
-            padding: 16px;
+            border-radius: 10px;
+            padding: 12px;
             text-align: center;
         }
 
-        .stat-value {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            font-size: 1.75rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, var(--strategy-color), #a78bfa);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+        .value-label {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 4px;
         }
 
-        .stat-label {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            margin-top: 4px;
+        .value-amount {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
         }
+
+        .value-amount.upside { color: var(--success); }
+        .value-amount.cost { color: var(--error); }
 
         /* Progress ring */
         .progress-ring-container {
             position: absolute;
-            top: 24px;
-            right: 24px;
-            width: 60px;
-            height: 60px;
+            top: 20px; right: 20px;
+            width: 56px; height: 56px;
         }
-
-        .progress-ring {
-            transform: rotate(-90deg);
-        }
-
-        .progress-ring-bg {
-            fill: none;
-            stroke: var(--bg-main);
-            stroke-width: 4;
-        }
-
+        .progress-ring { transform: rotate(-90deg); }
+        .progress-ring-bg { fill: none; stroke: var(--bg-main); stroke-width: 4; }
         .progress-ring-fill {
-            fill: none;
-            stroke: var(--strategy-color);
-            stroke-width: 4;
-            stroke-linecap: round;
-            transition: stroke-dashoffset 0.5s ease;
+            fill: none; stroke: var(--strategy-color);
+            stroke-width: 4; stroke-linecap: round;
         }
-
         .progress-ring-text {
             position: absolute;
-            top: 50%;
-            left: 50%;
+            top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 0.8rem;
-            font-weight: 700;
+            font-size: 0.75rem; font-weight: 700;
         }
 
         /* Goals preview */
-        .goals-preview {
-            margin-top: 16px;
-        }
-
+        .goals-preview { flex: 1; overflow: hidden; }
         .goals-preview-title {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-bottom: 12px;
+            font-size: 0.7rem; color: var(--text-muted);
+            text-transform: uppercase; letter-spacing: 0.05em;
+            margin-bottom: 10px;
         }
-
         .goal-mini {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px 12px;
+            display: flex; align-items: center; gap: 8px;
+            padding: 8px 10px;
             background: var(--bg-main);
             border-radius: 8px;
-            margin-bottom: 8px;
-            font-size: 0.85rem;
+            margin-bottom: 6px;
+            font-size: 0.8rem;
         }
-
         .goal-mini-dot {
-            width: 8px;
-            height: 8px;
+            width: 6px; height: 6px;
             border-radius: 50%;
             background: var(--goal-color);
         }
-
         .goal-mini-progress {
             margin-left: auto;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             font-weight: 600;
         }
-
         .goal-mini-progress.green { color: var(--success); }
         .goal-mini-progress.amber { color: var(--warning); }
         .goal-mini-progress.red { color: var(--error); }
 
-        /* Zoom hint */
+        .card-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: auto;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+        }
+        .stat-item {
+            background: var(--bg-main);
+            border-radius: 10px;
+            padding: 12px;
+            text-align: center;
+        }
+        .stat-value {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1.5rem; font-weight: 700;
+            background: linear-gradient(135deg, var(--strategy-color), #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .stat-label { font-size: 0.7rem; color: var(--text-muted); margin-top: 2px; }
+
         .zoom-hint {
             position: fixed;
-            bottom: 30px;
-            left: 50%;
+            bottom: 30px; left: 50%;
             transform: translateX(-50%);
             background: rgba(30, 41, 59, 0.95);
             backdrop-filter: blur(10px);
@@ -395,26 +295,10 @@
             border-radius: 30px;
             font-size: 0.9rem;
             color: var(--text-secondary);
-            display: flex;
-            align-items: center;
-            gap: 12px;
+            display: flex; align-items: center; gap: 12px;
             z-index: 50;
             border: 1px solid var(--border-color);
         }
-
-        .zoom-hint-icon {
-            font-size: 1.2rem;
-        }
-
-        .keyboard-hint {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            margin-left: 12px;
-            padding-left: 12px;
-            border-left: 1px solid var(--border-color);
-        }
-
         .key {
             background: var(--bg-main);
             padding: 4px 8px;
@@ -423,17 +307,9 @@
             font-weight: 600;
         }
 
-        /* Mobile */
         @media (max-width: 768px) {
-            .strategy-card {
-                flex: 0 0 320px;
-            }
-            .header-center {
-                display: none;
-            }
-            .keyboard-hint {
-                display: none;
-            }
+            .strategy-card { flex: 0 0 320px; max-height: 580px; }
+            .header-center { display: none; }
         }
     </style>
 </head>
@@ -455,33 +331,24 @@
             </div>
         </div>
         <div class="header-right">
-            <button class="zoom-btn zoom-out-btn" disabled>
-                <span>&#8722;</span> Zoom Out
-            </button>
-            <button class="zoom-btn zoom-in-btn" onclick="zoomIn()">
-                Zoom In <span>&#43;</span>
-            </button>
+            <button class="zoom-btn zoom-out-btn" disabled>&#8722; Zoom Out</button>
+            <button class="zoom-btn zoom-in-btn" onclick="zoomIn()">Zoom In &#43;</button>
         </div>
     </header>
 
     <main class="main-container">
         <div class="view-container" id="view-container">
-            <div class="content-scroll" id="content-scroll">
-                <!-- Strategy cards will be populated here -->
-            </div>
+            <div class="content-scroll" id="content-scroll"></div>
         </div>
     </main>
 
     <div class="zoom-hint">
-        <span class="zoom-hint-icon">&#128269;</span>
+        <span>&#128269;</span>
         <span>Select a strategy and <strong>Zoom In</strong> to see Goals</span>
-        <div class="keyboard-hint">
-            <span class="key">Enter</span> or <span class="key">Space</span>
-        </div>
+        <span class="key">Enter</span>
     </div>
 
     <script>
-        // Data - load from localStorage or use defaults
         let data = JSON.parse(localStorage.getItem('strategyMapData')) || getDefaultData();
         let selectedStrategy = null;
 
@@ -491,7 +358,9 @@
                     {
                         id: 'str-1',
                         title: 'Market Leadership in Digital Payments',
-                        description: 'Establish dominant market position in digital payment solutions through innovative technology and superior customer experience.',
+                        description: 'Establish dominant market position in digital payment solutions.',
+                        upside: '$2.5B Revenue',
+                        cost: '$450M Investment',
                         goals: [
                             { id: 'goal-1-1', title: 'Increase Payment Volume', targetProgress: 75 },
                             { id: 'goal-1-2', title: 'Reduce Transaction Costs', targetProgress: 60 },
@@ -501,7 +370,9 @@
                     {
                         id: 'str-2',
                         title: 'Financial Services Ecosystem',
-                        description: 'Build comprehensive financial services platform beyond payments including lending, banking, and wealth management.',
+                        description: 'Build comprehensive financial services platform beyond payments.',
+                        upside: '$1.8B Revenue',
+                        cost: '$320M Investment',
                         goals: [
                             { id: 'goal-2-1', title: 'Launch Merchant Lending', targetProgress: 45 },
                             { id: 'goal-2-2', title: 'Consumer Banking', targetProgress: 30 }
@@ -510,7 +381,9 @@
                     {
                         id: 'str-3',
                         title: 'Global Infrastructure Scale',
-                        description: 'Build world-class infrastructure capable of processing 100K TPS with 99.99% uptime across all regions.',
+                        description: 'Build world-class infrastructure with 99.99% uptime.',
+                        upside: '$800M Savings',
+                        cost: '$200M Investment',
                         goals: [
                             { id: 'goal-3-1', title: 'Achieve 99.99% Uptime', targetProgress: 95 },
                             { id: 'goal-3-2', title: 'Scale to 100K TPS', targetProgress: 70 }
@@ -519,7 +392,9 @@
                     {
                         id: 'str-4',
                         title: 'AI-First Product Experience',
-                        description: 'Leverage AI/ML to create personalized, intelligent experiences that anticipate customer needs.',
+                        description: 'Leverage AI/ML to create personalized experiences.',
+                        upside: '$600M Revenue',
+                        cost: '$150M Investment',
                         goals: [
                             { id: 'goal-4-1', title: 'AI-Powered Insights', targetProgress: 50 }
                         ]
@@ -528,23 +403,28 @@
             };
         }
 
-        function calculateOverallProgress(goals) {
+        function calculateProgress(goals) {
             if (!goals || goals.length === 0) return 0;
             return Math.round(goals.reduce((sum, g) => sum + (g.targetProgress || 0), 0) / goals.length);
         }
 
-        function getProgressColor(progress) {
-            if (progress >= 80) return 'green';
-            if (progress >= 50) return 'amber';
-            return 'red';
+        function getProgressColor(p) {
+            return p >= 80 ? 'green' : p >= 50 ? 'amber' : 'red';
+        }
+
+        function countInitiatives(strategy) {
+            const fullData = JSON.parse(localStorage.getItem('strategyMapData'));
+            if (!fullData) return 0;
+            const s = fullData.strategies.find(x => x.id === strategy.id);
+            return s ? s.goals.reduce((sum, g) => sum + (g.initiatives?.length || 0), 0) : 0;
         }
 
         function renderStrategies() {
             const container = document.getElementById('content-scroll');
             container.innerHTML = data.strategies.map(strategy => {
-                const progress = calculateOverallProgress(strategy.goals);
-                const circumference = 2 * Math.PI * 24;
-                const offset = circumference - (progress / 100) * circumference;
+                const progress = calculateProgress(strategy.goals);
+                const circ = 2 * Math.PI * 22;
+                const offset = circ - (progress / 100) * circ;
 
                 return `
                     <div class="strategy-card ${selectedStrategy?.id === strategy.id ? 'selected' : ''}"
@@ -552,28 +432,40 @@
                          onclick="selectStrategy('${strategy.id}')"
                          ondblclick="zoomIn()">
                         <div class="progress-ring-container">
-                            <svg class="progress-ring" width="60" height="60">
-                                <circle class="progress-ring-bg" cx="30" cy="30" r="24"/>
-                                <circle class="progress-ring-fill" cx="30" cy="30" r="24"
-                                    stroke-dasharray="${circumference}"
-                                    stroke-dashoffset="${offset}"/>
+                            <svg class="progress-ring" width="56" height="56">
+                                <circle class="progress-ring-bg" cx="28" cy="28" r="22"/>
+                                <circle class="progress-ring-fill" cx="28" cy="28" r="22"
+                                    stroke-dasharray="${circ}" stroke-dashoffset="${offset}"/>
                             </svg>
                             <span class="progress-ring-text">${progress}%</span>
                         </div>
                         <span class="card-badge strategy">&#9733; Strategy</span>
                         <h2 class="card-title">${strategy.title}</h2>
                         <p class="card-description">${strategy.description}</p>
+
+                        <div class="value-section">
+                            <div class="value-box">
+                                <div class="value-label">Potential Upside</div>
+                                <div class="value-amount upside">${strategy.upside || 'TBD'}</div>
+                            </div>
+                            <div class="value-box">
+                                <div class="value-label">Est. Cost</div>
+                                <div class="value-amount cost">${strategy.cost || 'TBD'}</div>
+                            </div>
+                        </div>
+
                         <div class="goals-preview">
-                            <div class="goals-preview-title">Goals</div>
-                            ${strategy.goals.slice(0, 3).map(goal => `
+                            <div class="goals-preview-title">Goals (${strategy.goals.length})</div>
+                            ${strategy.goals.slice(0, 3).map(g => `
                                 <div class="goal-mini">
                                     <span class="goal-mini-dot"></span>
-                                    <span>${goal.title}</span>
-                                    <span class="goal-mini-progress ${getProgressColor(goal.targetProgress)}">${goal.targetProgress}%</span>
+                                    <span>${g.title}</span>
+                                    <span class="goal-mini-progress ${getProgressColor(g.targetProgress)}">${g.targetProgress}%</span>
                                 </div>
                             `).join('')}
-                            ${strategy.goals.length > 3 ? `<div class="goal-mini" style="justify-content: center; color: var(--text-muted);">+${strategy.goals.length - 3} more</div>` : ''}
+                            ${strategy.goals.length > 3 ? `<div class="goal-mini" style="justify-content:center;color:var(--text-muted);">+${strategy.goals.length - 3} more</div>` : ''}
                         </div>
+
                         <div class="card-stats">
                             <div class="stat-item">
                                 <div class="stat-value">${strategy.goals.length}</div>
@@ -581,21 +473,12 @@
                             </div>
                             <div class="stat-item">
                                 <div class="stat-value">${countInitiatives(strategy)}</div>
-                                <div class="stat-label">Initiatives</div>
+                                <div class="stat-label">Requirements</div>
                             </div>
                         </div>
                     </div>
                 `;
             }).join('');
-        }
-
-        function countInitiatives(strategy) {
-            // Get from full data
-            const fullData = JSON.parse(localStorage.getItem('strategyMapData'));
-            if (!fullData) return 0;
-            const fullStrategy = fullData.strategies.find(s => s.id === strategy.id);
-            if (!fullStrategy) return 0;
-            return fullStrategy.goals.reduce((sum, g) => sum + (g.initiatives?.length || 0), 0);
         }
 
         function selectStrategy(id) {
@@ -605,59 +488,40 @@
         }
 
         function zoomIn() {
-            if (!selectedStrategy) {
-                // Auto-select first if none selected
-                if (data.strategies.length > 0) {
-                    selectStrategy(data.strategies[0].id);
-                }
+            if (!selectedStrategy && data.strategies.length > 0) {
+                selectStrategy(data.strategies[0].id);
             }
 
             if (selectedStrategy) {
+                // Add drilling effect to selected card
+                const card = document.querySelector(`[data-id="${selectedStrategy.id}"]`);
+                if (card) card.classList.add('drilling');
+
                 const container = document.getElementById('view-container');
-                container.classList.add('zooming-in');
+                container.classList.add('drilling-in');
 
                 setTimeout(() => {
                     window.location.href = 'view-goals.html';
-                }, 400);
+                }, 500);
             }
         }
 
-        // Keyboard navigation
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                zoomIn();
-            }
-            if (e.key === 'ArrowRight') {
-                navigateCard(1);
-            }
-            if (e.key === 'ArrowLeft') {
-                navigateCard(-1);
-            }
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); zoomIn(); }
+            if (e.key === 'ArrowRight') navigateCard(1);
+            if (e.key === 'ArrowLeft') navigateCard(-1);
         });
 
-        function navigateCard(direction) {
-            const currentIndex = selectedStrategy
-                ? data.strategies.findIndex(s => s.id === selectedStrategy.id)
-                : -1;
-            const newIndex = Math.max(0, Math.min(data.strategies.length - 1, currentIndex + direction));
-            selectStrategy(data.strategies[newIndex].id);
-
-            // Scroll to card
-            const card = document.querySelector(`[data-id="${data.strategies[newIndex].id}"]`);
-            if (card) {
-                card.scrollIntoView({ behavior: 'smooth', inline: 'center' });
-            }
+        function navigateCard(dir) {
+            const idx = selectedStrategy ? data.strategies.findIndex(s => s.id === selectedStrategy.id) : -1;
+            const newIdx = Math.max(0, Math.min(data.strategies.length - 1, idx + dir));
+            selectStrategy(data.strategies[newIdx].id);
+            document.querySelector(`[data-id="${data.strategies[newIdx].id}"]`)?.scrollIntoView({ behavior: 'smooth', inline: 'center' });
         }
 
-        // Initialize
         renderStrategies();
-
-        // Restore selection if coming back
         const savedId = sessionStorage.getItem('selectedStrategyId');
-        if (savedId) {
-            selectStrategy(savedId);
-        }
+        if (savedId) selectStrategy(savedId);
     </script>
 </body>
 </html>
