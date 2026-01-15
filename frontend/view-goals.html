@@ -83,101 +83,88 @@
         .zoom-out-btn { background: var(--bg-card); color: var(--text-primary); border: 1px solid var(--border-color); }
         .zoom-btn:hover { transform: scale(1.05); box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
 
-        /* Parent Hierarchy Navigation */
-        .hierarchy-nav {
+        /* Strategy Title Header */
+        .strategy-header {
             position: fixed;
             top: 60px; left: 0; right: 0;
-            height: 80px;
-            background: linear-gradient(180deg, rgba(15, 23, 42, 0.98), rgba(15, 23, 42, 0.9));
+            height: 70px;
+            background: linear-gradient(180deg, rgba(15, 23, 42, 0.98), rgba(15, 23, 42, 0.95));
             border-bottom: 1px solid var(--border-color);
             display: flex;
             align-items: center;
             padding: 0 40px;
             gap: 16px;
             z-index: 90;
-            overflow-x: auto;
         }
 
-        .hierarchy-item {
+        .strategy-badge {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 12px 20px;
-            background: var(--bg-card);
+            justify-content: center;
+            width: 44px;
+            height: 44px;
             border-radius: 12px;
-            border: 1px solid var(--border-color);
-            cursor: pointer;
-            transition: all 0.3s;
-            flex-shrink: 0;
-            opacity: 0.5;
-        }
-
-        .hierarchy-item.active {
-            opacity: 1;
-            border-color: var(--strategy-color);
-            background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(139, 92, 246, 0.1));
-            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.2);
-        }
-
-        .hierarchy-item:hover {
-            opacity: 0.8;
-            border-color: var(--strategy-color);
-        }
-
-        .hierarchy-item.active:hover {
-            opacity: 1;
-        }
-
-        .hierarchy-icon {
-            width: 36px; height: 36px;
-            border-radius: 8px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1rem;
-            background: rgba(139, 92, 246, 0.2);
-            color: var(--strategy-color);
-        }
-
-        .hierarchy-content {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .hierarchy-label {
-            font-size: 0.65rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .hierarchy-title {
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            max-width: 200px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .hierarchy-arrow {
-            color: var(--text-muted);
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.3), rgba(139, 92, 246, 0.1));
+            border: 2px solid var(--strategy-color);
             font-size: 1.2rem;
+        }
+
+        .strategy-header-content {
+            flex: 1;
+        }
+
+        .strategy-header-label {
+            font-size: 0.7rem;
+            color: var(--strategy-color);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-weight: 600;
+        }
+
+        .strategy-header-title {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text-primary);
         }
 
         /* Strategic Context Panel */
         .strategy-context {
             position: fixed;
-            top: 140px;
+            top: 130px;
             left: 0;
             right: 0;
-            height: 140px;
+            height: 120px;
             background: linear-gradient(180deg, var(--bg-main), rgba(15, 23, 42, 0.95));
             border-bottom: 1px solid var(--border-color);
-            padding: 16px 40px;
+            padding: 12px 40px;
             display: flex;
             gap: 20px;
             z-index: 80;
             overflow-x: auto;
+        }
+
+        /* Strategy Write-up Section */
+        .strategy-writeup {
+            position: fixed;
+            top: 250px;
+            left: 0;
+            right: 0;
+            background: var(--bg-main);
+            border-bottom: 1px solid var(--border-color);
+            padding: 20px 40px;
+            z-index: 75;
+        }
+
+        .writeup-content {
+            max-width: 1000px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        .writeup-content strong {
+            color: var(--text-primary);
         }
 
         .context-card {
@@ -332,7 +319,7 @@
 
         .main-container {
             position: fixed;
-            top: 280px; left: 0; right: 0; bottom: 0;
+            top: 340px; left: 0; right: 0; bottom: 0;
             overflow: hidden;
             perspective: 2000px;
         }
@@ -571,10 +558,12 @@
         @media (max-width: 768px) {
             .goal-card { flex: 0 0 300px; }
             .header-center { display: none; }
-            .hierarchy-nav { padding: 0 20px; }
-            .strategy-context { padding: 12px 20px; height: 120px; }
-            .main-container { top: 260px; }
-            .context-card { min-width: 240px; }
+            .strategy-header { padding: 0 20px; height: 60px; }
+            .strategy-header-title { font-size: 1.1rem; }
+            .strategy-context { padding: 10px 20px; height: 100px; top: 120px; }
+            .strategy-writeup { top: 220px; padding: 15px 20px; }
+            .main-container { top: 310px; }
+            .context-card { min-width: 220px; padding: 10px 14px; }
         }
     </style>
 </head>
@@ -600,13 +589,18 @@
         </div>
     </header>
 
-    <!-- Parent Hierarchy Navigation -->
-    <nav class="hierarchy-nav" id="hierarchy-nav">
+    <!-- Strategy Title Header -->
+    <div class="strategy-header" id="strategy-header">
         <!-- Populated by JS -->
-    </nav>
+    </div>
 
     <!-- Strategic Context Panel -->
     <div class="strategy-context" id="strategy-context">
+        <!-- Populated by JS -->
+    </div>
+
+    <!-- Strategy Write-up -->
+    <div class="strategy-writeup" id="strategy-writeup">
         <!-- Populated by JS -->
     </div>
 
@@ -643,20 +637,41 @@
             'str-4': { position: 4, leader: 'Visa', gap: '-30%', trend: 'Accelerating' }
         };
 
+        // Strategy write-ups explaining what each strategy means
+        const strategyWriteups = {
+            'str-1': `<strong>Market Leadership in Digital Payments</strong> is our core growth engine. As commerce increasingly moves digital, capturing payment volume is essential for long-term revenue sustainability. This strategy focuses on expanding our merchant base, improving transaction speeds, and reducing processing costs to become the preferred payment partner for businesses of all sizes. Success here directly drives our top-line growth and creates the foundation for all other strategic initiatives.`,
+            'str-2': `<strong>Financial Services Ecosystem</strong> represents our evolution beyond pure payments into a comprehensive financial platform. By offering lending, banking, and financial management tools alongside our payment infrastructure, we create deeper merchant relationships and multiple revenue streams. This strategy leverages our existing transaction data to underwrite loans more accurately and serve our merchants' broader financial needs, increasing customer lifetime value significantly.`,
+            'str-3': `<strong>Global Infrastructure Scale</strong> is the technical backbone enabling all other strategies. World-class uptime and processing capacity aren't just operational metrics—they're competitive advantages. Enterprise clients require five-nines reliability, and our ability to scale to 100K transactions per second positions us to capture high-volume merchants that competitors cannot serve. Investment here reduces long-term operational costs while enabling premium pricing.`,
+            'str-4': `<strong>AI-First Product Experience</strong> differentiates us in an increasingly commoditized market. By embedding machine learning into fraud detection, customer insights, and personalized recommendations, we deliver measurable value beyond basic payment processing. This strategy transforms us from a utility into a strategic partner, driving higher engagement and reducing churn through intelligent features that competitors struggle to replicate.`
+        };
+
         function getProgressColor(p) { return p >= 80 ? 'green' : p >= 50 ? 'amber' : 'red'; }
 
-        function renderHierarchy() {
-            const nav = document.getElementById('hierarchy-nav');
-            nav.innerHTML = fullData.strategies.map(strategy => `
-                <div class="hierarchy-item ${strategy.id === currentStrategy?.id ? 'active' : ''}"
-                     onclick="switchStrategy('${strategy.id}')">
-                    <div class="hierarchy-icon">&#9733;</div>
-                    <div class="hierarchy-content">
-                        <span class="hierarchy-label">Strategy</span>
-                        <span class="hierarchy-title">${strategy.title}</span>
-                    </div>
+        function renderStrategyHeader() {
+            const header = document.getElementById('strategy-header');
+            if (!currentStrategy) {
+                header.innerHTML = '';
+                return;
+            }
+
+            header.innerHTML = `
+                <div class="strategy-badge">&#9733;</div>
+                <div class="strategy-header-content">
+                    <div class="strategy-header-label">Strategy</div>
+                    <div class="strategy-header-title">${currentStrategy.title}</div>
                 </div>
-            `).join('<span class="hierarchy-arrow" style="opacity:0.3">|</span>');
+            `;
+        }
+
+        function renderStrategyWriteup() {
+            const writeup = document.getElementById('strategy-writeup');
+            if (!currentStrategy) {
+                writeup.innerHTML = '';
+                return;
+            }
+
+            const content = strategyWriteups[currentStrategy.id] || currentStrategy.description || 'No detailed description available for this strategy.';
+            writeup.innerHTML = `<div class="writeup-content">${content}</div>`;
         }
 
         function renderStrategyContext() {
@@ -728,8 +743,9 @@
             currentStrategy = fullData.strategies.find(s => s.id === id);
             sessionStorage.setItem('selectedStrategyId', id);
             selectedGoal = null;
-            renderHierarchy();
+            renderStrategyHeader();
             renderStrategyContext();
+            renderStrategyWriteup();
             renderGoals();
         }
 
@@ -878,8 +894,9 @@
             document.querySelector(`[data-id="${goals[newIdx].id}"]`)?.scrollIntoView({ behavior: 'smooth', inline: 'center' });
         }
 
-        renderHierarchy();
+        renderStrategyHeader();
         renderStrategyContext();
+        renderStrategyWriteup();
         renderGoals();
         const savedGoalId = sessionStorage.getItem('selectedGoalId');
         if (savedGoalId && currentStrategy.goals?.find(g => g.id === savedGoalId)) selectGoal(savedGoalId);
