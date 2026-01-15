@@ -26,7 +26,8 @@
 
         html, body {
             height: 100%;
-            overflow: hidden;
+            overflow-x: hidden;
+            overflow-y: auto;
             font-family: 'Inter', sans-serif;
             background: var(--bg-main);
             color: var(--text-primary);
@@ -83,18 +84,20 @@
         .zoom-out-btn { background: var(--bg-card); color: var(--text-primary); border: 1px solid var(--border-color); }
         .zoom-btn:hover { transform: scale(1.05); box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
 
+        /* Page wrapper for scrolling */
+        .page-wrapper {
+            padding-top: 60px; /* Account for fixed header */
+            min-height: 100vh;
+        }
+
         /* Strategy Title Header */
         .strategy-header {
-            position: fixed;
-            top: 60px; left: 0; right: 0;
-            height: 70px;
             background: linear-gradient(180deg, rgba(15, 23, 42, 0.98), rgba(15, 23, 42, 0.95));
             border-bottom: 1px solid var(--border-color);
             display: flex;
             align-items: center;
-            padding: 0 40px;
+            padding: 16px 40px;
             gap: 16px;
-            z-index: 90;
         }
 
         .strategy-badge {
@@ -130,30 +133,19 @@
 
         /* Strategic Context Panel */
         .strategy-context {
-            position: fixed;
-            top: 130px;
-            left: 0;
-            right: 0;
-            height: 120px;
             background: linear-gradient(180deg, var(--bg-main), rgba(15, 23, 42, 0.95));
             border-bottom: 1px solid var(--border-color);
-            padding: 12px 40px;
+            padding: 16px 40px;
             display: flex;
             gap: 20px;
-            z-index: 80;
             overflow-x: auto;
         }
 
         /* Strategy Write-up Section */
         .strategy-writeup {
-            position: fixed;
-            top: 250px;
-            left: 0;
-            right: 0;
             background: var(--bg-main);
             border-bottom: 1px solid var(--border-color);
             padding: 20px 40px;
-            z-index: 75;
         }
 
         .writeup-content {
@@ -318,9 +310,7 @@
         .sentiment-badge.neutral { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
 
         .main-container {
-            position: fixed;
-            top: 340px; left: 0; right: 0; bottom: 0;
-            overflow: hidden;
+            padding: 20px 0;
             perspective: 2000px;
         }
 
@@ -341,31 +331,29 @@
         }
 
         .content-scroll {
-            width: 100%; height: 100%;
-            overflow-x: auto; overflow-y: hidden;
-            display: flex; align-items: center;
-            padding: 30px 40px;
+            width: 100%;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            padding: 20px 40px 40px;
             gap: 24px;
-            scroll-snap-type: x mandatory;
-            -webkit-overflow-scrolling: touch;
         }
 
         /* Goal Card */
         .goal-card {
             flex: 0 0 360px;
-            height: calc(100% - 60px);
-            max-height: 500px;
+            min-height: 420px;
+            max-height: 480px;
             background: linear-gradient(145deg, var(--bg-card), #252f3f);
             border-radius: 24px;
             border: 1px solid var(--border-color);
             padding: 24px;
-            scroll-snap-align: center;
             cursor: pointer;
             transition: all 0.4s ease;
             display: flex;
             flex-direction: column;
             position: relative;
-            overflow: hidden;
+            overflow-y: auto;
             transform-style: preserve-3d;
         }
 
@@ -543,27 +531,228 @@
 
 
         .zoom-hint {
-            position: fixed;
-            bottom: 30px; left: calc(50% - 150px);
-            transform: translateX(-50%);
+            display: flex;
+            justify-content: center;
+            padding: 20px 40px 40px;
+        }
+
+        .zoom-hint-inner {
             background: rgba(30, 41, 59, 0.95);
             backdrop-filter: blur(10px);
             padding: 14px 28px; border-radius: 30px;
             font-size: 0.9rem; color: var(--text-secondary);
             display: flex; align-items: center; gap: 12px;
-            z-index: 50;
             border: 1px solid var(--border-color);
         }
 
+        /* Customer Voice Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            width: 90%;
+            max-width: 700px;
+            max-height: 80vh;
+            overflow-y: auto;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-color);
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.05));
+        }
+
+        .modal-header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .modal-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            background: rgba(59, 130, 246, 0.2);
+            color: var(--goal-color);
+        }
+
+        .modal-title {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .modal-close:hover {
+            background: var(--bg-main);
+            color: var(--text-primary);
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .feedback-section {
+            margin-bottom: 24px;
+        }
+
+        .feedback-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .feedback-section-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 12px;
+        }
+
+        .feedback-quote-card {
+            background: var(--bg-main);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-left: 3px solid var(--goal-color);
+        }
+
+        .feedback-quote {
+            font-style: italic;
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+
+        .feedback-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .feedback-source {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .feedback-sentiment {
+            font-size: 0.7rem;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+
+        .feedback-sentiment.positive { background: rgba(34, 197, 94, 0.2); color: var(--success); }
+        .feedback-sentiment.neutral { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
+        .feedback-sentiment.negative { background: rgba(239, 68, 68, 0.2); color: var(--error); }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .stat-card {
+            background: var(--bg-main);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .stat-value.positive { color: var(--success); }
+        .stat-value.neutral { color: var(--warning); }
+        .stat-value.negative { color: var(--error); }
+
+        .stat-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        /* Clickable customer card */
+        .context-card.customer {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .context-card.customer:hover {
+            border-color: var(--goal-color);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.2);
+        }
+
+        .click-hint {
+            font-size: 0.6rem;
+            color: var(--text-muted);
+            margin-top: 6px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
         @media (max-width: 768px) {
-            .goal-card { flex: 0 0 300px; }
+            .goal-card { flex: 0 0 300px; min-height: 380px; }
             .header-center { display: none; }
-            .strategy-header { padding: 0 20px; height: 60px; }
+            .strategy-header { padding: 12px 20px; }
             .strategy-header-title { font-size: 1.1rem; }
-            .strategy-context { padding: 10px 20px; height: 100px; top: 120px; }
-            .strategy-writeup { top: 220px; padding: 15px 20px; }
-            .main-container { top: 310px; }
+            .strategy-context { padding: 12px 20px; }
+            .strategy-writeup { padding: 15px 20px; }
             .context-card { min-width: 220px; padding: 10px 14px; }
+            .content-scroll { padding: 16px 20px 30px; }
+            .modal-content { width: 95%; max-height: 90vh; }
+            .stats-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+            .stat-card { padding: 12px 8px; }
+            .stat-value { font-size: 1.2rem; }
         }
     </style>
 </head>
@@ -589,30 +778,50 @@
         </div>
     </header>
 
-    <!-- Strategy Title Header -->
-    <div class="strategy-header" id="strategy-header">
-        <!-- Populated by JS -->
-    </div>
-
-    <!-- Strategic Context Panel -->
-    <div class="strategy-context" id="strategy-context">
-        <!-- Populated by JS -->
-    </div>
-
-    <!-- Strategy Write-up -->
-    <div class="strategy-writeup" id="strategy-writeup">
-        <!-- Populated by JS -->
-    </div>
-
-    <main class="main-container">
-        <div class="view-container" id="view-container">
-            <div class="content-scroll" id="content-scroll"></div>
+    <div class="page-wrapper">
+        <!-- Strategy Title Header -->
+        <div class="strategy-header" id="strategy-header">
+            <!-- Populated by JS -->
         </div>
-    </main>
 
-    <div class="zoom-hint">
-        <span>&#128269;</span>
-        <span>Select a goal and <strong>Zoom In</strong> for Requirements</span>
+        <!-- Strategic Context Panel -->
+        <div class="strategy-context" id="strategy-context">
+            <!-- Populated by JS -->
+        </div>
+
+        <!-- Strategy Write-up -->
+        <div class="strategy-writeup" id="strategy-writeup">
+            <!-- Populated by JS -->
+        </div>
+
+        <main class="main-container">
+            <div class="view-container" id="view-container">
+                <div class="content-scroll" id="content-scroll"></div>
+            </div>
+        </main>
+
+        <div class="zoom-hint">
+            <div class="zoom-hint-inner">
+                <span>&#128269;</span>
+                <span>Select a goal and <strong>Zoom In</strong> for Requirements</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Customer Voice Modal -->
+    <div class="modal-overlay" id="customer-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-header-left">
+                    <span class="modal-icon">&#128101;</span>
+                    <span class="modal-title">Customer Voice</span>
+                </div>
+                <button class="modal-close" onclick="closeCustomerModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <!-- Populated by JS -->
+            </div>
+        </div>
     </div>
 
     <script>
@@ -621,12 +830,48 @@
         let currentStrategy = fullData.strategies.find(s => s.id === selectedStrategyId) || fullData.strategies[0];
         let selectedGoal = null;
 
-        // Customer feedback data for strategies
+        // Customer feedback data for strategies (extended with multiple quotes)
         const customerFeedback = {
-            'str-1': { quote: 'Payment speeds have dramatically improved. This is exactly what we needed for our high-volume operations.', source: 'Fortune 500 Client', sentiment: 'positive' },
-            'str-2': { quote: 'Having lending and payments in one place would save us significant time and operational costs.', source: 'Mid-Market Client', sentiment: 'positive' },
-            'str-3': { quote: 'The 99.99% uptime target exceeds our requirements. Critical for our 24/7 operations.', source: 'Global Retailer', sentiment: 'positive' },
-            'str-4': { quote: 'AI-powered insights have transformed how we understand customer behavior.', source: 'Marketing Director', sentiment: 'positive' }
+            'str-1': {
+                primary: { quote: 'Payment speeds have dramatically improved. This is exactly what we needed for our high-volume operations.', source: 'Fortune 500 Client', sentiment: 'positive' },
+                all: [
+                    { quote: 'Payment speeds have dramatically improved. This is exactly what we needed for our high-volume operations.', source: 'Fortune 500 Client - VP Operations', sentiment: 'positive', date: 'Dec 2024' },
+                    { quote: 'Transaction fees are competitive but could be better for high-volume merchants. Looking forward to the new pricing tiers.', source: 'E-commerce Platform CEO', sentiment: 'neutral', date: 'Nov 2024' },
+                    { quote: 'The mobile payment SDK integration was seamless. Our developers had it running in two days.', source: 'FinTech Startup CTO', sentiment: 'positive', date: 'Nov 2024' },
+                    { quote: 'Cross-border payments are still slower than expected. Hope the global expansion addresses this.', source: 'International Retailer', sentiment: 'neutral', date: 'Oct 2024' }
+                ],
+                stats: { positive: 68, neutral: 25, negative: 7, nps: 72, responses: 1240 }
+            },
+            'str-2': {
+                primary: { quote: 'Having lending and payments in one place would save us significant time and operational costs.', source: 'Mid-Market Client', sentiment: 'positive' },
+                all: [
+                    { quote: 'Having lending and payments in one place would save us significant time and operational costs.', source: 'Mid-Market Client - CFO', sentiment: 'positive', date: 'Dec 2024' },
+                    { quote: 'The merchant cash advance feature has been a game-changer for managing our seasonal inventory.', source: 'Retail Chain Owner', sentiment: 'positive', date: 'Dec 2024' },
+                    { quote: 'Would love to see better integration with our accounting software for the lending products.', source: 'Small Business Owner', sentiment: 'neutral', date: 'Nov 2024' },
+                    { quote: 'Interest rates on business loans are slightly higher than traditional banks, but the speed makes up for it.', source: 'Restaurant Group', sentiment: 'neutral', date: 'Oct 2024' }
+                ],
+                stats: { positive: 72, neutral: 20, negative: 8, nps: 68, responses: 856 }
+            },
+            'str-3': {
+                primary: { quote: 'The 99.99% uptime target exceeds our requirements. Critical for our 24/7 operations.', source: 'Global Retailer', sentiment: 'positive' },
+                all: [
+                    { quote: 'The 99.99% uptime target exceeds our requirements. Critical for our 24/7 operations.', source: 'Global Retailer - CTO', sentiment: 'positive', date: 'Dec 2024' },
+                    { quote: 'System reliability during Black Friday was exceptional. Zero hiccups despite 10x normal volume.', source: 'E-commerce Director', sentiment: 'positive', date: 'Nov 2024' },
+                    { quote: 'API response times have improved significantly over the past quarter. Very impressed.', source: 'Platform Engineer', sentiment: 'positive', date: 'Nov 2024' },
+                    { quote: 'The new multi-region failover has given us peace of mind for our global operations.', source: 'Enterprise Client', sentiment: 'positive', date: 'Oct 2024' }
+                ],
+                stats: { positive: 85, neutral: 12, negative: 3, nps: 84, responses: 620 }
+            },
+            'str-4': {
+                primary: { quote: 'AI-powered insights have transformed how we understand customer behavior.', source: 'Marketing Director', sentiment: 'positive' },
+                all: [
+                    { quote: 'AI-powered insights have transformed how we understand customer behavior.', source: 'Marketing Director', sentiment: 'positive', date: 'Dec 2024' },
+                    { quote: 'Fraud detection accuracy has improved our chargeback rate by 40%. Incredible results.', source: 'Risk Manager', sentiment: 'positive', date: 'Dec 2024' },
+                    { quote: 'The predictive analytics for inventory are helpful but need more customization options.', source: 'Operations Lead', sentiment: 'neutral', date: 'Nov 2024' },
+                    { quote: 'AI recommendations for cross-selling have increased our average order value by 15%.', source: 'E-commerce Manager', sentiment: 'positive', date: 'Oct 2024' }
+                ],
+                stats: { positive: 74, neutral: 18, negative: 8, nps: 71, responses: 445 }
+            }
         };
 
         // Competitive data for strategies
@@ -681,7 +926,8 @@
                 return;
             }
 
-            const feedback = customerFeedback[currentStrategy.id] || { quote: 'No feedback yet', source: 'N/A', sentiment: 'neutral' };
+            const feedbackData = customerFeedback[currentStrategy.id] || { primary: { quote: 'No feedback yet', source: 'N/A', sentiment: 'neutral' } };
+            const feedback = feedbackData.primary;
             const competitive = competitiveData[currentStrategy.id] || { position: 4, leader: 'Unknown', gap: 'N/A', trend: 'N/A' };
             const rankClass = competitive.position === 1 ? 'first' : competitive.position === 2 ? 'second' : competitive.position === 3 ? 'third' : 'other';
 
@@ -726,8 +972,8 @@
                     </div>
                 </div>
 
-                <!-- Customer Feedback -->
-                <div class="context-card customer">
+                <!-- Customer Feedback (Clickable) -->
+                <div class="context-card customer" onclick="openCustomerModal()">
                     <div class="context-header">
                         <span class="context-icon customer">&#128101;</span>
                         <span class="context-title">Customer Voice</span>
@@ -735,9 +981,91 @@
                     </div>
                     <div class="customer-quote">"${feedback.quote}"</div>
                     <div class="customer-source">— ${feedback.source}</div>
+                    <div class="click-hint">
+                        <span>&#128279;</span>
+                        <span>Click for detailed customer insights</span>
+                    </div>
                 </div>
             `;
         }
+
+        function openCustomerModal() {
+            const feedbackData = customerFeedback[currentStrategy.id];
+            if (!feedbackData) return;
+
+            const modalBody = document.getElementById('modal-body');
+            const stats = feedbackData.stats;
+
+            modalBody.innerHTML = `
+                <div class="feedback-section">
+                    <div class="feedback-section-title">Sentiment Overview</div>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-value positive">${stats.positive}%</div>
+                            <div class="stat-label">Positive</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value neutral">${stats.neutral}%</div>
+                            <div class="stat-label">Neutral</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value negative">${stats.negative}%</div>
+                            <div class="stat-label">Negative</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="feedback-section">
+                    <div class="feedback-section-title">Key Metrics</div>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-value positive">${stats.nps}</div>
+                            <div class="stat-label">NPS Score</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${stats.responses.toLocaleString()}</div>
+                            <div class="stat-label">Responses</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${feedbackData.all.length}</div>
+                            <div class="stat-label">Recent Quotes</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="feedback-section">
+                    <div class="feedback-section-title">Recent Customer Feedback</div>
+                    ${feedbackData.all.map(f => `
+                        <div class="feedback-quote-card">
+                            <div class="feedback-quote">"${f.quote}"</div>
+                            <div class="feedback-meta">
+                                <span class="feedback-source">— ${f.source} (${f.date})</span>
+                                <span class="feedback-sentiment ${f.sentiment}">${f.sentiment === 'positive' ? 'Positive' : f.sentiment === 'neutral' ? 'Neutral' : 'Negative'}</span>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+
+            document.getElementById('customer-modal').classList.add('active');
+        }
+
+        function closeCustomerModal() {
+            document.getElementById('customer-modal').classList.remove('active');
+        }
+
+        // Close modal on overlay click
+        document.getElementById('customer-modal').addEventListener('click', function(e) {
+            if (e.target === this) closeCustomerModal();
+        });
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && document.getElementById('customer-modal').classList.contains('active')) {
+                closeCustomerModal();
+                e.stopPropagation();
+            }
+        });
 
         function switchStrategy(id) {
             currentStrategy = fullData.strategies.find(s => s.id === id);
@@ -880,6 +1208,9 @@
         }
 
         document.addEventListener('keydown', (e) => {
+            // Don't navigate if modal is open
+            if (document.getElementById('customer-modal').classList.contains('active')) return;
+
             if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); zoomIn(); }
             if (e.key === 'Escape' || e.key === 'Backspace') { e.preventDefault(); zoomOut(); }
             if (e.key === 'ArrowRight') navigateCard(1);
