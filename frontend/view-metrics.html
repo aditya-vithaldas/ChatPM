@@ -436,7 +436,7 @@
             top: 60px;
             right: 0;
             width: 320px;
-            bottom: 0;
+            bottom: 220px;
             background: var(--bg-card);
             border-left: 1px solid var(--border-color);
             padding: 24px;
@@ -554,9 +554,135 @@
             border: 1px solid var(--border-color);
         }
 
+        /* Chat Interface */
+        .chat-section {
+            position: fixed;
+            bottom: 0;
+            right: 0;
+            width: 320px;
+            background: var(--bg-card);
+            border-top: 1px solid var(--border-color);
+            padding: 16px;
+            z-index: 60;
+        }
+
+        .chat-title {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .chat-messages {
+            max-height: 150px;
+            overflow-y: auto;
+            margin-bottom: 12px;
+        }
+
+        .chat-message {
+            padding: 10px 12px;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            font-size: 0.8rem;
+            line-height: 1.5;
+        }
+
+        .chat-message.user {
+            background: rgba(99, 102, 241, 0.2);
+            color: var(--text-primary);
+            margin-left: 20px;
+        }
+
+        .chat-message.assistant {
+            background: var(--bg-main);
+            color: var(--text-secondary);
+            margin-right: 20px;
+        }
+
+        .chat-message.success {
+            background: rgba(34, 197, 94, 0.2);
+            color: var(--success);
+        }
+
+        .chat-input-container {
+            display: flex;
+            gap: 8px;
+        }
+
+        .chat-input {
+            flex: 1;
+            background: var(--bg-main);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px 16px;
+            font-size: 0.85rem;
+            color: var(--text-primary);
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .chat-input:focus {
+            border-color: var(--metric-color);
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+        }
+
+        .chat-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .chat-send {
+            background: linear-gradient(135deg, var(--metric-color), #10b981);
+            border: none;
+            border-radius: 12px;
+            padding: 12px 16px;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .chat-send:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3);
+        }
+
+        .chat-send:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .suggested-prompts {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+
+        .suggested-prompt {
+            background: var(--bg-main);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 6px 12px;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .suggested-prompt:hover {
+            border-color: var(--metric-color);
+            color: var(--metric-color);
+        }
+
         @media (max-width: 1024px) {
             .qa-sidebar { display: none; }
+            .chat-section { display: none; }
             .main-container { right: 0; }
+            .hierarchy-nav { right: 0; }
             .zoom-hint { left: 50%; }
         }
 
@@ -617,6 +743,27 @@
             <!-- Q&A populated by JS -->
         </div>
     </aside>
+
+    <div class="chat-section">
+        <div class="chat-title">
+            <span>&#128172;</span>
+            <span>Ask about metrics</span>
+        </div>
+        <div class="suggested-prompts">
+            <span class="suggested-prompt" onclick="useSuggestion('Track conversion rate')">Track conversion rate</span>
+            <span class="suggested-prompt" onclick="useSuggestion('Add revenue metric')">Add revenue metric</span>
+            <span class="suggested-prompt" onclick="useSuggestion('Monitor user growth')">Monitor user growth</span>
+        </div>
+        <div class="chat-messages" id="chat-messages">
+            <!-- Chat messages populated by JS -->
+        </div>
+        <div class="chat-input-container">
+            <input type="text" class="chat-input" id="chat-input"
+                   placeholder="e.g., Track monthly active users..."
+                   onkeypress="handleChatKeypress(event)">
+            <button class="chat-send" onclick="sendChatMessage()">&#10148;</button>
+        </div>
+    </div>
 
     <div class="zoom-hint">
         <span>&#128200;</span>
@@ -954,6 +1101,181 @@
 
             const card = document.querySelector(`[data-index="${newIndex}"]`);
             if (card) card.scrollIntoView({ behavior: 'smooth', inline: 'center' });
+        }
+
+        // Chat functionality
+        const chatMessages = [];
+
+        function useSuggestion(text) {
+            document.getElementById('chat-input').value = text;
+            document.getElementById('chat-input').focus();
+        }
+
+        function handleChatKeypress(event) {
+            if (event.key === 'Enter') {
+                sendChatMessage();
+            }
+        }
+
+        function sendChatMessage() {
+            const input = document.getElementById('chat-input');
+            const message = input.value.trim();
+
+            if (!message) return;
+
+            // Add user message
+            addChatMessage(message, 'user');
+            input.value = '';
+
+            // Process the message and generate metric
+            setTimeout(() => {
+                processMetricRequest(message);
+            }, 500);
+        }
+
+        function addChatMessage(text, type) {
+            chatMessages.push({ text, type });
+            renderChatMessages();
+        }
+
+        function renderChatMessages() {
+            const container = document.getElementById('chat-messages');
+            container.innerHTML = chatMessages.slice(-5).map(msg => `
+                <div class="chat-message ${msg.type}">${msg.text}</div>
+            `).join('');
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function processMetricRequest(message) {
+            // Parse the message to extract metric details
+            const metricInfo = parseMetricFromText(message);
+
+            if (metricInfo) {
+                // Create the new metric
+                const newMetric = createMetricFromInfo(metricInfo);
+
+                // Add to current requirement
+                if (!currentRequirement.metrics) {
+                    currentRequirement.metrics = [];
+                }
+                currentRequirement.metrics.push(newMetric);
+
+                // Save to localStorage
+                saveData();
+
+                // Show success message
+                addChatMessage(`Added "${newMetric.name}" metric with target ${newMetric.target}${newMetric.unit}. The metric is now tracking!`, 'success');
+
+                // Re-render metrics
+                renderMetrics();
+                renderHierarchy();
+
+                // Select the new metric
+                setTimeout(() => {
+                    selectMetric(newMetric.id, currentRequirement.metrics.length - 1);
+                    const card = document.querySelector(`[data-id="${newMetric.id}"]`);
+                    if (card) card.scrollIntoView({ behavior: 'smooth', inline: 'center' });
+                }, 200);
+            } else {
+                addChatMessage('I can help you add metrics! Try phrases like:\n• "Track monthly revenue with target $1M"\n• "Monitor conversion rate, goal 5%"\n• "Add user retention metric at 80%"', 'assistant');
+            }
+        }
+
+        function parseMetricFromText(text) {
+            const lower = text.toLowerCase();
+
+            // Extract metric name patterns
+            let name = '';
+            let target = 100;
+            let unit = '%';
+            let current = 0;
+
+            // Common metric patterns
+            const patterns = [
+                { regex: /track\s+(.+?)(?:\s+(?:with|at|target|goal))?/i, nameGroup: 1 },
+                { regex: /add\s+(.+?)(?:\s+(?:metric|with|at|target|goal))?/i, nameGroup: 1 },
+                { regex: /monitor\s+(.+?)(?:\s+(?:with|at|target|goal))?/i, nameGroup: 1 },
+                { regex: /measure\s+(.+?)(?:\s+(?:with|at|target|goal))?/i, nameGroup: 1 },
+                { regex: /create\s+(.+?)(?:\s+(?:metric|with|at|target|goal))?/i, nameGroup: 1 }
+            ];
+
+            for (const pattern of patterns) {
+                const match = text.match(pattern.regex);
+                if (match) {
+                    name = match[pattern.nameGroup].trim();
+                    // Clean up the name
+                    name = name.replace(/\s*(metric|with|at|target|goal|of|to).*$/i, '').trim();
+                    break;
+                }
+            }
+
+            if (!name) {
+                // Try to use the whole text as name if no pattern matched
+                name = text.replace(/[^a-zA-Z\s]/g, '').trim();
+                if (name.length < 3) return null;
+            }
+
+            // Extract target value
+            const numberMatch = text.match(/(\$?\d+(?:,\d{3})*(?:\.\d+)?)\s*(%|K|M|B|users?|customers?|dollars?)?/i);
+            if (numberMatch) {
+                let value = parseFloat(numberMatch[1].replace(/[$,]/g, ''));
+                const suffix = numberMatch[2]?.toLowerCase() || '';
+
+                if (suffix === 'k') { value *= 1000; unit = ''; }
+                else if (suffix === 'm') { value *= 1000000; unit = ''; }
+                else if (suffix === 'b') { value *= 1000000000; unit = ''; }
+                else if (suffix === '%') { unit = '%'; }
+                else if (suffix.includes('user') || suffix.includes('customer')) { unit = ' users'; }
+                else if (suffix.includes('dollar') || numberMatch[1].includes('$')) { unit = ''; name = name.includes('$') ? name : name; }
+                else { unit = ''; }
+
+                target = value;
+            }
+
+            // Set reasonable current value (random between 20-70% of target)
+            current = Math.round(target * (0.2 + Math.random() * 0.5));
+
+            // Capitalize name
+            name = name.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+
+            return { name, target, current, unit };
+        }
+
+        function createMetricFromInfo(info) {
+            const id = 'metric-' + Date.now();
+
+            // Generate trend data (simulated growth toward target)
+            const trend = [];
+            let val = info.current * 0.3;
+            for (let i = 0; i < 6; i++) {
+                val += (info.current - val) * (0.2 + Math.random() * 0.3);
+                trend.push(Math.round(val));
+            }
+            trend[5] = info.current; // Last value should be current
+
+            return {
+                id,
+                name: info.name,
+                current: info.current,
+                target: info.target,
+                unit: info.unit,
+                trend
+            };
+        }
+
+        function saveData() {
+            // Update the requirement in the full data structure
+            const strategyIndex = fullData.strategies.findIndex(s => s.id === currentStrategy.id);
+            if (strategyIndex >= 0) {
+                const goalIndex = fullData.strategies[strategyIndex].goals.findIndex(g => g.id === currentGoal.id);
+                if (goalIndex >= 0) {
+                    const reqIndex = fullData.strategies[strategyIndex].goals[goalIndex].initiatives.findIndex(i => i.id === currentRequirement.id);
+                    if (reqIndex >= 0) {
+                        fullData.strategies[strategyIndex].goals[goalIndex].initiatives[reqIndex].metrics = currentRequirement.metrics;
+                    }
+                }
+            }
+            localStorage.setItem('strategyMapData', JSON.stringify(fullData));
         }
 
         // Initialize
