@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Requirement Details - DecisionOS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #6366f1;
+            --bg-main: #0f172a;
+            --bg-card: #1e293b;
+            --bg-card-hover: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border-color: #334155;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --strategy-color: #8b5cf6;
+            --goal-color: #3b82f6;
+            --requirement-color: #f97316;
+            --metric-color: #22c55e;
+        }
+
+        html, body {
+            height: 100%;
+            overflow-x: hidden;
+            overflow-y: auto;
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-main);
+            color: var(--text-primary);
+        }
+
+        .header {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: 60px;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            z-index: 100;
+        }
+
+        .header-left { display: flex; align-items: center; gap: 16px; }
+        .back-btn {
+            background: none; border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem; cursor: pointer;
+            padding: 8px; border-radius: 8px;
+            transition: all 0.2s;
+        }
+        .back-btn:hover { background: var(--bg-card); color: var(--text-primary); }
+        .header-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.25rem; font-weight: 700; }
+        .breadcrumb { font-size: 0.75rem; color: var(--text-muted); }
+        .breadcrumb a { text-decoration: none; }
+        .breadcrumb .strategy-link { color: var(--strategy-color); }
+        .breadcrumb .goal-link { color: var(--goal-color); }
+        .breadcrumb .req-link { color: var(--requirement-color); }
+
+        .header-right { display: flex; align-items: center; gap: 12px; }
+        .zoom-btn {
+            display: flex; align-items: center; gap: 8px;
+            padding: 10px 20px; border-radius: 25px; border: none;
+            font-size: 0.9rem; font-weight: 600; cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .zoom-in-btn { background: linear-gradient(135deg, var(--metric-color), #10b981); color: white; }
+        .zoom-out-btn { background: var(--bg-card); color: var(--text-primary); border: 1px solid var(--border-color); }
+        .zoom-btn:hover { transform: scale(1.05); box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+
+        /* Main Content */
+        .main-content {
+            margin-top: 60px;
+            padding: 40px;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Requirement Hero Section */
+        .requirement-hero {
+            background: linear-gradient(145deg, var(--bg-card), #252f3f);
+            border-radius: 24px;
+            border: 1px solid var(--border-color);
+            padding: 40px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .requirement-hero::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--requirement-color), #f59e0b);
+        }
+
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 8px 16px; border-radius: 20px;
+            font-size: 0.75rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.05em;
+            margin-bottom: 20px;
+            background: rgba(249, 115, 22, 0.2);
+            color: var(--requirement-color);
+        }
+
+        .hero-title {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 16px;
+            line-height: 1.3;
+        }
+
+        .hero-description {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            margin-bottom: 24px;
+            max-width: 800px;
+        }
+
+        .hero-metrics {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+
+        .hero-metric {
+            background: var(--bg-main);
+            border-radius: 12px;
+            padding: 16px 24px;
+            text-align: center;
+            min-width: 140px;
+        }
+
+        .hero-metric-value {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .hero-metric-value.upside { color: var(--success); }
+        .hero-metric-value.cost { color: var(--error); }
+        .hero-metric-value.metrics { color: var(--metric-color); }
+
+        .hero-metric-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 4px;
+        }
+
+        /* Context Section */
+        .context-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 30px;
+        }
+
+        .context-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid var(--border-color);
+        }
+
+        .context-card.goal-context {
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+
+        .context-card.strategy-context {
+            border-color: rgba(139, 92, 246, 0.3);
+        }
+
+        .context-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .context-icon {
+            width: 36px; height: 36px;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1rem;
+        }
+
+        .context-icon.goal { background: rgba(59, 130, 246, 0.2); color: var(--goal-color); }
+        .context-icon.strategy { background: rgba(139, 92, 246, 0.2); color: var(--strategy-color); }
+
+        .context-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .context-title {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .context-body {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* Details Section */
+        .details-section {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 30px;
+            border: 1px solid var(--border-color);
+        }
+
+        .details-title {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .details-content {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            line-height: 1.8;
+        }
+
+        .details-content p {
+            margin-bottom: 16px;
+        }
+
+        .details-content strong {
+            color: var(--text-primary);
+        }
+
+        /* Key Outcomes */
+        .outcomes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+            margin-top: 24px;
+        }
+
+        .outcome-item {
+            background: var(--bg-main);
+            border-radius: 12px;
+            padding: 20px;
+            border-left: 3px solid var(--requirement-color);
+        }
+
+        .outcome-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .outcome-desc {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        /* Metrics Preview */
+        .metrics-section {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+
+        .metrics-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .metrics-title {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .view-metrics-btn {
+            background: linear-gradient(135deg, var(--metric-color), #10b981);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        .view-metrics-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 20px rgba(34, 197, 94, 0.3);
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .metric-preview {
+            background: var(--bg-main);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .metric-preview:hover {
+            border-color: var(--metric-color);
+            transform: translateY(-4px);
+        }
+
+        .metric-name {
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+
+        .metric-value {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--metric-color);
+        }
+
+        .metric-target {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .metric-progress {
+            margin-top: 12px;
+            height: 6px;
+            background: var(--bg-card);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .metric-progress-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.5s;
+        }
+
+        .metric-progress-fill.green { background: var(--success); }
+        .metric-progress-fill.amber { background: var(--warning); }
+        .metric-progress-fill.red { background: var(--error); }
+
+        .no-metrics {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-muted);
+        }
+
+        /* Zoom hint */
+        .zoom-hint {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 14px 28px;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 50;
+            border: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 768px) {
+            .main-content { padding: 20px; }
+            .requirement-hero { padding: 24px; }
+            .hero-title { font-size: 1.5rem; }
+            .hero-metrics { flex-direction: column; }
+            .context-section { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-left">
+            <button class="back-btn" onclick="goBack()">&#8592;</button>
+            <div>
+                <h1 class="header-title">Requirement Details</h1>
+                <p class="breadcrumb">
+                    <a href="view-strategy.html" class="strategy-link" id="strategy-link">Strategy</a> &gt;
+                    <a href="view-goals.html" class="goal-link" id="goal-link">Goal</a> &gt;
+                    <a href="view-requirements.html" class="req-link" id="req-link">Requirements</a> &gt;
+                    <span id="current-req">Details</span>
+                </p>
+            </div>
+        </div>
+        <div class="header-right">
+            <button class="zoom-btn zoom-out-btn" onclick="goBack()">&#8722; Back</button>
+            <button class="zoom-btn zoom-in-btn" onclick="viewMetrics()">View Metrics &#43;</button>
+        </div>
+    </header>
+
+    <main class="main-content" id="main-content">
+        <!-- Populated by JS -->
+    </main>
+
+    <div class="zoom-hint">
+        <span>&#128200;</span>
+        <span>Click <strong>View Metrics</strong> to see detailed tracking data</span>
+    </div>
+
+    <script>
+        // Load data
+        const fullData = JSON.parse(localStorage.getItem('strategyMapData')) || { strategies: [] };
+        const selectedStrategyId = sessionStorage.getItem('selectedStrategyId');
+        const selectedGoalId = sessionStorage.getItem('selectedGoalId');
+        const selectedRequirementId = sessionStorage.getItem('selectedRequirementId');
+
+        let currentStrategy = fullData.strategies.find(s => s.id === selectedStrategyId) || fullData.strategies[0];
+        let currentGoal = currentStrategy?.goals?.find(g => g.id === selectedGoalId) || currentStrategy?.goals?.[0];
+        let currentRequirement = currentGoal?.initiatives?.find(i => i.id === selectedRequirementId) || currentGoal?.initiatives?.[0];
+
+        // Update breadcrumbs
+        document.getElementById('strategy-link').textContent = currentStrategy?.title?.substring(0, 20) + '...' || 'Strategy';
+        document.getElementById('goal-link').textContent = currentGoal?.title?.substring(0, 20) + '...' || 'Goal';
+        document.getElementById('req-link').textContent = 'Requirements';
+        document.getElementById('current-req').textContent = currentRequirement?.title?.substring(0, 25) + '...' || 'Details';
+
+        // Requirement detailed write-ups
+        const requirementWriteups = {
+            default: `This requirement represents a key initiative that directly contributes to achieving our strategic goals. It has been carefully scoped to deliver measurable impact while managing risk and resource allocation effectively. The success criteria are clearly defined, and the team has identified the key dependencies and milestones needed for successful delivery.`
+        };
+
+        // Key outcomes data
+        const keyOutcomes = [
+            { title: 'Revenue Impact', desc: 'Direct contribution to top-line growth through new capabilities or market expansion.' },
+            { title: 'Cost Efficiency', desc: 'Operational improvements that reduce ongoing costs or prevent future expenses.' },
+            { title: 'Customer Experience', desc: 'Enhanced user satisfaction leading to improved retention and advocacy.' },
+            { title: 'Competitive Position', desc: 'Strengthened market differentiation against key competitors.' }
+        ];
+
+        function getProgressColor(current, target) {
+            const percent = (current / target) * 100;
+            if (percent >= 80) return 'green';
+            if (percent >= 50) return 'amber';
+            return 'red';
+        }
+
+        function renderPage() {
+            const container = document.getElementById('main-content');
+
+            if (!currentRequirement) {
+                container.innerHTML = '<div style="text-align:center;padding:60px;color:var(--text-muted);">No requirement selected</div>';
+                return;
+            }
+
+            const metricsCount = currentRequirement.metrics?.length || 0;
+            const writeup = requirementWriteups[currentRequirement.id] || requirementWriteups.default;
+
+            container.innerHTML = `
+                <!-- Requirement Hero -->
+                <div class="requirement-hero">
+                    <span class="hero-badge">&#128640; Requirement</span>
+                    <h1 class="hero-title">${currentRequirement.title}</h1>
+                    <p class="hero-description">${currentRequirement.description || 'This requirement is a key initiative designed to deliver measurable business value. It aligns with our strategic objectives and has clear success metrics defined.'}</p>
+                    <div class="hero-metrics">
+                        <div class="hero-metric">
+                            <div class="hero-metric-value upside">${currentRequirement.upside || '$0M'}</div>
+                            <div class="hero-metric-label">Potential Upside</div>
+                        </div>
+                        <div class="hero-metric">
+                            <div class="hero-metric-value cost">${currentRequirement.downside || '$0M'}</div>
+                            <div class="hero-metric-label">Estimated Cost</div>
+                        </div>
+                        <div class="hero-metric">
+                            <div class="hero-metric-value metrics">${metricsCount}</div>
+                            <div class="hero-metric-label">Metrics Tracking</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Context Section -->
+                <div class="context-section">
+                    <div class="context-card goal-context">
+                        <div class="context-header">
+                            <div class="context-icon goal">&#127919;</div>
+                            <div>
+                                <div class="context-label">Parent Goal</div>
+                                <div class="context-title">${currentGoal?.title || 'Goal'}</div>
+                            </div>
+                        </div>
+                        <div class="context-body">
+                            ${currentGoal?.description || 'This goal defines the key objectives we are working toward.'}
+                            <br><br><strong>Progress:</strong> ${currentGoal?.targetProgress || 0}% complete
+                        </div>
+                    </div>
+                    <div class="context-card strategy-context">
+                        <div class="context-header">
+                            <div class="context-icon strategy">&#9733;</div>
+                            <div>
+                                <div class="context-label">Strategy</div>
+                                <div class="context-title">${currentStrategy?.title || 'Strategy'}</div>
+                            </div>
+                        </div>
+                        <div class="context-body">
+                            ${currentStrategy?.description || 'This strategy guides our organizational direction.'}
+                            <br><br><strong>Investment:</strong> ${currentStrategy?.cost || 'TBD'}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Details Section -->
+                <div class="details-section">
+                    <h2 class="details-title">&#128203; Requirement Overview</h2>
+                    <div class="details-content">
+                        <p>${writeup}</p>
+                        <p><strong>Why this matters:</strong> Successfully delivering this requirement will directly impact our ability to achieve the parent goal. It addresses specific customer needs identified through research and competitive analysis, and represents a high-value opportunity relative to the investment required.</p>
+                    </div>
+
+                    <h3 style="margin-top: 24px; margin-bottom: 16px; font-size: 1rem; color: var(--text-primary);">Key Outcomes Expected</h3>
+                    <div class="outcomes-grid">
+                        ${keyOutcomes.map(o => `
+                            <div class="outcome-item">
+                                <div class="outcome-title">${o.title}</div>
+                                <div class="outcome-desc">${o.desc}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <!-- Metrics Preview -->
+                <div class="metrics-section">
+                    <div class="metrics-header">
+                        <h2 class="metrics-title">&#128200; Metrics</h2>
+                        ${metricsCount > 0 ? '<button class="view-metrics-btn" onclick="viewMetrics()">View All Metrics &#8594;</button>' : ''}
+                    </div>
+                    ${metricsCount > 0 ? `
+                        <div class="metrics-grid">
+                            ${currentRequirement.metrics.map(m => {
+                                const percent = Math.round((m.current / m.target) * 100);
+                                const color = getProgressColor(m.current, m.target);
+                                return `
+                                    <div class="metric-preview" onclick="viewMetrics()">
+                                        <div class="metric-name">${m.name}</div>
+                                        <div class="metric-value">${m.current}${m.unit}</div>
+                                        <div class="metric-target">Target: ${m.target}${m.unit}</div>
+                                        <div class="metric-progress">
+                                            <div class="metric-progress-fill ${color}" style="width: ${Math.min(percent, 100)}%"></div>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    ` : `
+                        <div class="no-metrics">
+                            <p style="font-size: 1.2rem; margin-bottom: 8px;">&#128200;</p>
+                            <p>No metrics defined yet for this requirement.</p>
+                            <p style="margin-top: 8px; font-size: 0.85rem;">Click "View Metrics" to add tracking metrics.</p>
+                        </div>
+                    `}
+                </div>
+            `;
+        }
+
+        function goBack() {
+            window.location.href = 'view-requirements.html';
+        }
+
+        function viewMetrics() {
+            window.location.href = 'view-metrics.html';
+        }
+
+        // Initialize
+        renderPage();
+    </script>
+</body>
+</html>
