@@ -138,7 +138,8 @@
             padding: 16px 40px;
             display: flex;
             gap: 20px;
-            overflow-x: auto;
+            overflow-x: hidden;
+            flex-wrap: wrap;
         }
 
         /* Strategy Write-up Section */
@@ -160,8 +161,8 @@
         }
 
         .context-card {
-            flex: 0 0 auto;
-            min-width: 280px;
+            flex: 1 1 280px;
+            max-width: 350px;
             background: var(--bg-card);
             border-radius: 12px;
             padding: 14px 18px;
@@ -169,7 +170,8 @@
         }
 
         .context-card.strategy-summary {
-            min-width: 320px;
+            flex: 1 1 300px;
+            max-width: 350px;
             border-color: rgba(139, 92, 246, 0.3);
             background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(139, 92, 246, 0.05));
         }
@@ -289,6 +291,8 @@
             font-size: 0.8rem;
             color: var(--text-secondary);
             line-height: 1.5;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
 
         .customer-source {
