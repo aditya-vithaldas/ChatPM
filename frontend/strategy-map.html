@@ -1,0 +1,1570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Strategy Map - Infinite Scroller</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #818cf8;
+            --accent: #f97316;
+            --bg-main: #0f172a;
+            --bg-card: #1e293b;
+            --bg-card-hover: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border-color: #334155;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --gradient-strategy: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            --gradient-goal: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+            --gradient-initiative: linear-gradient(135deg, #f97316 0%, #f59e0b 100%);
+            --gradient-metric: linear-gradient(135deg, #22c55e 0%, #10b981 100%);
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-main);
+            color: var(--text-primary);
+        }
+
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 100;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .back-btn:hover {
+            background: var(--bg-card);
+            color: var(--text-primary);
+        }
+
+        .header-title {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .edit-btn {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .edit-btn:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--primary);
+        }
+
+        /* Breadcrumb */
+        .breadcrumb {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            right: 0;
+            height: 50px;
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            gap: 8px;
+            z-index: 99;
+            overflow-x: auto;
+        }
+
+        .breadcrumb-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            white-space: nowrap;
+        }
+
+        .breadcrumb-item.active {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .breadcrumb-item span {
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        .breadcrumb-item span:hover {
+            background: var(--bg-card);
+        }
+
+        .breadcrumb-separator {
+            color: var(--text-muted);
+        }
+
+        /* Layer indicator */
+        .layer-indicator {
+            position: fixed;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 100;
+        }
+
+        .layer-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--bg-card);
+            border: 2px solid var(--border-color);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .layer-dot.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            transform: scale(1.3);
+        }
+
+        .layer-dot:hover {
+            border-color: var(--primary);
+        }
+
+        .layer-dot[data-layer="strategy"] { }
+        .layer-dot[data-layer="goal"].active { background: #3b82f6; border-color: #3b82f6; }
+        .layer-dot[data-layer="initiative"].active { background: #f97316; border-color: #f97316; }
+        .layer-dot[data-layer="metric"].active { background: #22c55e; border-color: #22c55e; }
+
+        /* Main container */
+        .map-container {
+            position: fixed;
+            top: 110px;
+            left: 0;
+            right: 40px;
+            bottom: 0;
+            overflow: hidden;
+        }
+
+        /* Layer */
+        .layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            overflow-x: auto;
+            overflow-y: hidden;
+            scroll-snap-type: x mandatory;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            gap: 20px;
+            transition: opacity 0.3s, transform 0.3s;
+        }
+
+        .layer.hidden {
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(50px);
+        }
+
+        /* Cards */
+        .card {
+            flex: 0 0 auto;
+            width: 320px;
+            min-height: 400px;
+            background: var(--bg-card);
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            padding: 24px;
+            scroll-snap-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card:hover {
+            border-color: var(--primary);
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .card.selected {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
+        }
+
+        .card-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 16px;
+        }
+
+        .card.strategy .card-badge { background: rgba(99, 102, 241, 0.2); color: #818cf8; }
+        .card.goal .card-badge { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
+        .card.initiative .card-badge { background: rgba(249, 115, 22, 0.2); color: #fb923c; }
+        .card.metric .card-badge { background: rgba(34, 197, 94, 0.2); color: #4ade80; }
+
+        .card-title {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            line-height: 1.3;
+        }
+
+        .card-description {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            flex: 1;
+        }
+
+        .card-meta {
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* Progress indicator */
+        .progress-container {
+            margin-top: 16px;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .progress-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .progress-value {
+            font-size: 0.9rem;
+            font-weight: 700;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: var(--bg-main);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .progress-fill.red { background: linear-gradient(90deg, #ef4444, #f87171); }
+        .progress-fill.amber { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+        .progress-fill.green { background: linear-gradient(90deg, #22c55e, #4ade80); }
+
+        /* Metric value */
+        .metric-value {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .metric-icon {
+            font-size: 0.9rem;
+        }
+
+        /* Goal count */
+        .count-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: var(--bg-main);
+            border-radius: 8px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        /* Initiative details */
+        .initiative-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .stat-box {
+            background: var(--bg-main);
+            border-radius: 8px;
+            padding: 12px;
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .stat-value.upside { color: var(--success); }
+        .stat-value.downside { color: var(--error); }
+
+        /* Detail Panel */
+        .detail-panel {
+            position: fixed;
+            top: 110px;
+            right: -450px;
+            width: 450px;
+            bottom: 0;
+            background: var(--bg-card);
+            border-left: 1px solid var(--border-color);
+            z-index: 101;
+            transition: right 0.3s ease;
+            overflow-y: auto;
+            padding: 24px;
+        }
+
+        .detail-panel.open {
+            right: 0;
+        }
+
+        .detail-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        .detail-close:hover {
+            color: var(--text-primary);
+        }
+
+        .detail-header {
+            margin-bottom: 24px;
+        }
+
+        .detail-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .detail-badge.initiative { background: rgba(249, 115, 22, 0.2); color: #fb923c; }
+
+        .detail-title {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .detail-description {
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        .detail-section {
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .detail-section-title {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+
+        .insight-box {
+            background: var(--bg-main);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .insight-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .insight-text {
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        /* Q&A Section */
+        .qa-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .qa-item {
+            background: var(--bg-main);
+            border-radius: 12px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .qa-item:hover {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .qa-question {
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .qa-icon {
+            color: var(--primary);
+        }
+
+        .qa-answer {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-color);
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            display: none;
+        }
+
+        .qa-item.expanded .qa-answer {
+            display: block;
+        }
+
+        /* Metrics charts */
+        .metrics-grid {
+            display: grid;
+            gap: 16px;
+        }
+
+        .metric-chart-card {
+            background: var(--bg-main);
+            border-radius: 12px;
+            padding: 16px;
+        }
+
+        .metric-chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .metric-chart-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .metric-chart-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .metric-chart-value.positive { color: var(--success); }
+        .metric-chart-value.negative { color: var(--error); }
+
+        .chart-container {
+            height: 150px;
+        }
+
+        /* Swipe hint */
+        .swipe-hint {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(30, 41, 59, 0.95);
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            animation: fadeInUp 0.5s ease;
+            z-index: 50;
+        }
+
+        .swipe-hint.hidden {
+            display: none;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translate(-50%, 20px); }
+            to { opacity: 1; transform: translate(-50%, 0); }
+        }
+
+        /* Mobile adjustments */
+        @media (max-width: 768px) {
+            .card {
+                width: 280px;
+                min-height: 350px;
+                padding: 20px;
+            }
+
+            .detail-panel {
+                width: 100%;
+                right: -100%;
+            }
+
+            .layer-indicator {
+                right: 10px;
+            }
+
+            .map-container {
+                right: 30px;
+            }
+
+            .header-title {
+                font-size: 1rem;
+            }
+        }
+
+        /* Scroll snap for touch */
+        @media (pointer: coarse) {
+            .layer {
+                scroll-snap-type: x mandatory;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <button class="back-btn" onclick="window.location.href='index.html'">&#8592;</button>
+            <h1 class="header-title">Strategy Map</h1>
+        </div>
+        <div class="header-right">
+            <a href="strategy-edit.html" class="edit-btn">
+                <span>&#9998;</span> Edit
+            </a>
+        </div>
+    </header>
+
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb" id="breadcrumb">
+        <div class="breadcrumb-item active" data-layer="strategy">
+            <span onclick="navigateToLayer('strategy')">Strategies</span>
+        </div>
+    </nav>
+
+    <!-- Layer indicator -->
+    <div class="layer-indicator">
+        <div class="layer-dot active" data-layer="strategy" title="Strategies" onclick="navigateToLayer('strategy')"></div>
+        <div class="layer-dot" data-layer="goal" title="Goals" onclick="navigateToLayer('goal')"></div>
+        <div class="layer-dot" data-layer="initiative" title="Initiatives" onclick="navigateToLayer('initiative')"></div>
+        <div class="layer-dot" data-layer="metric" title="Metrics" onclick="navigateToLayer('metric')"></div>
+    </div>
+
+    <!-- Main map container -->
+    <div class="map-container">
+        <!-- Strategy Layer -->
+        <div class="layer" id="layer-strategy">
+            <!-- Cards will be populated by JS -->
+        </div>
+
+        <!-- Goal Layer -->
+        <div class="layer hidden" id="layer-goal">
+        </div>
+
+        <!-- Initiative Layer -->
+        <div class="layer hidden" id="layer-initiative">
+        </div>
+
+        <!-- Metric Layer -->
+        <div class="layer hidden" id="layer-metric">
+        </div>
+    </div>
+
+    <!-- Detail Panel -->
+    <div class="detail-panel" id="detail-panel">
+        <button class="detail-close" onclick="closeDetailPanel()">&times;</button>
+        <div id="detail-content">
+            <!-- Dynamic content -->
+        </div>
+    </div>
+
+    <!-- Swipe hint -->
+    <div class="swipe-hint" id="swipe-hint">
+        <span>&#8596;</span> Swipe to explore | Tap card to drill down
+    </div>
+
+    <script>
+        // ============================================
+        // SAMPLE DATA - Strategy -> Goals -> Initiatives -> Metrics
+        // ============================================
+        // Try to load from localStorage first (syncs with edit page)
+        let strategyData = localStorage.getItem('strategyMapData') ? JSON.parse(localStorage.getItem('strategyMapData')) : {
+            strategies: [
+                {
+                    id: 'str-1',
+                    title: 'Market Leadership in Digital Payments',
+                    description: 'Establish dominant market position in digital payment solutions through innovative technology and superior customer experience.',
+                    goals: [
+                        {
+                            id: 'goal-1-1',
+                            title: 'Increase Payment Volume',
+                            description: 'Grow total payment transaction volume to $50B annually',
+                            metric: '$50B TPV',
+                            targetProgress: 75,
+                            initiatives: [
+                                {
+                                    id: 'init-1-1-1',
+                                    title: 'Mobile Wallet Integration',
+                                    description: 'Integrate with top 5 mobile wallet providers to expand reach',
+                                    upside: '+$8B TPV',
+                                    downside: '$2M integration cost',
+                                    customerInsight: 'Research shows 67% of millennials prefer mobile wallet payments over cards',
+                                    goalConnection: 'Direct contribution to TPV through new payment channels',
+                                    similarProjects: ['Apple Pay Integration (2022) - Added $3B TPV', 'Google Pay Partnership (2021) - Added $2.5B TPV'],
+                                    metrics: [
+                                        { id: 'met-1-1-1-1', name: 'Mobile TPV', current: 12.5, target: 20, unit: 'B', trend: [8, 9, 10, 11, 12, 12.5] },
+                                        { id: 'met-1-1-1-2', name: 'Wallet Users', current: 2.3, target: 5, unit: 'M', trend: [1.2, 1.5, 1.8, 2.0, 2.2, 2.3] }
+                                    ]
+                                },
+                                {
+                                    id: 'init-1-1-2',
+                                    title: 'Cross-border Payment Expansion',
+                                    description: 'Enable seamless cross-border payments in 20 new markets',
+                                    upside: '+$5B TPV',
+                                    downside: 'Regulatory complexity',
+                                    customerInsight: 'SMBs report 45% of revenue comes from international customers',
+                                    goalConnection: 'Unlocks new geographic markets for payment volume growth',
+                                    similarProjects: ['LATAM Expansion (2023) - 15 countries live', 'EU PSD2 Compliance (2020)'],
+                                    metrics: [
+                                        { id: 'met-1-1-2-1', name: 'Markets Live', current: 12, target: 20, unit: '', trend: [5, 7, 8, 10, 11, 12] },
+                                        { id: 'met-1-1-2-2', name: 'Cross-border TPV', current: 3.2, target: 8, unit: 'B', trend: [1.5, 2.0, 2.4, 2.8, 3.0, 3.2] }
+                                    ]
+                                },
+                                {
+                                    id: 'init-1-1-3',
+                                    title: 'Enterprise API Platform',
+                                    description: 'Launch developer-first API platform for enterprise integration',
+                                    upside: '+$10B TPV from enterprise',
+                                    downside: '$5M development cost',
+                                    customerInsight: 'Enterprise clients request 3x more API capabilities than currently offered',
+                                    goalConnection: 'High-value enterprise accounts drive significant transaction volume',
+                                    similarProjects: ['SMB API Launch (2022) - 500 integrations', 'Partner SDK (2021)'],
+                                    metrics: [
+                                        { id: 'met-1-1-3-1', name: 'API Calls', current: 45, target: 100, unit: 'M/day', trend: [20, 28, 35, 40, 43, 45] },
+                                        { id: 'met-1-1-3-2', name: 'Enterprise Clients', current: 120, target: 250, unit: '', trend: [50, 70, 85, 100, 110, 120] }
+                                    ]
+                                },
+                                {
+                                    id: 'init-1-1-4',
+                                    title: 'Instant Settlement',
+                                    description: 'Reduce settlement time from T+2 to real-time for all merchants',
+                                    upside: '+15% merchant adoption',
+                                    downside: 'Float revenue reduction',
+                                    customerInsight: 'Merchants cite cash flow as top concern - instant settlement is #1 requested feature',
+                                    goalConnection: 'Improves merchant experience leading to higher transaction volume',
+                                    similarProjects: ['Same-day Settlement Pilot (2023) - 89% satisfaction'],
+                                    metrics: [
+                                        { id: 'met-1-1-4-1', name: 'Real-time %', current: 35, target: 100, unit: '%', trend: [10, 15, 22, 28, 32, 35] },
+                                        { id: 'met-1-1-4-2', name: 'Merchant NPS', current: 72, target: 85, unit: '', trend: [55, 60, 65, 68, 70, 72] }
+                                    ]
+                                },
+                                {
+                                    id: 'init-1-1-5',
+                                    title: 'Crypto Payment Rails',
+                                    description: 'Enable cryptocurrency payments for merchants',
+                                    upside: '+$2B from crypto-native users',
+                                    downside: 'Volatility risk',
+                                    customerInsight: '23% of Gen Z users hold cryptocurrency and want to spend it',
+                                    goalConnection: 'Captures emerging payment method for future growth',
+                                    similarProjects: ['Stablecoin Pilot (2024) - 50 merchants'],
+                                    metrics: [
+                                        { id: 'met-1-1-5-1', name: 'Crypto TPV', current: 0.5, target: 2, unit: 'B', trend: [0.1, 0.2, 0.3, 0.4, 0.45, 0.5] },
+                                        { id: 'met-1-1-5-2', name: 'Crypto Merchants', current: 500, target: 5000, unit: '', trend: [50, 150, 250, 350, 450, 500] }
+                                    ]
+                                },
+                                {
+                                    id: 'init-1-1-6',
+                                    title: 'POS Hardware Rollout',
+                                    description: 'Deploy next-gen POS terminals to 100K merchant locations',
+                                    upside: '+$3B in-store TPV',
+                                    downside: '$15M hardware investment',
+                                    customerInsight: 'In-store merchants report 30% higher conversion with modern POS',
+                                    goalConnection: 'Physical presence drives omnichannel payment volume',
+                                    similarProjects: ['Terminal V2 Launch (2022) - 50K deployed'],
+                                    metrics: [
+                                        { id: 'met-1-1-6-1', name: 'Terminals Deployed', current: 65, target: 100, unit: 'K', trend: [30, 40, 48, 55, 60, 65] },
+                                        { id: 'met-1-1-6-2', name: 'In-store TPV', current: 8.5, target: 12, unit: 'B', trend: [5, 6, 7, 7.5, 8, 8.5] }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            id: 'goal-1-2',
+                            title: 'Reduce Transaction Costs',
+                            description: 'Lower average transaction cost by 25% through optimization',
+                            metric: '-25% cost',
+                            targetProgress: 60,
+                            initiatives: [
+                                {
+                                    id: 'init-1-2-1',
+                                    title: 'Smart Routing Engine',
+                                    description: 'AI-powered routing to optimize transaction costs',
+                                    upside: '-15% transaction cost',
+                                    downside: '$3M AI development',
+                                    customerInsight: 'Merchants save avg $0.02 per transaction with optimal routing',
+                                    goalConnection: 'Direct cost reduction through intelligent payment routing',
+                                    similarProjects: ['Rule-based Routing (2021) - 8% cost reduction'],
+                                    metrics: [
+                                        { id: 'met-1-2-1-1', name: 'Cost per Transaction', current: 0.28, target: 0.22, unit: '$', trend: [0.35, 0.33, 0.31, 0.30, 0.29, 0.28] },
+                                        { id: 'met-1-2-1-2', name: 'Routing Efficiency', current: 78, target: 95, unit: '%', trend: [50, 58, 65, 70, 74, 78] }
+                                    ]
+                                },
+                                {
+                                    id: 'init-1-2-2',
+                                    title: 'Network Optimization',
+                                    description: 'Renegotiate network fees and optimize card network mix',
+                                    upside: '-10% network costs',
+                                    downside: 'Negotiation timeline',
+                                    customerInsight: 'Enterprise clients compare network costs across providers monthly',
+                                    goalConnection: 'Reduces baseline costs across all transactions',
+                                    similarProjects: ['Visa Partnership (2023) - 5% fee reduction'],
+                                    metrics: [
+                                        { id: 'met-1-2-2-1', name: 'Network Cost %', current: 1.8, target: 1.5, unit: '%', trend: [2.1, 2.0, 1.95, 1.9, 1.85, 1.8] }
+                                    ]
+                                },
+                                {
+                                    id: 'init-1-2-3',
+                                    title: 'Fraud ML Models',
+                                    description: 'Deploy advanced ML models to reduce false declines',
+                                    upside: '+$500M recovered revenue',
+                                    downside: 'Model training time',
+                                    customerInsight: 'False declines cost merchants 3x more than actual fraud',
+                                    goalConnection: 'Reduces chargebacks and associated costs',
+                                    similarProjects: ['Fraud Detection V2 (2023) - 40% reduction in false positives'],
+                                    metrics: [
+                                        { id: 'met-1-2-3-1', name: 'False Decline Rate', current: 2.5, target: 1.0, unit: '%', trend: [4.5, 4.0, 3.5, 3.0, 2.8, 2.5] },
+                                        { id: 'met-1-2-3-2', name: 'Fraud Rate', current: 0.08, target: 0.05, unit: '%', trend: [0.15, 0.12, 0.10, 0.09, 0.085, 0.08] }
+                                    ]
+                                },
+                                {
+                                    id: 'init-1-2-4',
+                                    title: 'ACH Direct Debit',
+                                    description: 'Promote low-cost ACH for recurring payments',
+                                    upside: '-60% on recurring cost',
+                                    downside: 'Slower settlement',
+                                    customerInsight: 'Subscription businesses prefer ACH for predictable costs',
+                                    goalConnection: 'Shifts volume to lowest-cost payment rails',
+                                    similarProjects: ['ACH Launch (2022) - 15% subscription adoption'],
+                                    metrics: [
+                                        { id: 'met-1-2-4-1', name: 'ACH Volume', current: 8, target: 20, unit: '%', trend: [3, 4, 5, 6, 7, 8] }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            id: 'goal-1-3',
+                            title: 'Improve Merchant Retention',
+                            description: 'Achieve 95% annual merchant retention rate',
+                            metric: '95% retention',
+                            targetProgress: 88,
+                            initiatives: [
+                                {
+                                    id: 'init-1-3-1',
+                                    title: 'Merchant Success Program',
+                                    description: 'Dedicated success managers for top 1000 accounts',
+                                    upside: '+8% retention',
+                                    downside: '$2M team cost',
+                                    customerInsight: 'Merchants with dedicated support have 2x higher NPS',
+                                    goalConnection: 'Proactive support reduces churn',
+                                    similarProjects: ['Enterprise Support Tier (2022) - 98% retention'],
+                                    metrics: [
+                                        { id: 'met-1-3-1-1', name: 'Retention Rate', current: 92, target: 95, unit: '%', trend: [85, 87, 89, 90, 91, 92] },
+                                        { id: 'met-1-3-1-2', name: 'NPS', current: 68, target: 80, unit: '', trend: [45, 52, 58, 62, 65, 68] }
+                                    ]
+                                },
+                                {
+                                    id: 'init-1-3-2',
+                                    title: 'Self-service Dashboard',
+                                    description: 'Build comprehensive merchant analytics dashboard',
+                                    upside: '-50% support tickets',
+                                    downside: '$1M development',
+                                    customerInsight: '78% of merchants want real-time access to their data',
+                                    goalConnection: 'Empowers merchants, increasing satisfaction and retention',
+                                    similarProjects: ['Basic Dashboard (2021) - 30% ticket reduction'],
+                                    metrics: [
+                                        { id: 'met-1-3-2-1', name: 'Dashboard MAU', current: 45, target: 80, unit: '%', trend: [20, 28, 35, 40, 43, 45] },
+                                        { id: 'met-1-3-2-2', name: 'Support Tickets', current: 12000, target: 6000, unit: '/mo', trend: [20000, 18000, 16000, 14500, 13000, 12000] }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    id: 'str-2',
+                    title: 'Financial Services Ecosystem',
+                    description: 'Build comprehensive financial services platform beyond payments including lending, banking, and wealth management.',
+                    goals: [
+                        {
+                            id: 'goal-2-1',
+                            title: 'Launch Merchant Lending',
+                            description: 'Originate $5B in merchant working capital loans',
+                            metric: '$5B originated',
+                            targetProgress: 45,
+                            initiatives: [
+                                {
+                                    id: 'init-2-1-1',
+                                    title: 'AI Underwriting',
+                                    description: 'Build ML-based underwriting using payment data',
+                                    upside: '+40% approval rate',
+                                    downside: 'Model risk',
+                                    customerInsight: 'Traditional banks reject 60% of SMB loan applications',
+                                    goalConnection: 'Enables faster, more accurate lending decisions',
+                                    similarProjects: ['Manual Underwriting Pilot (2023) - $200M originated'],
+                                    metrics: [
+                                        { id: 'met-2-1-1-1', name: 'Loans Originated', current: 2.2, target: 5, unit: 'B', trend: [0.5, 0.9, 1.3, 1.7, 2.0, 2.2] },
+                                        { id: 'met-2-1-1-2', name: 'Default Rate', current: 3.5, target: 2.0, unit: '%', trend: [5.0, 4.5, 4.2, 4.0, 3.8, 3.5] }
+                                    ]
+                                },
+                                {
+                                    id: 'init-2-1-2',
+                                    title: 'Credit Line Product',
+                                    description: 'Flexible credit lines for seasonal businesses',
+                                    upside: '+$1B credit volume',
+                                    downside: 'Capital requirements',
+                                    customerInsight: 'Seasonal merchants need flexible credit, not term loans',
+                                    goalConnection: 'Addresses underserved merchant segment',
+                                    similarProjects: ['Term Loan Launch (2023) - $500M deployed'],
+                                    metrics: [
+                                        { id: 'met-2-1-2-1', name: 'Active Credit Lines', current: 5000, target: 15000, unit: '', trend: [1000, 2000, 3000, 4000, 4500, 5000] }
+                                    ]
+                                },
+                                {
+                                    id: 'init-2-1-3',
+                                    title: 'Instant Advance',
+                                    description: 'Same-day advance on future receivables',
+                                    upside: '+$800M volume',
+                                    downside: 'Cash management',
+                                    customerInsight: '45% of SMBs face cash flow gaps weekly',
+                                    goalConnection: 'Quick capital access improves merchant success',
+                                    similarProjects: ['Invoice Factoring Beta (2024)'],
+                                    metrics: [
+                                        { id: 'met-2-1-3-1', name: 'Advances Disbursed', current: 350, target: 800, unit: 'M', trend: [50, 100, 180, 250, 300, 350] }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            id: 'goal-2-2',
+                            title: 'Consumer Banking',
+                            description: 'Launch consumer banking with 2M accounts',
+                            metric: '2M accounts',
+                            targetProgress: 30,
+                            initiatives: [
+                                {
+                                    id: 'init-2-2-1',
+                                    title: 'Digital Bank Launch',
+                                    description: 'Full-service digital bank account with debit card',
+                                    upside: '+$100M deposits',
+                                    downside: 'Regulatory overhead',
+                                    customerInsight: 'Users want unified payment and banking experience',
+                                    goalConnection: 'Foundation for consumer banking presence',
+                                    similarProjects: ['Business Banking (2023) - 50K accounts'],
+                                    metrics: [
+                                        { id: 'met-2-2-1-1', name: 'Consumer Accounts', current: 600, target: 2000, unit: 'K', trend: [100, 200, 350, 450, 550, 600] },
+                                        { id: 'met-2-2-1-2', name: 'Total Deposits', current: 45, target: 200, unit: 'M', trend: [5, 12, 22, 32, 40, 45] }
+                                    ]
+                                },
+                                {
+                                    id: 'init-2-2-2',
+                                    title: 'Savings Product',
+                                    description: 'High-yield savings account to attract deposits',
+                                    upside: '+$500M deposits',
+                                    downside: 'Interest margin',
+                                    customerInsight: 'Users seeking better rates than traditional banks',
+                                    goalConnection: 'Drives deposit growth and engagement',
+                                    similarProjects: ['N/A - New product category'],
+                                    metrics: [
+                                        { id: 'met-2-2-2-1', name: 'Savings Balance', current: 15, target: 100, unit: 'M', trend: [2, 5, 8, 11, 13, 15] }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    id: 'str-3',
+                    title: 'Global Infrastructure Scale',
+                    description: 'Build world-class infrastructure capable of processing 100K TPS with 99.99% uptime across all regions.',
+                    goals: [
+                        {
+                            id: 'goal-3-1',
+                            title: 'Achieve 99.99% Uptime',
+                            description: 'Maintain four-nines availability across all services',
+                            metric: '99.99% uptime',
+                            targetProgress: 95,
+                            initiatives: [
+                                {
+                                    id: 'init-3-1-1',
+                                    title: 'Multi-region Active-Active',
+                                    description: 'Deploy active-active architecture across 5 regions',
+                                    upside: 'Zero single point of failure',
+                                    downside: '$10M infrastructure cost',
+                                    customerInsight: 'Enterprise clients require contractual uptime guarantees',
+                                    goalConnection: 'Geographic redundancy ensures continuous availability',
+                                    similarProjects: ['US Multi-AZ (2022) - 99.95% achieved'],
+                                    metrics: [
+                                        { id: 'met-3-1-1-1', name: 'Uptime', current: 99.97, target: 99.99, unit: '%', trend: [99.90, 99.92, 99.94, 99.95, 99.96, 99.97] },
+                                        { id: 'met-3-1-1-2', name: 'Regions Active', current: 3, target: 5, unit: '', trend: [1, 1, 2, 2, 3, 3] }
+                                    ]
+                                },
+                                {
+                                    id: 'init-3-1-2',
+                                    title: 'Chaos Engineering',
+                                    description: 'Implement continuous failure testing',
+                                    upside: '-80% incident impact',
+                                    downside: 'Engineering time',
+                                    customerInsight: 'Proactive testing prevents customer-facing incidents',
+                                    goalConnection: 'Identifies and fixes weaknesses before they cause outages',
+                                    similarProjects: ['Game Day Program (2023) - 12 major issues found'],
+                                    metrics: [
+                                        { id: 'met-3-1-2-1', name: 'MTTR', current: 15, target: 5, unit: 'min', trend: [45, 35, 28, 22, 18, 15] },
+                                        { id: 'met-3-1-2-2', name: 'Incidents/Month', current: 3, target: 1, unit: '', trend: [12, 9, 7, 5, 4, 3] }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            id: 'goal-3-2',
+                            title: 'Scale to 100K TPS',
+                            description: 'Handle peak loads of 100,000 transactions per second',
+                            metric: '100K TPS',
+                            targetProgress: 70,
+                            initiatives: [
+                                {
+                                    id: 'init-3-2-1',
+                                    title: 'Database Sharding',
+                                    description: 'Implement horizontal database partitioning',
+                                    upside: '+10x capacity',
+                                    downside: 'Migration complexity',
+                                    customerInsight: 'Peak events (Black Friday) require 5x normal capacity',
+                                    goalConnection: 'Removes database bottleneck for scaling',
+                                    similarProjects: ['Read Replica Setup (2022) - 3x read capacity'],
+                                    metrics: [
+                                        { id: 'met-3-2-1-1', name: 'Peak TPS', current: 70, target: 100, unit: 'K', trend: [30, 40, 50, 58, 65, 70] }
+                                    ]
+                                },
+                                {
+                                    id: 'init-3-2-2',
+                                    title: 'Edge Computing',
+                                    description: 'Deploy edge nodes in 50 global locations',
+                                    upside: '-40ms latency',
+                                    downside: '$5M infrastructure',
+                                    customerInsight: 'Latency directly impacts conversion rates',
+                                    goalConnection: 'Reduces latency enabling higher throughput',
+                                    similarProjects: ['CDN Deployment (2023) - 20 locations'],
+                                    metrics: [
+                                        { id: 'met-3-2-2-1', name: 'P99 Latency', current: 120, target: 80, unit: 'ms', trend: [200, 180, 160, 145, 130, 120] },
+                                        { id: 'met-3-2-2-2', name: 'Edge Nodes', current: 30, target: 50, unit: '', trend: [10, 15, 20, 24, 28, 30] }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    id: 'str-4',
+                    title: 'AI-First Product Experience',
+                    description: 'Leverage AI/ML to create personalized, intelligent experiences that anticipate customer needs.',
+                    goals: [
+                        {
+                            id: 'goal-4-1',
+                            title: 'AI-Powered Insights',
+                            description: 'Deliver actionable AI insights to 80% of merchants',
+                            metric: '80% coverage',
+                            targetProgress: 50,
+                            initiatives: [
+                                {
+                                    id: 'init-4-1-1',
+                                    title: 'Revenue Prediction',
+                                    description: 'ML models predicting merchant revenue trends',
+                                    upside: '+20% merchant engagement',
+                                    downside: 'Model accuracy',
+                                    customerInsight: 'Merchants want proactive business insights, not just reports',
+                                    goalConnection: 'Provides value beyond payments through intelligence',
+                                    similarProjects: ['Basic Analytics (2022) - 30% adoption'],
+                                    metrics: [
+                                        { id: 'met-4-1-1-1', name: 'Insights Delivered', current: 40, target: 80, unit: '%', trend: [15, 22, 28, 33, 37, 40] },
+                                        { id: 'met-4-1-1-2', name: 'Prediction Accuracy', current: 85, target: 95, unit: '%', trend: [70, 75, 78, 81, 83, 85] }
+                                    ]
+                                },
+                                {
+                                    id: 'init-4-1-2',
+                                    title: 'Anomaly Detection',
+                                    description: 'Real-time alerts for unusual business patterns',
+                                    upside: '-$50M fraud losses',
+                                    downside: 'Alert fatigue risk',
+                                    customerInsight: 'Early detection of issues saves merchants thousands',
+                                    goalConnection: 'Proactive protection as a service',
+                                    similarProjects: ['Fraud Alerts (2023) - $20M saved'],
+                                    metrics: [
+                                        { id: 'met-4-1-2-1', name: 'Alerts Accuracy', current: 92, target: 98, unit: '%', trend: [75, 80, 84, 88, 90, 92] }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        };
+
+        // Save default data to localStorage if not exists
+        if (!localStorage.getItem('strategyMapData')) {
+            localStorage.setItem('strategyMapData', JSON.stringify(strategyData));
+        }
+
+        // ============================================
+        // STATE MANAGEMENT
+        // ============================================
+        let currentLayer = 'strategy';
+        let selectedStrategy = null;
+        let selectedGoal = null;
+        let selectedInitiative = null;
+        let navigationPath = [];
+
+        // ============================================
+        // RENDERING FUNCTIONS
+        // ============================================
+        function renderStrategyLayer() {
+            const layer = document.getElementById('layer-strategy');
+            layer.innerHTML = strategyData.strategies.map(strategy => {
+                const totalGoals = strategy.goals.length;
+                const totalInitiatives = strategy.goals.reduce((sum, g) => sum + g.initiatives.length, 0);
+
+                return `
+                    <div class="card strategy" data-id="${strategy.id}" onclick="selectStrategy('${strategy.id}')">
+                        <span class="card-badge">Strategy</span>
+                        <h3 class="card-title">${strategy.title}</h3>
+                        <p class="card-description">${strategy.description}</p>
+                        <div class="card-meta">
+                            <div class="count-badge">
+                                <span>${totalGoals} Goals</span>
+                                <span>&#8226;</span>
+                                <span>${totalInitiatives} Initiatives</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderGoalLayer(strategy) {
+            const layer = document.getElementById('layer-goal');
+            layer.innerHTML = strategy.goals.map(goal => {
+                const progressClass = goal.targetProgress < 50 ? 'red' : goal.targetProgress < 80 ? 'amber' : 'green';
+                const initiativeProgress = calculateInitiativeProgress(goal);
+
+                return `
+                    <div class="card goal" data-id="${goal.id}" onclick="selectGoal('${goal.id}')">
+                        <span class="card-badge">Goal</span>
+                        <h3 class="card-title">${goal.title}</h3>
+                        <p class="card-description">${goal.description}</p>
+                        <div class="metric-value">
+                            <span class="metric-icon">&#127919;</span>
+                            <span>Target: ${goal.metric}</span>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-header">
+                                <span class="progress-label">Planned Coverage</span>
+                                <span class="progress-value" style="color: var(--${progressClass === 'red' ? 'error' : progressClass === 'amber' ? 'warning' : 'success'})">${initiativeProgress}%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill ${progressClass}" style="width: ${initiativeProgress}%"></div>
+                            </div>
+                        </div>
+                        <div class="card-meta">
+                            <div class="count-badge">
+                                <span>${goal.initiatives.length} Initiatives</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function calculateInitiativeProgress(goal) {
+            // Simulated: calculate what % of the goal is covered by initiatives
+            const baseProgress = goal.targetProgress;
+            // Add some variance based on initiative count
+            const boost = Math.min(goal.initiatives.length * 5, 20);
+            return Math.min(baseProgress + boost, 100);
+        }
+
+        function renderInitiativeLayer(goal) {
+            const layer = document.getElementById('layer-initiative');
+            layer.innerHTML = goal.initiatives.map(init => {
+                return `
+                    <div class="card initiative" data-id="${init.id}" onclick="selectInitiative('${init.id}')">
+                        <span class="card-badge">Initiative</span>
+                        <h3 class="card-title">${init.title}</h3>
+                        <p class="card-description">${init.description}</p>
+                        <div class="initiative-stats">
+                            <div class="stat-box">
+                                <div class="stat-label">Upside</div>
+                                <div class="stat-value upside">${init.upside}</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-label">Downside</div>
+                                <div class="stat-value downside">${init.downside}</div>
+                            </div>
+                        </div>
+                        <div class="card-meta">
+                            <div class="count-badge">
+                                <span>${init.metrics.length} Metrics</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderMetricLayer(initiative) {
+            const layer = document.getElementById('layer-metric');
+            layer.innerHTML = initiative.metrics.map((metric, index) => {
+                const chartId = `metric-chart-${metric.id}`;
+                const progress = (metric.current / metric.target * 100).toFixed(0);
+                const isPositive = metric.current >= metric.target * 0.8;
+
+                return `
+                    <div class="card metric" data-id="${metric.id}">
+                        <span class="card-badge">Metric</span>
+                        <h3 class="card-title">${metric.name}</h3>
+                        <div class="metric-chart-card">
+                            <div class="metric-chart-header">
+                                <div>
+                                    <div style="font-size: 0.8rem; color: var(--text-muted);">Current</div>
+                                    <div class="metric-chart-value ${isPositive ? 'positive' : 'negative'}">${metric.current}${metric.unit}</div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="font-size: 0.8rem; color: var(--text-muted);">Target</div>
+                                    <div style="font-size: 1.1rem; font-weight: 600;">${metric.target}${metric.unit}</div>
+                                </div>
+                            </div>
+                            <div class="progress-container">
+                                <div class="progress-bar">
+                                    <div class="progress-fill ${progress < 50 ? 'red' : progress < 80 ? 'amber' : 'green'}" style="width: ${Math.min(progress, 100)}%"></div>
+                                </div>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="${chartId}"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Render charts after DOM update
+            setTimeout(() => {
+                initiative.metrics.forEach(metric => {
+                    renderMetricChart(metric);
+                });
+            }, 100);
+        }
+
+        function renderMetricChart(metric) {
+            const ctx = document.getElementById(`metric-chart-${metric.id}`);
+            if (!ctx) return;
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: metric.name,
+                        data: metric.trend,
+                        borderColor: '#6366f1',
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#6366f1'
+                    }, {
+                        label: 'Target',
+                        data: Array(6).fill(metric.target),
+                        borderColor: '#22c55e',
+                        borderDash: [5, 5],
+                        pointRadius: 0,
+                        fill: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#64748b' }
+                        },
+                        y: {
+                            grid: { color: 'rgba(100, 116, 139, 0.2)' },
+                            ticks: { color: '#64748b' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // ============================================
+        // NAVIGATION & SELECTION
+        // ============================================
+        function selectStrategy(id) {
+            const strategy = strategyData.strategies.find(s => s.id === id);
+            if (!strategy) return;
+
+            selectedStrategy = strategy;
+            navigationPath = [{ type: 'strategy', id: id, title: strategy.title }];
+
+            renderGoalLayer(strategy);
+            showLayer('goal');
+            updateBreadcrumb();
+        }
+
+        function selectGoal(id) {
+            if (!selectedStrategy) return;
+
+            const goal = selectedStrategy.goals.find(g => g.id === id);
+            if (!goal) return;
+
+            selectedGoal = goal;
+            navigationPath.push({ type: 'goal', id: id, title: goal.title });
+
+            renderInitiativeLayer(goal);
+            showLayer('initiative');
+            updateBreadcrumb();
+        }
+
+        function selectInitiative(id) {
+            if (!selectedGoal) return;
+
+            const initiative = selectedGoal.initiatives.find(i => i.id === id);
+            if (!initiative) return;
+
+            selectedInitiative = initiative;
+            navigationPath.push({ type: 'initiative', id: id, title: initiative.title });
+
+            // Show detail panel instead of going to metric layer
+            showDetailPanel(initiative);
+            updateBreadcrumb();
+        }
+
+        function goToMetrics(initiative) {
+            navigationPath.push({ type: 'metric', id: 'metrics', title: 'Metrics' });
+            renderMetricLayer(initiative);
+            showLayer('metric');
+            updateBreadcrumb();
+            closeDetailPanel();
+        }
+
+        function showLayer(layerName) {
+            currentLayer = layerName;
+
+            // Hide all layers
+            document.querySelectorAll('.layer').forEach(l => l.classList.add('hidden'));
+
+            // Show target layer
+            document.getElementById(`layer-${layerName}`).classList.remove('hidden');
+
+            // Update layer indicator
+            document.querySelectorAll('.layer-dot').forEach(d => d.classList.remove('active'));
+            document.querySelector(`.layer-dot[data-layer="${layerName}"]`).classList.add('active');
+        }
+
+        function navigateToLayer(layerName) {
+            const layerIndex = ['strategy', 'goal', 'initiative', 'metric'].indexOf(layerName);
+            const currentIndex = ['strategy', 'goal', 'initiative', 'metric'].indexOf(currentLayer);
+
+            if (layerIndex <= currentIndex) {
+                // Navigate back
+                if (layerName === 'strategy') {
+                    navigationPath = [];
+                    selectedStrategy = null;
+                    selectedGoal = null;
+                    selectedInitiative = null;
+                } else if (layerName === 'goal' && selectedStrategy) {
+                    navigationPath = navigationPath.slice(0, 1);
+                    selectedGoal = null;
+                    selectedInitiative = null;
+                } else if (layerName === 'initiative' && selectedGoal) {
+                    navigationPath = navigationPath.slice(0, 2);
+                    selectedInitiative = null;
+                }
+
+                showLayer(layerName);
+                updateBreadcrumb();
+                closeDetailPanel();
+            }
+        }
+
+        function updateBreadcrumb() {
+            const breadcrumb = document.getElementById('breadcrumb');
+            let html = `
+                <div class="breadcrumb-item ${navigationPath.length === 0 ? 'active' : ''}" data-layer="strategy">
+                    <span onclick="navigateToLayer('strategy')">Strategies</span>
+                </div>
+            `;
+
+            navigationPath.forEach((item, index) => {
+                const isActive = index === navigationPath.length - 1;
+                html += `
+                    <span class="breadcrumb-separator">&#8250;</span>
+                    <div class="breadcrumb-item ${isActive ? 'active' : ''}" data-layer="${item.type}">
+                        <span onclick="navigateToBreadcrumb(${index})">${item.title}</span>
+                    </div>
+                `;
+            });
+
+            breadcrumb.innerHTML = html;
+        }
+
+        function navigateToBreadcrumb(index) {
+            const targetPath = navigationPath[index];
+            navigationPath = navigationPath.slice(0, index + 1);
+
+            if (targetPath.type === 'strategy') {
+                selectedGoal = null;
+                selectedInitiative = null;
+            } else if (targetPath.type === 'goal') {
+                selectedInitiative = null;
+            }
+
+            showLayer(targetPath.type);
+            updateBreadcrumb();
+            closeDetailPanel();
+        }
+
+        // ============================================
+        // DETAIL PANEL
+        // ============================================
+        function showDetailPanel(initiative) {
+            const panel = document.getElementById('detail-panel');
+            const content = document.getElementById('detail-content');
+
+            content.innerHTML = `
+                <div class="detail-header">
+                    <span class="detail-badge initiative">Initiative</span>
+                    <h2 class="detail-title">${initiative.title}</h2>
+                    <p class="detail-description">${initiative.description}</p>
+                </div>
+
+                <div class="initiative-stats" style="margin-top: 20px;">
+                    <div class="stat-box">
+                        <div class="stat-label">Potential Upside</div>
+                        <div class="stat-value upside">${initiative.upside}</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Risk / Downside</div>
+                        <div class="stat-value downside">${initiative.downside}</div>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <h4 class="detail-section-title">Goal Connection</h4>
+                    <div class="insight-box">
+                        <div class="insight-text">${initiative.goalConnection}</div>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <h4 class="detail-section-title">Customer Insight</h4>
+                    <div class="insight-box">
+                        <div class="insight-label">Research Finding</div>
+                        <div class="insight-text">${initiative.customerInsight}</div>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <h4 class="detail-section-title">Questions & Answers</h4>
+                    <div class="qa-list">
+                        <div class="qa-item" onclick="toggleQA(this)">
+                            <div class="qa-question">
+                                <span class="qa-icon">&#10067;</span>
+                                How does this meet the goal?
+                            </div>
+                            <div class="qa-answer">${initiative.goalConnection}</div>
+                        </div>
+                        <div class="qa-item" onclick="toggleQA(this)">
+                            <div class="qa-question">
+                                <span class="qa-icon">&#10067;</span>
+                                What customer insight supports this?
+                            </div>
+                            <div class="qa-answer">${initiative.customerInsight}</div>
+                        </div>
+                        <div class="qa-item" onclick="toggleQA(this)">
+                            <div class="qa-question">
+                                <span class="qa-icon">&#10067;</span>
+                                Are there similar past projects?
+                            </div>
+                            <div class="qa-answer">
+                                ${initiative.similarProjects.map(p => `<div style="margin-bottom: 8px;">&#8226; ${p}</div>`).join('')}
+                            </div>
+                        </div>
+                        <div class="qa-item" onclick="toggleQA(this)">
+                            <div class="qa-question">
+                                <span class="qa-icon">&#10067;</span>
+                                What are the key risks?
+                            </div>
+                            <div class="qa-answer">The primary downside risk is: ${initiative.downside}. This should be monitored and mitigated through proper planning and stakeholder alignment.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <h4 class="detail-section-title">Key Metrics (${initiative.metrics.length})</h4>
+                    <button onclick="goToMetrics(selectedInitiative)" style="width: 100%; padding: 14px; background: var(--gradient-metric); border: none; border-radius: 10px; color: white; font-weight: 600; cursor: pointer; margin-top: 8px;">
+                        View Metrics & Charts &#8594;
+                    </button>
+                </div>
+            `;
+
+            panel.classList.add('open');
+        }
+
+        function closeDetailPanel() {
+            document.getElementById('detail-panel').classList.remove('open');
+        }
+
+        function toggleQA(element) {
+            element.classList.toggle('expanded');
+        }
+
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+        function init() {
+            renderStrategyLayer();
+
+            // Hide swipe hint after 5 seconds
+            setTimeout(() => {
+                document.getElementById('swipe-hint').classList.add('hidden');
+            }, 5000);
+
+            // Handle swipe/scroll for mobile
+            document.querySelectorAll('.layer').forEach(layer => {
+                layer.addEventListener('scroll', () => {
+                    document.getElementById('swipe-hint').classList.add('hidden');
+                });
+            });
+
+            // Keyboard navigation
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    closeDetailPanel();
+                }
+            });
+        }
+
+        // Start the app
+        init();
+    </script>
+</body>
+</html>

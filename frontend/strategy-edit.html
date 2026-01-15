@@ -1,0 +1,1460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Strategy Map</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #818cf8;
+            --accent: #f97316;
+            --bg-main: #f1f5f9;
+            --bg-card: #ffffff;
+            --bg-sidebar: #0f172a;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            --border-color: #e2e8f0;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --error: #ef4444;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-main);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: var(--bg-sidebar);
+            color: white;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            padding: 20px 0;
+        }
+
+        .sidebar-header {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 20px;
+        }
+
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #f97316, #f59e0b);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .logo-text {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .logo-subtitle {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+
+        .nav-section {
+            padding: 0 12px;
+            margin-bottom: 16px;
+        }
+
+        .nav-section-title {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            padding: 8px 12px;
+            font-weight: 600;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .nav-item:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+
+        .nav-item.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .nav-icon {
+            font-size: 14px;
+        }
+
+        .nav-badge {
+            margin-left: auto;
+            background: rgba(255,255,255,0.2);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+        }
+
+        .tree-item {
+            padding: 8px 12px 8px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 2px 12px;
+        }
+
+        .tree-item:hover {
+            background: rgba(255,255,255,0.05);
+            color: white;
+        }
+
+        .tree-item.active {
+            background: rgba(99, 102, 241, 0.3);
+            color: white;
+        }
+
+        .tree-item.goal {
+            padding-left: 36px;
+        }
+
+        .tree-item.initiative {
+            padding-left: 48px;
+        }
+
+        .tree-icon {
+            font-size: 10px;
+            opacity: 0.6;
+        }
+
+        /* Main content */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: var(--bg-card);
+            padding: 20px 32px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .header-left h1 {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .header-left p {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--bg-main);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #22c55e, #10b981);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--error);
+            color: white;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.8rem;
+        }
+
+        /* Content area */
+        .content-area {
+            padding: 32px;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .card-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .card-badge.strategy { background: rgba(99, 102, 241, 0.1); color: #6366f1; }
+        .card-badge.goal { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+        .card-badge.initiative { background: rgba(249, 115, 22, 0.1); color: #f97316; }
+        .card-badge.metric { background: rgba(34, 197, 94, 0.1); color: #22c55e; }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+        }
+
+        .form-hint {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        textarea.form-input {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        /* List items */
+        .list-container {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .list-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .list-item:last-child {
+            border-bottom: none;
+        }
+
+        .list-item:hover {
+            background: var(--bg-main);
+        }
+
+        .list-item.active {
+            background: rgba(99, 102, 241, 0.1);
+            border-left: 3px solid var(--primary);
+        }
+
+        .list-item-content {
+            flex: 1;
+        }
+
+        .list-item-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin-bottom: 4px;
+        }
+
+        .list-item-subtitle {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .list-item-actions {
+            display: flex;
+            gap: 8px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .list-item:hover .list-item-actions {
+            opacity: 1;
+        }
+
+        .icon-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .icon-btn.edit {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+        }
+
+        .icon-btn.edit:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .icon-btn.delete {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error);
+        }
+
+        .icon-btn.delete:hover {
+            background: var(--error);
+            color: white;
+        }
+
+        /* Add button */
+        .add-item-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 16px;
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            background: none;
+            width: 100%;
+            cursor: pointer;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .add-item-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        /* Metrics form */
+        .metric-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr auto;
+            gap: 12px;
+            align-items: center;
+            padding: 12px;
+            background: var(--bg-main);
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+
+        .metric-row input {
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.85rem;
+        }
+
+        .metric-row input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        /* Similar projects */
+        .similar-project-row {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .similar-project-row input {
+            flex: 1;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 24px;
+            background: var(--bg-main);
+            padding: 4px;
+            border-radius: 8px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 10px 16px;
+            border: none;
+            background: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+        }
+
+        .tab.active {
+            background: white;
+            color: var(--text-primary);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .tab:hover:not(.active) {
+            color: var(--text-primary);
+        }
+
+        /* Panel */
+        .panel {
+            display: none;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        /* Alert */
+        .alert {
+            padding: 14px 18px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+
+        .alert-success {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .alert-info {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            width: 500px;
+            max-width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-title {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 24px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 24px;
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 60px 40px;
+            color: var(--text-muted);
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .empty-state-title {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 240px;
+            }
+            .main-content {
+                margin-left: 240px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+            .main-content {
+                margin-left: 0;
+            }
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            .metric-row {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <div class="logo-icon">&#127919;</div>
+                <div>
+                    <div class="logo-text">Strategy Map</div>
+                    <div class="logo-subtitle">Editor</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="nav-section">
+            <div class="nav-section-title">Navigation</div>
+            <a href="strategy-map.html" class="nav-item">
+                <span class="nav-icon">&#8592;</span>
+                Back to Map View
+            </a>
+        </div>
+
+        <div class="nav-section">
+            <div class="nav-section-title">Strategies</div>
+            <div id="strategy-tree">
+                <!-- Populated by JS -->
+            </div>
+            <div class="nav-item" onclick="addStrategy()" style="margin: 8px 12px;">
+                <span class="nav-icon">+</span>
+                Add Strategy
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main content -->
+    <main class="main-content">
+        <header class="header">
+            <div class="header-left">
+                <h1 id="editor-title">Strategy Editor</h1>
+                <p id="editor-subtitle">Edit your organization's strategy map</p>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-secondary" onclick="exportData()">Export JSON</button>
+                <button class="btn btn-primary" onclick="saveAll()">Save Changes</button>
+            </div>
+        </header>
+
+        <div class="content-area">
+            <!-- Welcome Panel -->
+            <div class="panel active" id="panel-welcome">
+                <div class="empty-state">
+                    <div class="empty-state-icon">&#128221;</div>
+                    <div class="empty-state-title">Welcome to Strategy Map Editor</div>
+                    <p>Select a strategy, goal, or initiative from the sidebar to start editing, or add a new strategy.</p>
+                    <button class="btn btn-primary" onclick="addStrategy()" style="margin-top: 24px;">
+                        + Add New Strategy
+                    </button>
+                </div>
+            </div>
+
+            <!-- Strategy Editor Panel -->
+            <div class="panel" id="panel-strategy">
+                <div id="strategy-status"></div>
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <span class="card-badge strategy">Strategy</span>
+                            <h2 class="card-title" style="margin-top: 8px;">Edit Strategy</h2>
+                        </div>
+                        <button class="btn btn-danger btn-sm" onclick="deleteStrategy()">Delete</button>
+                    </div>
+                    <form id="strategy-form">
+                        <div class="form-group">
+                            <label class="form-label">Strategy Title</label>
+                            <input type="text" class="form-input" id="strategy-title" placeholder="e.g., Market Leadership in Digital Payments">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Description</label>
+                            <textarea class="form-input" id="strategy-description" placeholder="Describe the strategic direction..."></textarea>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Goals</h3>
+                        <button class="btn btn-sm btn-secondary" onclick="addGoal()">+ Add Goal</button>
+                    </div>
+                    <div id="goals-list" class="list-container">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Goal Editor Panel -->
+            <div class="panel" id="panel-goal">
+                <div id="goal-status"></div>
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <span class="card-badge goal">Goal</span>
+                            <h2 class="card-title" style="margin-top: 8px;">Edit Goal</h2>
+                        </div>
+                        <button class="btn btn-danger btn-sm" onclick="deleteGoal()">Delete</button>
+                    </div>
+                    <form id="goal-form">
+                        <div class="form-group">
+                            <label class="form-label">Goal Title</label>
+                            <input type="text" class="form-input" id="goal-title" placeholder="e.g., Increase Payment Volume">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Description</label>
+                            <textarea class="form-input" id="goal-description" placeholder="Describe what this goal aims to achieve..."></textarea>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Target Metric</label>
+                                <input type="text" class="form-input" id="goal-metric" placeholder="e.g., $50B TPV">
+                                <p class="form-hint">The key metric that defines success</p>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Target Progress (%)</label>
+                                <input type="number" class="form-input" id="goal-progress" min="0" max="100" placeholder="75">
+                                <p class="form-hint">Current progress toward the goal</p>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Initiatives</h3>
+                        <button class="btn btn-sm btn-secondary" onclick="addInitiative()">+ Add Initiative</button>
+                    </div>
+                    <div id="initiatives-list" class="list-container">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Initiative Editor Panel -->
+            <div class="panel" id="panel-initiative">
+                <div id="initiative-status"></div>
+
+                <div class="tabs">
+                    <button class="tab active" onclick="switchInitiativeTab('details')">Details</button>
+                    <button class="tab" onclick="switchInitiativeTab('insights')">Insights & Q&A</button>
+                    <button class="tab" onclick="switchInitiativeTab('metrics')">Metrics</button>
+                </div>
+
+                <!-- Details Tab -->
+                <div class="panel active" id="tab-details">
+                    <div class="card">
+                        <div class="card-header">
+                            <div>
+                                <span class="card-badge initiative">Initiative</span>
+                                <h2 class="card-title" style="margin-top: 8px;">Edit Initiative</h2>
+                            </div>
+                            <button class="btn btn-danger btn-sm" onclick="deleteInitiative()">Delete</button>
+                        </div>
+                        <form id="initiative-form">
+                            <div class="form-group">
+                                <label class="form-label">Initiative Title</label>
+                                <input type="text" class="form-input" id="initiative-title" placeholder="e.g., Mobile Wallet Integration">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Description</label>
+                                <textarea class="form-input" id="initiative-description" placeholder="Describe what this initiative entails..."></textarea>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Potential Upside</label>
+                                    <input type="text" class="form-input" id="initiative-upside" placeholder="e.g., +$8B TPV">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Risk / Downside</label>
+                                    <input type="text" class="form-input" id="initiative-downside" placeholder="e.g., $2M integration cost">
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Insights Tab -->
+                <div class="panel" id="tab-insights">
+                    <div class="card">
+                        <h3 class="card-title" style="margin-bottom: 20px;">Customer Insight</h3>
+                        <div class="form-group">
+                            <label class="form-label">Research Finding</label>
+                            <textarea class="form-input" id="initiative-customer-insight" placeholder="e.g., Research shows 67% of millennials prefer mobile wallet payments..."></textarea>
+                            <p class="form-hint">What customer research or insight supports this initiative?</p>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3 class="card-title" style="margin-bottom: 20px;">Goal Connection</h3>
+                        <div class="form-group">
+                            <label class="form-label">How does this meet the goal?</label>
+                            <textarea class="form-input" id="initiative-goal-connection" placeholder="e.g., Direct contribution to TPV through new payment channels..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3 class="card-title" style="margin-bottom: 20px;">Similar Past Projects</h3>
+                        <div id="similar-projects-list">
+                            <!-- Populated by JS -->
+                        </div>
+                        <button class="add-item-btn" onclick="addSimilarProject()" style="margin-top: 12px;">
+                            + Add Similar Project
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Metrics Tab -->
+                <div class="panel" id="tab-metrics">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Key Metrics</h3>
+                            <button class="btn btn-sm btn-secondary" onclick="addMetric()">+ Add Metric</button>
+                        </div>
+                        <p class="form-hint" style="margin-bottom: 16px;">Define the metrics that will track this initiative's success</p>
+                        <div id="metrics-list">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal-overlay" id="delete-modal">
+        <div class="modal">
+            <h3 class="modal-title">Confirm Delete</h3>
+            <p id="delete-message">Are you sure you want to delete this item? This action cannot be undone.</p>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
+                <button class="btn btn-danger" onclick="confirmDelete()">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // DATA (Same structure as strategy-map.html)
+        // ============================================
+        let strategyData = {
+            strategies: [
+                {
+                    id: 'str-1',
+                    title: 'Market Leadership in Digital Payments',
+                    description: 'Establish dominant market position in digital payment solutions through innovative technology and superior customer experience.',
+                    goals: [
+                        {
+                            id: 'goal-1-1',
+                            title: 'Increase Payment Volume',
+                            description: 'Grow total payment transaction volume to $50B annually',
+                            metric: '$50B TPV',
+                            targetProgress: 75,
+                            initiatives: [
+                                {
+                                    id: 'init-1-1-1',
+                                    title: 'Mobile Wallet Integration',
+                                    description: 'Integrate with top 5 mobile wallet providers to expand reach',
+                                    upside: '+$8B TPV',
+                                    downside: '$2M integration cost',
+                                    customerInsight: 'Research shows 67% of millennials prefer mobile wallet payments over cards',
+                                    goalConnection: 'Direct contribution to TPV through new payment channels',
+                                    similarProjects: ['Apple Pay Integration (2022) - Added $3B TPV', 'Google Pay Partnership (2021) - Added $2.5B TPV'],
+                                    metrics: [
+                                        { id: 'met-1-1-1-1', name: 'Mobile TPV', current: 12.5, target: 20, unit: 'B', trend: [8, 9, 10, 11, 12, 12.5] },
+                                        { id: 'met-1-1-1-2', name: 'Wallet Users', current: 2.3, target: 5, unit: 'M', trend: [1.2, 1.5, 1.8, 2.0, 2.2, 2.3] }
+                                    ]
+                                },
+                                {
+                                    id: 'init-1-1-2',
+                                    title: 'Cross-border Payment Expansion',
+                                    description: 'Enable seamless cross-border payments in 20 new markets',
+                                    upside: '+$5B TPV',
+                                    downside: 'Regulatory complexity',
+                                    customerInsight: 'SMBs report 45% of revenue comes from international customers',
+                                    goalConnection: 'Unlocks new geographic markets for payment volume growth',
+                                    similarProjects: ['LATAM Expansion (2023) - 15 countries live'],
+                                    metrics: [
+                                        { id: 'met-1-1-2-1', name: 'Markets Live', current: 12, target: 20, unit: '', trend: [5, 7, 8, 10, 11, 12] }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            id: 'goal-1-2',
+                            title: 'Reduce Transaction Costs',
+                            description: 'Lower average transaction cost by 25% through optimization',
+                            metric: '-25% cost',
+                            targetProgress: 60,
+                            initiatives: [
+                                {
+                                    id: 'init-1-2-1',
+                                    title: 'Smart Routing Engine',
+                                    description: 'AI-powered routing to optimize transaction costs',
+                                    upside: '-15% transaction cost',
+                                    downside: '$3M AI development',
+                                    customerInsight: 'Merchants save avg $0.02 per transaction with optimal routing',
+                                    goalConnection: 'Direct cost reduction through intelligent payment routing',
+                                    similarProjects: ['Rule-based Routing (2021) - 8% cost reduction'],
+                                    metrics: [
+                                        { id: 'met-1-2-1-1', name: 'Cost per Transaction', current: 0.28, target: 0.22, unit: '$', trend: [0.35, 0.33, 0.31, 0.30, 0.29, 0.28] }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    id: 'str-2',
+                    title: 'Financial Services Ecosystem',
+                    description: 'Build comprehensive financial services platform beyond payments.',
+                    goals: [
+                        {
+                            id: 'goal-2-1',
+                            title: 'Launch Merchant Lending',
+                            description: 'Originate $5B in merchant working capital loans',
+                            metric: '$5B originated',
+                            targetProgress: 45,
+                            initiatives: [
+                                {
+                                    id: 'init-2-1-1',
+                                    title: 'AI Underwriting',
+                                    description: 'Build ML-based underwriting using payment data',
+                                    upside: '+40% approval rate',
+                                    downside: 'Model risk',
+                                    customerInsight: 'Traditional banks reject 60% of SMB loan applications',
+                                    goalConnection: 'Enables faster, more accurate lending decisions',
+                                    similarProjects: ['Manual Underwriting Pilot (2023)'],
+                                    metrics: [
+                                        { id: 'met-2-1-1-1', name: 'Loans Originated', current: 2.2, target: 5, unit: 'B', trend: [0.5, 0.9, 1.3, 1.7, 2.0, 2.2] }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        };
+
+        // Load from localStorage if available
+        const savedData = localStorage.getItem('strategyMapData');
+        if (savedData) {
+            try {
+                strategyData = JSON.parse(savedData);
+            } catch (e) {
+                console.error('Failed to load saved data');
+            }
+        }
+
+        // ============================================
+        // STATE
+        // ============================================
+        let currentStrategy = null;
+        let currentGoal = null;
+        let currentInitiative = null;
+        let deleteContext = null;
+
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+        function init() {
+            renderStrategyTree();
+            showPanel('welcome');
+        }
+
+        // ============================================
+        // NAVIGATION TREE
+        // ============================================
+        function renderStrategyTree() {
+            const container = document.getElementById('strategy-tree');
+            let html = '';
+
+            strategyData.strategies.forEach(strategy => {
+                const isActive = currentStrategy?.id === strategy.id;
+                html += `
+                    <div class="tree-item ${isActive && !currentGoal ? 'active' : ''}" onclick="selectStrategy('${strategy.id}')">
+                        <span class="tree-icon">&#9656;</span>
+                        ${strategy.title.substring(0, 25)}${strategy.title.length > 25 ? '...' : ''}
+                    </div>
+                `;
+
+                if (currentStrategy?.id === strategy.id) {
+                    strategy.goals.forEach(goal => {
+                        const isGoalActive = currentGoal?.id === goal.id;
+                        html += `
+                            <div class="tree-item goal ${isGoalActive && !currentInitiative ? 'active' : ''}" onclick="selectGoal('${strategy.id}', '${goal.id}')">
+                                <span class="tree-icon">&#8226;</span>
+                                ${goal.title.substring(0, 22)}${goal.title.length > 22 ? '...' : ''}
+                            </div>
+                        `;
+
+                        if (currentGoal?.id === goal.id) {
+                            goal.initiatives.forEach(init => {
+                                const isInitActive = currentInitiative?.id === init.id;
+                                html += `
+                                    <div class="tree-item initiative ${isInitActive ? 'active' : ''}" onclick="selectInitiative('${strategy.id}', '${goal.id}', '${init.id}')">
+                                        <span class="tree-icon">&#9702;</span>
+                                        ${init.title.substring(0, 20)}${init.title.length > 20 ? '...' : ''}
+                                    </div>
+                                `;
+                            });
+                        }
+                    });
+                }
+            });
+
+            container.innerHTML = html;
+        }
+
+        // ============================================
+        // PANEL SWITCHING
+        // ============================================
+        function showPanel(panelName) {
+            document.querySelectorAll('.content-area > .panel').forEach(p => p.classList.remove('active'));
+            document.getElementById(`panel-${panelName}`).classList.add('active');
+        }
+
+        function switchInitiativeTab(tabName) {
+            document.querySelectorAll('#panel-initiative .tabs .tab').forEach(t => t.classList.remove('active'));
+            document.querySelector(`#panel-initiative .tabs .tab[onclick*="${tabName}"]`).classList.add('active');
+
+            document.querySelectorAll('#panel-initiative > .panel').forEach(p => p.classList.remove('active'));
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+        }
+
+        // ============================================
+        // SELECTION
+        // ============================================
+        function selectStrategy(id) {
+            currentStrategy = strategyData.strategies.find(s => s.id === id);
+            currentGoal = null;
+            currentInitiative = null;
+
+            if (currentStrategy) {
+                document.getElementById('strategy-title').value = currentStrategy.title;
+                document.getElementById('strategy-description').value = currentStrategy.description;
+                renderGoalsList();
+                showPanel('strategy');
+                updateHeader('Strategy', currentStrategy.title);
+            }
+
+            renderStrategyTree();
+        }
+
+        function selectGoal(strategyId, goalId) {
+            currentStrategy = strategyData.strategies.find(s => s.id === strategyId);
+            currentGoal = currentStrategy?.goals.find(g => g.id === goalId);
+            currentInitiative = null;
+
+            if (currentGoal) {
+                document.getElementById('goal-title').value = currentGoal.title;
+                document.getElementById('goal-description').value = currentGoal.description;
+                document.getElementById('goal-metric').value = currentGoal.metric;
+                document.getElementById('goal-progress').value = currentGoal.targetProgress;
+                renderInitiativesList();
+                showPanel('goal');
+                updateHeader('Goal', currentGoal.title);
+            }
+
+            renderStrategyTree();
+        }
+
+        function selectInitiative(strategyId, goalId, initId) {
+            currentStrategy = strategyData.strategies.find(s => s.id === strategyId);
+            currentGoal = currentStrategy?.goals.find(g => g.id === goalId);
+            currentInitiative = currentGoal?.initiatives.find(i => i.id === initId);
+
+            if (currentInitiative) {
+                document.getElementById('initiative-title').value = currentInitiative.title;
+                document.getElementById('initiative-description').value = currentInitiative.description;
+                document.getElementById('initiative-upside').value = currentInitiative.upside;
+                document.getElementById('initiative-downside').value = currentInitiative.downside;
+                document.getElementById('initiative-customer-insight').value = currentInitiative.customerInsight || '';
+                document.getElementById('initiative-goal-connection').value = currentInitiative.goalConnection || '';
+                renderSimilarProjects();
+                renderMetricsList();
+                showPanel('initiative');
+                switchInitiativeTab('details');
+                updateHeader('Initiative', currentInitiative.title);
+            }
+
+            renderStrategyTree();
+        }
+
+        function updateHeader(type, title) {
+            document.getElementById('editor-title').textContent = `Edit ${type}`;
+            document.getElementById('editor-subtitle').textContent = title;
+        }
+
+        // ============================================
+        // RENDERING LISTS
+        // ============================================
+        function renderGoalsList() {
+            const container = document.getElementById('goals-list');
+            if (!currentStrategy || currentStrategy.goals.length === 0) {
+                container.innerHTML = '<div class="empty-state" style="padding: 40px;"><p>No goals yet. Add your first goal.</p></div>';
+                return;
+            }
+
+            container.innerHTML = currentStrategy.goals.map(goal => `
+                <div class="list-item" onclick="selectGoal('${currentStrategy.id}', '${goal.id}')">
+                    <div class="list-item-content">
+                        <div class="list-item-title">${goal.title}</div>
+                        <div class="list-item-subtitle">${goal.initiatives.length} initiatives | Target: ${goal.metric}</div>
+                    </div>
+                    <div class="list-item-actions">
+                        <button class="icon-btn edit" onclick="event.stopPropagation(); selectGoal('${currentStrategy.id}', '${goal.id}')">&#9998;</button>
+                        <button class="icon-btn delete" onclick="event.stopPropagation(); prepareDeleteGoal('${goal.id}')">&#10005;</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderInitiativesList() {
+            const container = document.getElementById('initiatives-list');
+            if (!currentGoal || currentGoal.initiatives.length === 0) {
+                container.innerHTML = '<div class="empty-state" style="padding: 40px;"><p>No initiatives yet. Add your first initiative.</p></div>';
+                return;
+            }
+
+            container.innerHTML = currentGoal.initiatives.map(init => `
+                <div class="list-item" onclick="selectInitiative('${currentStrategy.id}', '${currentGoal.id}', '${init.id}')">
+                    <div class="list-item-content">
+                        <div class="list-item-title">${init.title}</div>
+                        <div class="list-item-subtitle">Upside: ${init.upside} | ${init.metrics?.length || 0} metrics</div>
+                    </div>
+                    <div class="list-item-actions">
+                        <button class="icon-btn edit" onclick="event.stopPropagation(); selectInitiative('${currentStrategy.id}', '${currentGoal.id}', '${init.id}')">&#9998;</button>
+                        <button class="icon-btn delete" onclick="event.stopPropagation(); prepareDeleteInitiative('${init.id}')">&#10005;</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderSimilarProjects() {
+            const container = document.getElementById('similar-projects-list');
+            const projects = currentInitiative?.similarProjects || [];
+
+            container.innerHTML = projects.map((project, index) => `
+                <div class="similar-project-row">
+                    <input type="text" value="${project}" onchange="updateSimilarProject(${index}, this.value)" placeholder="e.g., Apple Pay Integration (2022) - Added $3B TPV">
+                    <button class="icon-btn delete" onclick="removeSimilarProject(${index})">&#10005;</button>
+                </div>
+            `).join('');
+        }
+
+        function renderMetricsList() {
+            const container = document.getElementById('metrics-list');
+            const metrics = currentInitiative?.metrics || [];
+
+            if (metrics.length === 0) {
+                container.innerHTML = '<div class="empty-state" style="padding: 40px;"><p>No metrics defined yet.</p></div>';
+                return;
+            }
+
+            container.innerHTML = metrics.map((metric, index) => `
+                <div class="metric-row">
+                    <input type="text" value="${metric.name}" onchange="updateMetric(${index}, 'name', this.value)" placeholder="Metric name">
+                    <input type="number" value="${metric.current}" onchange="updateMetric(${index}, 'current', parseFloat(this.value))" placeholder="Current">
+                    <input type="number" value="${metric.target}" onchange="updateMetric(${index}, 'target', parseFloat(this.value))" placeholder="Target">
+                    <input type="text" value="${metric.unit}" onchange="updateMetric(${index}, 'unit', this.value)" placeholder="Unit">
+                    <button class="icon-btn delete" onclick="removeMetric(${index})">&#10005;</button>
+                </div>
+            `).join('');
+        }
+
+        // ============================================
+        // ADD FUNCTIONS
+        // ============================================
+        function addStrategy() {
+            const newStrategy = {
+                id: 'str-' + Date.now(),
+                title: 'New Strategy',
+                description: '',
+                goals: []
+            };
+            strategyData.strategies.push(newStrategy);
+            selectStrategy(newStrategy.id);
+            saveToLocalStorage();
+        }
+
+        function addGoal() {
+            if (!currentStrategy) return;
+
+            const newGoal = {
+                id: 'goal-' + Date.now(),
+                title: 'New Goal',
+                description: '',
+                metric: '',
+                targetProgress: 0,
+                initiatives: []
+            };
+            currentStrategy.goals.push(newGoal);
+            renderGoalsList();
+            selectGoal(currentStrategy.id, newGoal.id);
+            saveToLocalStorage();
+        }
+
+        function addInitiative() {
+            if (!currentGoal) return;
+
+            const newInit = {
+                id: 'init-' + Date.now(),
+                title: 'New Initiative',
+                description: '',
+                upside: '',
+                downside: '',
+                customerInsight: '',
+                goalConnection: '',
+                similarProjects: [],
+                metrics: []
+            };
+            currentGoal.initiatives.push(newInit);
+            renderInitiativesList();
+            selectInitiative(currentStrategy.id, currentGoal.id, newInit.id);
+            saveToLocalStorage();
+        }
+
+        function addSimilarProject() {
+            if (!currentInitiative) return;
+            if (!currentInitiative.similarProjects) {
+                currentInitiative.similarProjects = [];
+            }
+            currentInitiative.similarProjects.push('');
+            renderSimilarProjects();
+            saveToLocalStorage();
+        }
+
+        function addMetric() {
+            if (!currentInitiative) return;
+            if (!currentInitiative.metrics) {
+                currentInitiative.metrics = [];
+            }
+            currentInitiative.metrics.push({
+                id: 'met-' + Date.now(),
+                name: '',
+                current: 0,
+                target: 0,
+                unit: '',
+                trend: [0, 0, 0, 0, 0, 0]
+            });
+            renderMetricsList();
+            saveToLocalStorage();
+        }
+
+        // ============================================
+        // UPDATE FUNCTIONS
+        // ============================================
+        function updateSimilarProject(index, value) {
+            if (currentInitiative && currentInitiative.similarProjects) {
+                currentInitiative.similarProjects[index] = value;
+                saveToLocalStorage();
+            }
+        }
+
+        function updateMetric(index, field, value) {
+            if (currentInitiative && currentInitiative.metrics) {
+                currentInitiative.metrics[index][field] = value;
+                saveToLocalStorage();
+            }
+        }
+
+        function removeSimilarProject(index) {
+            if (currentInitiative && currentInitiative.similarProjects) {
+                currentInitiative.similarProjects.splice(index, 1);
+                renderSimilarProjects();
+                saveToLocalStorage();
+            }
+        }
+
+        function removeMetric(index) {
+            if (currentInitiative && currentInitiative.metrics) {
+                currentInitiative.metrics.splice(index, 1);
+                renderMetricsList();
+                saveToLocalStorage();
+            }
+        }
+
+        // ============================================
+        // DELETE FUNCTIONS
+        // ============================================
+        function prepareDeleteGoal(goalId) {
+            deleteContext = { type: 'goal', id: goalId };
+            document.getElementById('delete-message').textContent = 'Are you sure you want to delete this goal and all its initiatives? This action cannot be undone.';
+            document.getElementById('delete-modal').classList.add('show');
+        }
+
+        function prepareDeleteInitiative(initId) {
+            deleteContext = { type: 'initiative', id: initId };
+            document.getElementById('delete-message').textContent = 'Are you sure you want to delete this initiative? This action cannot be undone.';
+            document.getElementById('delete-modal').classList.add('show');
+        }
+
+        function deleteStrategy() {
+            deleteContext = { type: 'strategy', id: currentStrategy?.id };
+            document.getElementById('delete-message').textContent = 'Are you sure you want to delete this entire strategy and all its goals and initiatives? This action cannot be undone.';
+            document.getElementById('delete-modal').classList.add('show');
+        }
+
+        function deleteGoal() {
+            if (currentGoal) {
+                prepareDeleteGoal(currentGoal.id);
+            }
+        }
+
+        function deleteInitiative() {
+            if (currentInitiative) {
+                prepareDeleteInitiative(currentInitiative.id);
+            }
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('delete-modal').classList.remove('show');
+            deleteContext = null;
+        }
+
+        function confirmDelete() {
+            if (!deleteContext) return;
+
+            if (deleteContext.type === 'strategy') {
+                strategyData.strategies = strategyData.strategies.filter(s => s.id !== deleteContext.id);
+                currentStrategy = null;
+                currentGoal = null;
+                currentInitiative = null;
+                showPanel('welcome');
+            } else if (deleteContext.type === 'goal' && currentStrategy) {
+                currentStrategy.goals = currentStrategy.goals.filter(g => g.id !== deleteContext.id);
+                currentGoal = null;
+                currentInitiative = null;
+                renderGoalsList();
+            } else if (deleteContext.type === 'initiative' && currentGoal) {
+                currentGoal.initiatives = currentGoal.initiatives.filter(i => i.id !== deleteContext.id);
+                currentInitiative = null;
+                renderInitiativesList();
+            }
+
+            closeDeleteModal();
+            renderStrategyTree();
+            saveToLocalStorage();
+        }
+
+        // ============================================
+        // SAVE FUNCTIONS
+        // ============================================
+        function saveCurrentForm() {
+            if (currentStrategy && document.getElementById('panel-strategy').classList.contains('active')) {
+                currentStrategy.title = document.getElementById('strategy-title').value;
+                currentStrategy.description = document.getElementById('strategy-description').value;
+            }
+
+            if (currentGoal && document.getElementById('panel-goal').classList.contains('active')) {
+                currentGoal.title = document.getElementById('goal-title').value;
+                currentGoal.description = document.getElementById('goal-description').value;
+                currentGoal.metric = document.getElementById('goal-metric').value;
+                currentGoal.targetProgress = parseInt(document.getElementById('goal-progress').value) || 0;
+            }
+
+            if (currentInitiative && document.getElementById('panel-initiative').classList.contains('active')) {
+                currentInitiative.title = document.getElementById('initiative-title').value;
+                currentInitiative.description = document.getElementById('initiative-description').value;
+                currentInitiative.upside = document.getElementById('initiative-upside').value;
+                currentInitiative.downside = document.getElementById('initiative-downside').value;
+                currentInitiative.customerInsight = document.getElementById('initiative-customer-insight').value;
+                currentInitiative.goalConnection = document.getElementById('initiative-goal-connection').value;
+            }
+        }
+
+        function saveToLocalStorage() {
+            saveCurrentForm();
+            localStorage.setItem('strategyMapData', JSON.stringify(strategyData));
+            renderStrategyTree();
+        }
+
+        function saveAll() {
+            saveToLocalStorage();
+            showStatus('strategy-status', 'Changes saved successfully!');
+            showStatus('goal-status', 'Changes saved successfully!');
+            showStatus('initiative-status', 'Changes saved successfully!');
+        }
+
+        function showStatus(elementId, message) {
+            const el = document.getElementById(elementId);
+            if (el) {
+                el.innerHTML = `<div class="alert alert-success">${message}</div>`;
+                setTimeout(() => { el.innerHTML = ''; }, 3000);
+            }
+        }
+
+        // Auto-save on input change
+        document.addEventListener('input', (e) => {
+            if (e.target.classList.contains('form-input')) {
+                clearTimeout(window.autoSaveTimeout);
+                window.autoSaveTimeout = setTimeout(saveToLocalStorage, 1000);
+            }
+        });
+
+        // ============================================
+        // EXPORT
+        // ============================================
+        function exportData() {
+            saveCurrentForm();
+            const dataStr = JSON.stringify(strategyData, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'strategy-map-data.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // ============================================
+        // INITIALIZE
+        // ============================================
+        init();
+    </script>
+</body>
+</html>
