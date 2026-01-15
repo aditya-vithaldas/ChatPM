@@ -696,7 +696,11 @@
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
+            gap: 10px;
+        }
+
+        .stats-grid.six-col {
+            grid-template-columns: repeat(6, 1fr);
         }
 
         .stat-card {
@@ -721,6 +725,155 @@
             font-size: 0.7rem;
             color: var(--text-muted);
             text-transform: uppercase;
+        }
+
+        /* Theme sections */
+        .themes-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 8px;
+        }
+
+        .theme-column {
+            background: var(--bg-main);
+            border-radius: 12px;
+            padding: 16px;
+        }
+
+        .theme-column.likes {
+            border-left: 3px solid var(--success);
+        }
+
+        .theme-column.dislikes {
+            border-left: 3px solid var(--error);
+        }
+
+        .theme-column-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .theme-column-icon {
+            font-size: 1.2rem;
+        }
+
+        .theme-column-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .theme-item {
+            margin-bottom: 16px;
+        }
+
+        .theme-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .theme-name {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .theme-badge {
+            font-size: 0.6rem;
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+
+        .theme-badge.high { background: rgba(34, 197, 94, 0.2); color: var(--success); }
+        .theme-badge.medium { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
+        .theme-badge.low { background: rgba(100, 116, 139, 0.2); color: var(--text-muted); }
+
+        .theme-quote {
+            font-size: 0.75rem;
+            font-style: italic;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            padding-left: 12px;
+            border-left: 2px solid var(--border-color);
+            margin-bottom: 6px;
+        }
+
+        .theme-quote-source {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            padding-left: 12px;
+        }
+
+        /* Referenced Documents */
+        .documents-section {
+            margin-top: 8px;
+        }
+
+        .documents-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .document-card {
+            background: var(--bg-main);
+            border-radius: 10px;
+            padding: 12px 14px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .document-card:hover {
+            border-color: var(--goal-color);
+            background: rgba(59, 130, 246, 0.05);
+        }
+
+        .document-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .document-icon.pdf { background: rgba(239, 68, 68, 0.2); color: var(--error); }
+        .document-icon.sheet { background: rgba(34, 197, 94, 0.2); color: var(--success); }
+        .document-icon.doc { background: rgba(59, 130, 246, 0.2); color: var(--goal-color); }
+        .document-icon.survey { background: rgba(139, 92, 246, 0.2); color: var(--strategy-color); }
+
+        .document-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .document-name {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .document-meta {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            display: flex;
+            gap: 8px;
         }
 
         /* Clickable customer card */
@@ -755,8 +908,11 @@
             .content-scroll { padding: 16px 20px 30px; }
             .modal-content { width: 95%; max-height: 90vh; }
             .stats-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
-            .stat-card { padding: 12px 8px; }
-            .stat-value { font-size: 1.2rem; }
+            .stat-card { padding: 10px 6px; }
+            .stat-value { font-size: 1rem; }
+            .stat-label { font-size: 0.6rem; }
+            .themes-container { grid-template-columns: 1fr; }
+            .documents-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -834,47 +990,80 @@
         let currentStrategy = fullData.strategies.find(s => s.id === selectedStrategyId) || fullData.strategies[0];
         let selectedGoal = null;
 
-        // Customer feedback data for strategies (extended with multiple quotes)
+        // Customer feedback data for strategies (with themes and documents)
         const customerFeedback = {
             'str-1': {
                 primary: { quote: 'Payment speeds have dramatically improved. This is exactly what we needed for our high-volume operations.', source: 'Fortune 500 Client', sentiment: 'positive' },
-                all: [
-                    { quote: 'Payment speeds have dramatically improved. This is exactly what we needed for our high-volume operations.', source: 'Fortune 500 Client - VP Operations', sentiment: 'positive', date: 'Dec 2024' },
-                    { quote: 'Transaction fees are competitive but could be better for high-volume merchants. Looking forward to the new pricing tiers.', source: 'E-commerce Platform CEO', sentiment: 'neutral', date: 'Nov 2024' },
-                    { quote: 'The mobile payment SDK integration was seamless. Our developers had it running in two days.', source: 'FinTech Startup CTO', sentiment: 'positive', date: 'Nov 2024' },
-                    { quote: 'Cross-border payments are still slower than expected. Hope the global expansion addresses this.', source: 'International Retailer', sentiment: 'neutral', date: 'Oct 2024' }
+                stats: { positive: 68, neutral: 25, negative: 7, nps: 72, responses: 1240 },
+                likes: [
+                    { theme: 'Transaction Speed', frequency: 'high', quote: 'Payment speeds have dramatically improved. This is exactly what we needed for our high-volume operations.', source: 'Fortune 500 Client - VP Operations' },
+                    { theme: 'Developer Experience', frequency: 'high', quote: 'The mobile payment SDK integration was seamless. Our developers had it running in two days.', source: 'FinTech Startup CTO' },
+                    { theme: 'Competitive Pricing', frequency: 'medium', quote: 'Transaction fees are very competitive compared to legacy processors we used before.', source: 'E-commerce Platform CEO' }
                 ],
-                stats: { positive: 68, neutral: 25, negative: 7, nps: 72, responses: 1240 }
+                dislikes: [
+                    { theme: 'Cross-border Latency', frequency: 'medium', quote: 'Cross-border payments are still slower than expected. Hope the global expansion addresses this.', source: 'International Retailer' },
+                    { theme: 'Volume Pricing Tiers', frequency: 'low', quote: 'Pricing could be better for high-volume merchants. Looking forward to the new pricing tiers.', source: 'Enterprise Client' }
+                ],
+                documents: [
+                    { name: 'Q4 2024 NPS Survey Results', type: 'survey', date: 'Dec 2024', size: '2.4 MB' },
+                    { name: 'Payment Experience Research', type: 'pdf', date: 'Nov 2024', size: '5.1 MB' },
+                    { name: 'Merchant Feedback Analysis', type: 'sheet', date: 'Nov 2024', size: '1.2 MB' },
+                    { name: 'Developer Survey Summary', type: 'doc', date: 'Oct 2024', size: '890 KB' }
+                ]
             },
             'str-2': {
                 primary: { quote: 'Having lending and payments in one place would save us significant time and operational costs.', source: 'Mid-Market Client', sentiment: 'positive' },
-                all: [
-                    { quote: 'Having lending and payments in one place would save us significant time and operational costs.', source: 'Mid-Market Client - CFO', sentiment: 'positive', date: 'Dec 2024' },
-                    { quote: 'The merchant cash advance feature has been a game-changer for managing our seasonal inventory.', source: 'Retail Chain Owner', sentiment: 'positive', date: 'Dec 2024' },
-                    { quote: 'Would love to see better integration with our accounting software for the lending products.', source: 'Small Business Owner', sentiment: 'neutral', date: 'Nov 2024' },
-                    { quote: 'Interest rates on business loans are slightly higher than traditional banks, but the speed makes up for it.', source: 'Restaurant Group', sentiment: 'neutral', date: 'Oct 2024' }
+                stats: { positive: 72, neutral: 20, negative: 8, nps: 68, responses: 856 },
+                likes: [
+                    { theme: 'Unified Platform', frequency: 'high', quote: 'Having lending and payments in one place would save us significant time and operational costs.', source: 'Mid-Market Client - CFO' },
+                    { theme: 'Cash Advance Speed', frequency: 'high', quote: 'The merchant cash advance feature has been a game-changer for managing our seasonal inventory.', source: 'Retail Chain Owner' },
+                    { theme: 'Approval Process', frequency: 'medium', quote: 'Getting approved for a business loan took 24 hours instead of the usual 2 weeks with banks.', source: 'Restaurant Group' }
                 ],
-                stats: { positive: 72, neutral: 20, negative: 8, nps: 68, responses: 856 }
+                dislikes: [
+                    { theme: 'Interest Rates', frequency: 'medium', quote: 'Interest rates on business loans are slightly higher than traditional banks, but the speed makes up for it.', source: 'Restaurant Group' },
+                    { theme: 'Accounting Integration', frequency: 'medium', quote: 'Would love to see better integration with our accounting software for the lending products.', source: 'Small Business Owner' }
+                ],
+                documents: [
+                    { name: 'Lending Product Survey Q4', type: 'survey', date: 'Dec 2024', size: '1.8 MB' },
+                    { name: 'Financial Services UX Study', type: 'pdf', date: 'Nov 2024', size: '4.2 MB' },
+                    { name: 'SMB Needs Analysis', type: 'sheet', date: 'Oct 2024', size: '2.1 MB' }
+                ]
             },
             'str-3': {
                 primary: { quote: 'The 99.99% uptime target exceeds our requirements. Critical for our 24/7 operations.', source: 'Global Retailer', sentiment: 'positive' },
-                all: [
-                    { quote: 'The 99.99% uptime target exceeds our requirements. Critical for our 24/7 operations.', source: 'Global Retailer - CTO', sentiment: 'positive', date: 'Dec 2024' },
-                    { quote: 'System reliability during Black Friday was exceptional. Zero hiccups despite 10x normal volume.', source: 'E-commerce Director', sentiment: 'positive', date: 'Nov 2024' },
-                    { quote: 'API response times have improved significantly over the past quarter. Very impressed.', source: 'Platform Engineer', sentiment: 'positive', date: 'Nov 2024' },
-                    { quote: 'The new multi-region failover has given us peace of mind for our global operations.', source: 'Enterprise Client', sentiment: 'positive', date: 'Oct 2024' }
+                stats: { positive: 85, neutral: 12, negative: 3, nps: 84, responses: 620 },
+                likes: [
+                    { theme: 'System Reliability', frequency: 'high', quote: 'The 99.99% uptime target exceeds our requirements. Critical for our 24/7 operations.', source: 'Global Retailer - CTO' },
+                    { theme: 'Peak Performance', frequency: 'high', quote: 'System reliability during Black Friday was exceptional. Zero hiccups despite 10x normal volume.', source: 'E-commerce Director' },
+                    { theme: 'API Response Times', frequency: 'high', quote: 'API response times have improved significantly over the past quarter. Very impressed.', source: 'Platform Engineer' }
                 ],
-                stats: { positive: 85, neutral: 12, negative: 3, nps: 84, responses: 620 }
+                dislikes: [
+                    { theme: 'Regional Latency', frequency: 'low', quote: 'APAC region latency is still higher than US/EU. Would benefit from more edge locations.', source: 'Singapore-based Client' }
+                ],
+                documents: [
+                    { name: 'Infrastructure Reliability Report', type: 'pdf', date: 'Dec 2024', size: '3.2 MB' },
+                    { name: 'Black Friday Performance Analysis', type: 'sheet', date: 'Nov 2024', size: '1.5 MB' },
+                    { name: 'Enterprise Client Interviews', type: 'doc', date: 'Nov 2024', size: '2.8 MB' },
+                    { name: 'Uptime SLA Survey', type: 'survey', date: 'Oct 2024', size: '980 KB' }
+                ]
             },
             'str-4': {
                 primary: { quote: 'AI-powered insights have transformed how we understand customer behavior.', source: 'Marketing Director', sentiment: 'positive' },
-                all: [
-                    { quote: 'AI-powered insights have transformed how we understand customer behavior.', source: 'Marketing Director', sentiment: 'positive', date: 'Dec 2024' },
-                    { quote: 'Fraud detection accuracy has improved our chargeback rate by 40%. Incredible results.', source: 'Risk Manager', sentiment: 'positive', date: 'Dec 2024' },
-                    { quote: 'The predictive analytics for inventory are helpful but need more customization options.', source: 'Operations Lead', sentiment: 'neutral', date: 'Nov 2024' },
-                    { quote: 'AI recommendations for cross-selling have increased our average order value by 15%.', source: 'E-commerce Manager', sentiment: 'positive', date: 'Oct 2024' }
+                stats: { positive: 74, neutral: 18, negative: 8, nps: 71, responses: 445 },
+                likes: [
+                    { theme: 'Customer Insights', frequency: 'high', quote: 'AI-powered insights have transformed how we understand customer behavior.', source: 'Marketing Director' },
+                    { theme: 'Fraud Detection', frequency: 'high', quote: 'Fraud detection accuracy has improved our chargeback rate by 40%. Incredible results.', source: 'Risk Manager' },
+                    { theme: 'Revenue Impact', frequency: 'medium', quote: 'AI recommendations for cross-selling have increased our average order value by 15%.', source: 'E-commerce Manager' }
                 ],
-                stats: { positive: 74, neutral: 18, negative: 8, nps: 71, responses: 445 }
+                dislikes: [
+                    { theme: 'Customization Options', frequency: 'medium', quote: 'The predictive analytics for inventory are helpful but need more customization options.', source: 'Operations Lead' },
+                    { theme: 'Learning Curve', frequency: 'low', quote: 'Dashboard is powerful but took our team a while to understand all the AI features.', source: 'Small Business Owner' }
+                ],
+                documents: [
+                    { name: 'AI Feature Adoption Study', type: 'pdf', date: 'Dec 2024', size: '4.5 MB' },
+                    { name: 'Fraud Detection ROI Analysis', type: 'sheet', date: 'Dec 2024', size: '1.1 MB' },
+                    { name: 'ML Product Feedback Survey', type: 'survey', date: 'Nov 2024', size: '1.9 MB' }
+                ]
             }
         };
 
@@ -1000,10 +1189,29 @@
             const modalBody = document.getElementById('modal-body');
             const stats = feedbackData.stats;
 
+            const getDocIcon = (type) => {
+                switch(type) {
+                    case 'pdf': return '&#128196;';
+                    case 'sheet': return '&#128202;';
+                    case 'doc': return '&#128221;';
+                    case 'survey': return '&#128203;';
+                    default: return '&#128196;';
+                }
+            };
+
             modalBody.innerHTML = `
+                <!-- Metrics Section (Top) -->
                 <div class="feedback-section">
-                    <div class="feedback-section-title">Sentiment Overview</div>
+                    <div class="feedback-section-title">Sentiment Metrics</div>
                     <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-value positive">${stats.nps}</div>
+                            <div class="stat-label">NPS Score</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${stats.responses.toLocaleString()}</div>
+                            <div class="stat-label">Responses</div>
+                        </div>
                         <div class="stat-card">
                             <div class="stat-value positive">${stats.positive}%</div>
                             <div class="stat-label">Positive</div>
@@ -1016,38 +1224,69 @@
                             <div class="stat-value negative">${stats.negative}%</div>
                             <div class="stat-label">Negative</div>
                         </div>
-                    </div>
-                </div>
-
-                <div class="feedback-section">
-                    <div class="feedback-section-title">Key Metrics</div>
-                    <div class="stats-grid">
                         <div class="stat-card">
-                            <div class="stat-value positive">${stats.nps}</div>
-                            <div class="stat-label">NPS Score</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-value">${stats.responses.toLocaleString()}</div>
-                            <div class="stat-label">Responses</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-value">${feedbackData.all.length}</div>
-                            <div class="stat-label">Recent Quotes</div>
+                            <div class="stat-value">${feedbackData.likes.length + feedbackData.dislikes.length}</div>
+                            <div class="stat-label">Themes</div>
                         </div>
                     </div>
                 </div>
 
+                <!-- Likes & Dislikes Themes -->
                 <div class="feedback-section">
-                    <div class="feedback-section-title">Recent Customer Feedback</div>
-                    ${feedbackData.all.map(f => `
-                        <div class="feedback-quote-card">
-                            <div class="feedback-quote">"${f.quote}"</div>
-                            <div class="feedback-meta">
-                                <span class="feedback-source">— ${f.source} (${f.date})</span>
-                                <span class="feedback-sentiment ${f.sentiment}">${f.sentiment === 'positive' ? 'Positive' : f.sentiment === 'neutral' ? 'Neutral' : 'Negative'}</span>
+                    <div class="feedback-section-title">Customer Sentiment Themes</div>
+                    <div class="themes-container">
+                        <div class="theme-column likes">
+                            <div class="theme-column-header">
+                                <span class="theme-column-icon">&#128077;</span>
+                                <span class="theme-column-title">What Users Like</span>
                             </div>
+                            ${feedbackData.likes.map(item => `
+                                <div class="theme-item">
+                                    <div class="theme-name">
+                                        ${item.theme}
+                                        <span class="theme-badge ${item.frequency}">${item.frequency} frequency</span>
+                                    </div>
+                                    <div class="theme-quote">"${item.quote}"</div>
+                                    <div class="theme-quote-source">— ${item.source}</div>
+                                </div>
+                            `).join('')}
                         </div>
-                    `).join('')}
+                        <div class="theme-column dislikes">
+                            <div class="theme-column-header">
+                                <span class="theme-column-icon">&#128078;</span>
+                                <span class="theme-column-title">What Users Don't Like</span>
+                            </div>
+                            ${feedbackData.dislikes.map(item => `
+                                <div class="theme-item">
+                                    <div class="theme-name">
+                                        ${item.theme}
+                                        <span class="theme-badge ${item.frequency}">${item.frequency} frequency</span>
+                                    </div>
+                                    <div class="theme-quote">"${item.quote}"</div>
+                                    <div class="theme-quote-source">— ${item.source}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Referenced Documents -->
+                <div class="feedback-section documents-section">
+                    <div class="feedback-section-title">Referenced Documents</div>
+                    <div class="documents-grid">
+                        ${feedbackData.documents.map(doc => `
+                            <div class="document-card">
+                                <div class="document-icon ${doc.type}">${getDocIcon(doc.type)}</div>
+                                <div class="document-info">
+                                    <div class="document-name">${doc.name}</div>
+                                    <div class="document-meta">
+                                        <span>${doc.date}</span>
+                                        <span>${doc.size}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
                 </div>
             `;
 
