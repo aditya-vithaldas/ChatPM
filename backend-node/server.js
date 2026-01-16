@@ -11,6 +11,7 @@ import OpenAI from 'openai';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { Firestore } from '@google-cloud/firestore';
+import { google } from 'googleapis';
 
 dotenv.config();
 
@@ -1253,6 +1254,520 @@ ${content}`;
   } catch (error) {
     console.error('Review error:', error);
     res.status(500).json({ error: 'Failed to review requirements' });
+  }
+});
+
+// ============================================
+// SETUP / IMPORT ROUTES (No authentication required)
+// ============================================
+
+// Serve setup page
+app.get('/setup', (req, res) => {
+  res.sendFile(path.join(FRONTEND_PATH, 'setup.html'));
+});
+
+// Import from Google Docs (public document)
+app.post('/api/import/google-docs', async (req, res) => {
+  try {
+    const { docUrl } = req.body;
+
+    if (!docUrl) {
+      return res.status(400).json({ error: 'Google Doc URL is required' });
+    }
+
+    // Extract document ID from URL
+    // Formats:
+    // https://docs.google.com/document/d/DOCUMENT_ID/edit
+    // https://docs.google.com/document/d/DOCUMENT_ID/pub
+    const docIdMatch = docUrl.match(/\/document\/d\/([a-zA-Z0-9_-]+)/);
+    if (!docIdMatch) {
+      return res.status(400).json({ error: 'Invalid Google Docs URL. Please use a URL like: https://docs.google.com/document/d/YOUR_DOC_ID/edit' });
+    }
+
+    const documentId = docIdMatch[1];
+
+    // Fetch HTML format to preserve bold/heading structure
+    const htmlUrl = `https://docs.google.com/document/d/${documentId}/export?format=html`;
+    const textUrl = `https://docs.google.com/document/d/${documentId}/export?format=txt`;
+
+    // Fetch both HTML (for structure) and text (for display)
+    const [htmlResponse, textResponse] = await Promise.all([
+      fetch(htmlUrl),
+      fetch(textUrl)
+    ]);
+
+    if (!htmlResponse.ok || !textResponse.ok) {
+      const status = htmlResponse.status || textResponse.status;
+      if (status === 404) {
+        return res.status(404).json({ error: 'Document not found. Make sure the document exists.' });
+      }
+      if (status === 401 || status === 403) {
+        return res.status(403).json({
+          error: 'Document is not publicly shared. Please: 1) Open the doc, 2) Click Share, 3) Change "Restricted" to "Anyone with the link", 4) Set to Viewer, 5) Click Done'
+        });
+      }
+      return res.status(status).json({ error: `Failed to fetch document (HTTP ${status}): ${htmlResponse.statusText || textResponse.statusText}` });
+    }
+
+    const htmlContent = await htmlResponse.text();
+    const textContent = await textResponse.text();
+
+    // Check if we got an auth page
+    if (htmlContent.includes('accounts.google.com') || htmlContent.includes('ServiceLogin')) {
+      return res.status(403).json({
+        error: 'Document requires authentication. Please make it publicly accessible: Share > Anyone with the link > Viewer'
+      });
+    }
+
+    // Check if content is empty
+    if (!textContent || textContent.trim().length === 0) {
+      return res.json({
+        success: true,
+        documentId,
+        rawContent: '',
+        parsed: { strategies: [] },
+        warning: 'Document appears to be empty'
+      });
+    }
+
+    // Parse the content using HTML for structure detection
+    const parsed = parseStrategyDocument(htmlContent, textContent);
+
+    res.json({
+      success: true,
+      documentId,
+      rawContent: textContent,
+      rawHtml: htmlContent,
+      parsed,
+      contentLength: textContent.length
+    });
+
+  } catch (error) {
+    console.error('Google Docs import error:', error);
+    res.status(500).json({ error: 'Failed to import from Google Docs: ' + error.message });
+  }
+});
+
+// Parse strategy document content into structured data
+// Uses HTML for structure detection (bold, headings) and text for content
+function parseStrategyDocument(htmlContent, textContent) {
+  const strategies = [];
+
+  // Strategy keywords to look for
+  const strategyKeywords = [
+    'focus area',
+    'strategic focus',
+    'strategic priority',
+    'strategic pillar',
+    'dimension',
+    'priority area',
+    'key initiative',
+    'strategic theme',
+    'pillar'
+  ];
+
+  // Goal keywords
+  const goalKeywords = [
+    'goal',
+    'objective',
+    'target',
+    'outcome',
+    'key result',
+    'deliverable'
+  ];
+
+  // Extract structured elements from HTML
+  // Google Docs HTML uses <span> with font-weight for bold, and <h1>-<h6> for headings
+  const structuredItems = [];
+
+  // Find all bold text (Google Docs uses inline styles)
+  const boldRegex = /<span[^>]*font-weight:\s*(bold|700|800|900)[^>]*>([^<]+)<\/span>/gi;
+  let match;
+  while ((match = boldRegex.exec(htmlContent)) !== null) {
+    const text = match[2].trim();
+    if (text.length > 2 && text.length < 200) {
+      structuredItems.push({ type: 'bold', text, position: match.index });
+    }
+  }
+
+  // Find headings
+  const headingRegex = /<h([1-6])[^>]*>([^<]*(?:<[^>]+>[^<]*)*)<\/h\1>/gi;
+  while ((match = headingRegex.exec(htmlContent)) !== null) {
+    const level = parseInt(match[1]);
+    const text = match[2].replace(/<[^>]+>/g, '').trim();
+    if (text.length > 2) {
+      structuredItems.push({ type: 'heading', level, text, position: match.index });
+    }
+  }
+
+  // Also check for Google Docs title/subtitle styles
+  const titleRegex = /<p[^>]*class="[^"]*title[^"]*"[^>]*>([^<]+)<\/p>/gi;
+  while ((match = titleRegex.exec(htmlContent)) !== null) {
+    structuredItems.push({ type: 'heading', level: 1, text: match[1].trim(), position: match.index });
+  }
+
+  // Sort by position in document
+  structuredItems.sort((a, b) => a.position - b.position);
+
+  // Now identify strategies using heuristics:
+  // 1. Look for items containing strategy keywords
+  // 2. Find items at the same structural level (all bold, all h2, etc.)
+
+  let detectedStrategyPattern = null;
+  let strategyItems = [];
+
+  // First pass: find items with strategy keywords
+  for (const item of structuredItems) {
+    const lowerText = item.text.toLowerCase();
+    if (strategyKeywords.some(kw => lowerText.includes(kw))) {
+      if (!detectedStrategyPattern) {
+        detectedStrategyPattern = item.type === 'heading' ? `heading-${item.level}` : item.type;
+      }
+      strategyItems.push(item);
+    }
+  }
+
+  // Second pass: if we found a pattern, get all items matching that pattern
+  if (detectedStrategyPattern && strategyItems.length > 0) {
+    // Find all items at the same level
+    const allSameLevel = structuredItems.filter(item => {
+      if (detectedStrategyPattern.startsWith('heading-')) {
+        const level = parseInt(detectedStrategyPattern.split('-')[1]);
+        return item.type === 'heading' && item.level === level;
+      }
+      return item.type === detectedStrategyPattern;
+    });
+
+    // If we found more items at the same level, use those as strategies
+    if (allSameLevel.length >= strategyItems.length) {
+      strategyItems = allSameLevel;
+    }
+  }
+
+  // If no strategy keywords found, try to detect structure from bold/headings
+  if (strategyItems.length === 0) {
+    // Try headings first (prefer h2, then h1, then h3)
+    for (const level of [2, 1, 3, 4]) {
+      const headings = structuredItems.filter(i => i.type === 'heading' && i.level === level);
+      if (headings.length >= 2) {
+        strategyItems = headings;
+        break;
+      }
+    }
+
+    // If no headings, try bold items that look like titles (short, don't end with period)
+    if (strategyItems.length === 0) {
+      const boldTitles = structuredItems.filter(i =>
+        i.type === 'bold' &&
+        i.text.length < 80 &&
+        !i.text.endsWith('.') &&
+        !i.text.match(/^\d+\.?\s*$/) // Not just a number
+      );
+      if (boldTitles.length >= 2) {
+        strategyItems = boldTitles;
+      }
+    }
+  }
+
+  // Parse text content for goals and descriptions
+  const textLines = textContent.split('\n').map(l => l.trim()).filter(l => l);
+
+  // Build strategies from identified items
+  for (let i = 0; i < strategyItems.length; i++) {
+    const item = strategyItems[i];
+    const nextItem = strategyItems[i + 1];
+
+    // Clean up title - remove "Focus Area:", "Strategic Focus:", numbering, etc.
+    let title = item.text
+      .replace(/^(focus\s*area|strategic\s*focus|strategic\s*priority|dimension|pillar)\s*[\d.:)]*\s*/i, '')
+      .replace(/^\d+[.):\s]+/, '')
+      .trim();
+
+    // Find description and goals from text content
+    // Look for text between this strategy and the next one
+    const titleInText = textLines.findIndex(line =>
+      line.toLowerCase().includes(title.toLowerCase().substring(0, 20)) ||
+      line.toLowerCase().includes(item.text.toLowerCase().substring(0, 20))
+    );
+
+    let description = '';
+    let goals = [];
+
+    if (titleInText !== -1) {
+      // Find where next strategy starts
+      let endIndex = textLines.length;
+      if (nextItem) {
+        const nextTitle = nextItem.text.substring(0, 20).toLowerCase();
+        for (let j = titleInText + 1; j < textLines.length; j++) {
+          if (textLines[j].toLowerCase().includes(nextTitle)) {
+            endIndex = j;
+            break;
+          }
+        }
+      }
+
+      // Extract content between this strategy and the next
+      const strategyContent = textLines.slice(titleInText + 1, endIndex);
+      let currentGoal = null;
+
+      for (const line of strategyContent) {
+        const lowerLine = line.toLowerCase();
+
+        // Check if this line is a goal
+        const isGoalLine = goalKeywords.some(kw => lowerLine.includes(kw)) ||
+                          (line.match(/^[-•*]\s+/) && line.length < 150) ||
+                          (line.match(/^\d+[.)]\s+/) && line.length < 150);
+
+        if (isGoalLine) {
+          // Save previous goal
+          if (currentGoal) {
+            goals.push(currentGoal);
+          }
+
+          // Clean up goal title
+          let goalTitle = line
+            .replace(/^[-•*\d.)]+\s*/, '')
+            .replace(/^(goal|objective|target|outcome)[:\s]*/i, '')
+            .trim();
+
+          currentGoal = {
+            id: `goal-${strategies.length + 1}-${goals.length + 1}`,
+            title: goalTitle,
+            description: '',
+            targetProgress: 50,
+            initiatives: []
+          };
+        } else if (currentGoal) {
+          // Add to current goal's description
+          if (currentGoal.description) currentGoal.description += ' ';
+          currentGoal.description += line;
+        } else {
+          // Add to strategy description
+          if (description) description += ' ';
+          description += line;
+        }
+      }
+
+      // Don't forget last goal
+      if (currentGoal) {
+        goals.push(currentGoal);
+      }
+    }
+
+    strategies.push({
+      id: `str-${strategies.length + 1}`,
+      title: title || item.text,
+      description: description.substring(0, 500),
+      upside: 'TBD',
+      cost: 'TBD',
+      goals: goals
+    });
+  }
+
+  // If no strategies found, fall back to simple text parsing
+  if (strategies.length === 0) {
+    return parseStrategyDocumentFallback(textContent);
+  }
+
+  return {
+    strategies,
+    detectedPattern: detectedStrategyPattern,
+    itemsFound: strategyItems.length
+  };
+}
+
+// Fallback parser for when HTML parsing doesn't find structure
+function parseStrategyDocumentFallback(textContent) {
+  const lines = textContent.split('\n').map(l => l.trim()).filter(l => l);
+  const strategies = [];
+  let currentStrategy = null;
+
+  for (const line of lines) {
+    // Simple heuristic: short lines that don't end with period are likely titles
+    const isTitle = line.length < 80 && !line.endsWith('.') && !line.match(/^[-•*]/);
+
+    if (isTitle && (!currentStrategy || currentStrategy.description.length > 50)) {
+      if (currentStrategy) {
+        strategies.push(currentStrategy);
+      }
+      currentStrategy = {
+        id: `str-${strategies.length + 1}`,
+        title: line,
+        description: '',
+        upside: 'TBD',
+        cost: 'TBD',
+        goals: []
+      };
+    } else if (currentStrategy) {
+      if (currentStrategy.description) currentStrategy.description += ' ';
+      currentStrategy.description += line;
+    }
+  }
+
+  if (currentStrategy) {
+    strategies.push(currentStrategy);
+  }
+
+  // If still nothing, create a single strategy from the document
+  if (strategies.length === 0 && textContent.trim()) {
+    strategies.push({
+      id: 'str-1',
+      title: lines[0]?.substring(0, 80) || 'Imported Strategy',
+      description: textContent.substring(0, 500),
+      upside: 'TBD',
+      cost: 'TBD',
+      goals: []
+    });
+  }
+
+  return { strategies, detectedPattern: 'fallback' };
+}
+
+// Import from Jira
+app.post('/api/import/jira', async (req, res) => {
+  try {
+    const { jiraUrl, email, apiToken, projectKey, jqlQuery } = req.body;
+
+    if (!jiraUrl || !email || !apiToken) {
+      return res.status(400).json({ error: 'Jira URL, email, and API token are required' });
+    }
+
+    // Clean up the Jira URL
+    let baseUrl = jiraUrl.trim();
+    if (baseUrl.endsWith('/')) baseUrl = baseUrl.slice(0, -1);
+    if (!baseUrl.startsWith('http')) baseUrl = 'https://' + baseUrl;
+
+    // Build JQL query
+    let jql = jqlQuery || '';
+    if (!jql && projectKey) {
+      jql = `project = "${projectKey}" ORDER BY created DESC`;
+    }
+    if (!jql) {
+      jql = 'ORDER BY created DESC';
+    }
+
+    // Jira Cloud API - Using new /search/jql endpoint (migrated from deprecated /search)
+    // See: https://developer.atlassian.com/changelog/#CHANGE-2046
+    const searchUrl = `${baseUrl}/rest/api/3/search/jql`;
+    const auth = Buffer.from(`${email}:${apiToken}`).toString('base64');
+
+    const response = await fetch(searchUrl, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Basic ${auth}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        jql: jql,
+        maxResults: 100,
+        fields: ['summary', 'description', 'status', 'priority', 'issuetype', 'labels', 'customfield_10016', 'parent']
+      })
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Jira API error:', response.status, errorText);
+      if (response.status === 401) {
+        return res.status(401).json({ error: 'Authentication failed. Please check your email and API token.' });
+      }
+      if (response.status === 403) {
+        return res.status(403).json({ error: 'Access forbidden. Please check your permissions for this Jira project.' });
+      }
+      return res.status(response.status).json({ error: `Jira API error: ${response.statusText}` });
+    }
+
+    const data = await response.json();
+
+    // Transform Jira issues into requirements format
+    const requirements = data.issues.map((issue, index) => {
+      const fields = issue.fields;
+
+      // Extract description text (Jira uses Atlassian Document Format)
+      let description = '';
+      if (fields.description) {
+        if (typeof fields.description === 'string') {
+          description = fields.description;
+        } else if (fields.description.content) {
+          // Parse ADF format
+          description = extractTextFromADF(fields.description);
+        }
+      }
+
+      return {
+        id: `req-jira-${issue.key}`,
+        jiraKey: issue.key,
+        title: fields.summary || 'Untitled',
+        description: description,
+        status: fields.status?.name || 'Unknown',
+        priority: fields.priority?.name || 'Medium',
+        issueType: fields.issuetype?.name || 'Task',
+        labels: fields.labels || [],
+        storyPoints: fields.customfield_10016 || null,
+        parentKey: fields.parent?.key || null,
+        upside: 'TBD',
+        downside: 'TBD',
+        metrics: []
+      };
+    });
+
+    res.json({
+      success: true,
+      total: data.total,
+      retrieved: requirements.length,
+      requirements
+    });
+
+  } catch (error) {
+    console.error('Jira import error:', error);
+    res.status(500).json({ error: 'Failed to import from Jira: ' + error.message });
+  }
+});
+
+// Helper function to extract text from Atlassian Document Format
+function extractTextFromADF(adf) {
+  if (!adf || !adf.content) return '';
+
+  let text = '';
+
+  function traverse(nodes) {
+    for (const node of nodes) {
+      if (node.type === 'text') {
+        text += node.text;
+      } else if (node.type === 'hardBreak' || node.type === 'paragraph') {
+        text += '\n';
+      }
+      if (node.content) {
+        traverse(node.content);
+      }
+    }
+  }
+
+  traverse(adf.content);
+  return text.trim();
+}
+
+// Save imported strategy data
+app.post('/api/import/save-strategy', async (req, res) => {
+  try {
+    const { strategies } = req.body;
+
+    if (!strategies || !Array.isArray(strategies)) {
+      return res.status(400).json({ error: 'Strategies array is required' });
+    }
+
+    // For now, we just return success - the frontend will save to localStorage
+    // In production, you'd save to a database here
+    res.json({
+      success: true,
+      message: 'Strategy data ready to save',
+      strategiesCount: strategies.length,
+      goalsCount: strategies.reduce((sum, s) => sum + (s.goals?.length || 0), 0)
+    });
+
+  } catch (error) {
+    console.error('Save strategy error:', error);
+    res.status(500).json({ error: 'Failed to save strategy data' });
   }
 });
 

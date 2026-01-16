@@ -985,7 +985,14 @@
     </div>
 
     <script>
-        const fullData = JSON.parse(localStorage.getItem('strategyMapData')) || { strategies: [] };
+        const CACHE_KEY = 'strategyMapData';
+
+        // Load data - redirect to strategy page only if no data exists
+        const fullData = JSON.parse(localStorage.getItem(CACHE_KEY)) || { strategies: [] };
+        if (!fullData.strategies || fullData.strategies.length === 0) {
+            window.location.href = 'view-strategy.html';
+        }
+
         const selectedStrategyId = sessionStorage.getItem('selectedStrategyId');
         let currentStrategy = fullData.strategies.find(s => s.id === selectedStrategyId) || fullData.strategies[0];
         let selectedGoal = null;

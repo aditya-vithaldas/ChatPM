@@ -349,7 +349,46 @@
     </div>
 
     <script>
-        let data = JSON.parse(localStorage.getItem('strategyMapData')) || getDefaultData();
+        const CACHE_KEY = 'strategyMapData';
+        const CACHE_TIMESTAMP_KEY = 'strategyMapTimestamp';
+        const CACHE_EXPIRY_MS = 30 * 60 * 1000; // 30 minutes
+
+        // Clear corrupted cache and load fresh data with expiry
+        function loadData() {
+            const timestamp = localStorage.getItem(CACHE_TIMESTAMP_KEY);
+            const now = Date.now();
+
+            // Force reset if ?reset is in URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const forceReset = urlParams.has('reset');
+
+            // Check if cache expired (30 min) or doesn't exist or force reset
+            if (forceReset || !timestamp || (now - parseInt(timestamp)) > CACHE_EXPIRY_MS) {
+                localStorage.removeItem(CACHE_KEY);
+                localStorage.removeItem(CACHE_TIMESTAMP_KEY);
+                const defaultData = getDefaultData();
+                localStorage.setItem(CACHE_KEY, JSON.stringify(defaultData));
+                localStorage.setItem(CACHE_TIMESTAMP_KEY, now.toString());
+                // Remove ?reset from URL without reloading
+                if (forceReset) {
+                    window.history.replaceState({}, '', window.location.pathname);
+                }
+                return defaultData;
+            }
+
+            const cached = localStorage.getItem(CACHE_KEY);
+            if (cached) {
+                try {
+                    return JSON.parse(cached);
+                } catch (e) {
+                    localStorage.removeItem(CACHE_KEY);
+                    return getDefaultData();
+                }
+            }
+            return getDefaultData();
+        }
+
+        let data = loadData();
         let selectedStrategy = null;
 
         function getDefaultData() {
@@ -362,9 +401,84 @@
                         upside: '$2.5B Revenue',
                         cost: '$450M Investment',
                         goals: [
-                            { id: 'goal-1-1', title: 'Increase Payment Volume', targetProgress: 75 },
-                            { id: 'goal-1-2', title: 'Reduce Transaction Costs', targetProgress: 60 },
-                            { id: 'goal-1-3', title: 'Improve Merchant Retention', targetProgress: 88 }
+                            {
+                                id: 'goal-1-1',
+                                title: 'Increase Payment Volume',
+                                description: 'Drive transaction volume growth across all merchant segments.',
+                                targetProgress: 75,
+                                initiatives: [
+                                    {
+                                        id: 'req-1-1-1',
+                                        title: 'Mobile Payment SDK',
+                                        description: 'Launch mobile SDK for iOS and Android to enable in-app payments.',
+                                        upside: '$120M',
+                                        downside: '$15M',
+                                        metrics: [
+                                            { id: 'metric-1-1-1-1', name: 'SDK Adoption Rate', current: 68, target: 85, unit: '%', trend: [20, 35, 45, 55, 62, 68] },
+                                            { id: 'metric-1-1-1-2', name: 'Mobile Transaction Volume', current: 2.4, target: 5, unit: 'M/day', trend: [0.5, 1.0, 1.5, 1.9, 2.2, 2.4] }
+                                        ]
+                                    },
+                                    {
+                                        id: 'req-1-1-2',
+                                        title: 'SMB Onboarding Automation',
+                                        description: 'Automate merchant onboarding to reduce time-to-first-transaction.',
+                                        upside: '$80M',
+                                        downside: '$8M',
+                                        metrics: [
+                                            { id: 'metric-1-1-2-1', name: 'Onboarding Time', current: 2.5, target: 1, unit: ' days', trend: [7, 5, 4, 3.5, 3, 2.5] },
+                                            { id: 'metric-1-1-2-2', name: 'Merchant Activation Rate', current: 78, target: 90, unit: '%', trend: [55, 62, 68, 72, 75, 78] }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                id: 'goal-1-2',
+                                title: 'Reduce Transaction Costs',
+                                description: 'Optimize processing infrastructure to reduce per-transaction costs.',
+                                targetProgress: 60,
+                                initiatives: [
+                                    {
+                                        id: 'req-1-2-1',
+                                        title: 'Payment Router Optimization',
+                                        description: 'Implement intelligent routing to minimize interchange fees.',
+                                        upside: '$45M',
+                                        downside: '$6M',
+                                        metrics: [
+                                            { id: 'metric-1-2-1-1', name: 'Avg Transaction Cost', current: 0.18, target: 0.12, unit: '$', trend: [0.25, 0.23, 0.21, 0.20, 0.19, 0.18] },
+                                            { id: 'metric-1-2-1-2', name: 'Routing Success Rate', current: 94, target: 99, unit: '%', trend: [85, 88, 90, 92, 93, 94] }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                id: 'goal-1-3',
+                                title: 'Improve Merchant Retention',
+                                description: 'Reduce churn and increase merchant lifetime value.',
+                                targetProgress: 88,
+                                initiatives: [
+                                    {
+                                        id: 'req-1-3-1',
+                                        title: 'Merchant Success Program',
+                                        description: 'Proactive support and insights for at-risk merchants.',
+                                        upside: '$60M',
+                                        downside: '$5M',
+                                        metrics: [
+                                            { id: 'metric-1-3-1-1', name: 'Monthly Churn Rate', current: 1.8, target: 1.0, unit: '%', trend: [3.5, 3.0, 2.5, 2.2, 2.0, 1.8] },
+                                            { id: 'metric-1-3-1-2', name: 'NPS Score', current: 72, target: 80, unit: '', trend: [58, 62, 65, 68, 70, 72] }
+                                        ]
+                                    },
+                                    {
+                                        id: 'req-1-3-2',
+                                        title: 'Loyalty Rewards Integration',
+                                        description: 'Enable merchants to offer loyalty programs through our platform.',
+                                        upside: '$35M',
+                                        downside: '$4M',
+                                        metrics: [
+                                            { id: 'metric-1-3-2-1', name: 'Merchants Using Loyalty', current: 12000, target: 25000, unit: '', trend: [2000, 4500, 7000, 9000, 10500, 12000] }
+                                        ]
+                                    }
+                                ]
+                            }
                         ]
                     },
                     {
@@ -374,8 +488,55 @@
                         upside: '$1.8B Revenue',
                         cost: '$320M Investment',
                         goals: [
-                            { id: 'goal-2-1', title: 'Launch Merchant Lending', targetProgress: 45 },
-                            { id: 'goal-2-2', title: 'Consumer Banking', targetProgress: 30 }
+                            {
+                                id: 'goal-2-1',
+                                title: 'Launch Merchant Lending',
+                                description: 'Offer working capital loans to qualified merchants.',
+                                targetProgress: 45,
+                                initiatives: [
+                                    {
+                                        id: 'req-2-1-1',
+                                        title: 'Credit Risk Model',
+                                        description: 'ML-based underwriting using transaction history.',
+                                        upside: '$200M',
+                                        downside: '$25M',
+                                        metrics: [
+                                            { id: 'metric-2-1-1-1', name: 'Model Accuracy', current: 87, target: 95, unit: '%', trend: [72, 76, 80, 83, 85, 87] },
+                                            { id: 'metric-2-1-1-2', name: 'Default Rate', current: 3.2, target: 2.0, unit: '%', trend: [5.5, 5.0, 4.5, 4.0, 3.5, 3.2] }
+                                        ]
+                                    },
+                                    {
+                                        id: 'req-2-1-2',
+                                        title: 'Loan Origination Platform',
+                                        description: 'Self-service loan application and disbursement system.',
+                                        upside: '$150M',
+                                        downside: '$18M',
+                                        metrics: [
+                                            { id: 'metric-2-1-2-1', name: 'Loans Disbursed', current: 8500, target: 20000, unit: '', trend: [1000, 2500, 4500, 6000, 7500, 8500] },
+                                            { id: 'metric-2-1-2-2', name: 'Avg Loan Size', current: 45000, target: 50000, unit: '$', trend: [25000, 30000, 35000, 40000, 42000, 45000] }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                id: 'goal-2-2',
+                                title: 'Consumer Banking',
+                                description: 'Offer consumer financial products through merchant network.',
+                                targetProgress: 30,
+                                initiatives: [
+                                    {
+                                        id: 'req-2-2-1',
+                                        title: 'Digital Wallet Launch',
+                                        description: 'Consumer-facing wallet for payments and savings.',
+                                        upside: '$180M',
+                                        downside: '$30M',
+                                        metrics: [
+                                            { id: 'metric-2-2-1-1', name: 'Wallet Users', current: 850000, target: 3000000, unit: '', trend: [100000, 250000, 400000, 550000, 700000, 850000] },
+                                            { id: 'metric-2-2-1-2', name: 'Monthly Active Users', current: 320000, target: 1500000, unit: '', trend: [50000, 100000, 160000, 220000, 280000, 320000] }
+                                        ]
+                                    }
+                                ]
+                            }
                         ]
                     },
                     {
@@ -385,8 +546,54 @@
                         upside: '$800M Savings',
                         cost: '$200M Investment',
                         goals: [
-                            { id: 'goal-3-1', title: 'Achieve 99.99% Uptime', targetProgress: 95 },
-                            { id: 'goal-3-2', title: 'Scale to 100K TPS', targetProgress: 70 }
+                            {
+                                id: 'goal-3-1',
+                                title: 'Achieve 99.99% Uptime',
+                                description: 'Enterprise-grade reliability for mission-critical payments.',
+                                targetProgress: 95,
+                                initiatives: [
+                                    {
+                                        id: 'req-3-1-1',
+                                        title: 'Multi-Region Failover',
+                                        description: 'Automatic failover across 3 geographic regions.',
+                                        upside: '$120M',
+                                        downside: '$35M',
+                                        metrics: [
+                                            { id: 'metric-3-1-1-1', name: 'Uptime', current: 99.97, target: 99.99, unit: '%', trend: [99.5, 99.7, 99.85, 99.9, 99.95, 99.97] },
+                                            { id: 'metric-3-1-1-2', name: 'Failover Time', current: 12, target: 5, unit: ' sec', trend: [60, 45, 30, 22, 16, 12] }
+                                        ]
+                                    },
+                                    {
+                                        id: 'req-3-1-2',
+                                        title: 'Chaos Engineering Program',
+                                        description: 'Proactive failure testing to identify weaknesses.',
+                                        upside: '$40M',
+                                        downside: '$5M',
+                                        metrics: [
+                                            { id: 'metric-3-1-2-1', name: 'Issues Found Pre-Prod', current: 89, target: 95, unit: '%', trend: [60, 68, 75, 80, 85, 89] }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                id: 'goal-3-2',
+                                title: 'Scale to 100K TPS',
+                                description: 'Handle peak loads of 100,000 transactions per second.',
+                                targetProgress: 70,
+                                initiatives: [
+                                    {
+                                        id: 'req-3-2-1',
+                                        title: 'Horizontal Scaling Architecture',
+                                        description: 'Kubernetes-based auto-scaling for payment processors.',
+                                        upside: '$90M',
+                                        downside: '$22M',
+                                        metrics: [
+                                            { id: 'metric-3-2-1-1', name: 'Peak TPS Capacity', current: 72000, target: 100000, unit: '', trend: [30000, 40000, 50000, 58000, 65000, 72000] },
+                                            { id: 'metric-3-2-1-2', name: 'P99 Latency', current: 145, target: 100, unit: 'ms', trend: [250, 220, 190, 170, 155, 145] }
+                                        ]
+                                    }
+                                ]
+                            }
                         ]
                     },
                     {
@@ -396,7 +603,46 @@
                         upside: '$600M Revenue',
                         cost: '$150M Investment',
                         goals: [
-                            { id: 'goal-4-1', title: 'AI-Powered Insights', targetProgress: 50 }
+                            {
+                                id: 'goal-4-1',
+                                title: 'AI-Powered Insights',
+                                description: 'Deliver actionable intelligence to merchants.',
+                                targetProgress: 50,
+                                initiatives: [
+                                    {
+                                        id: 'req-4-1-1',
+                                        title: 'Fraud Detection ML Model',
+                                        description: 'Real-time fraud scoring using transaction patterns.',
+                                        upside: '$85M',
+                                        downside: '$12M',
+                                        metrics: [
+                                            { id: 'metric-4-1-1-1', name: 'Fraud Detection Rate', current: 94, target: 99, unit: '%', trend: [78, 82, 86, 89, 92, 94] },
+                                            { id: 'metric-4-1-1-2', name: 'False Positive Rate', current: 2.1, target: 0.5, unit: '%', trend: [8, 6, 4.5, 3.5, 2.8, 2.1] }
+                                        ]
+                                    },
+                                    {
+                                        id: 'req-4-1-2',
+                                        title: 'Smart Analytics Dashboard',
+                                        description: 'AI-generated insights and recommendations for merchants.',
+                                        upside: '$55M',
+                                        downside: '$8M',
+                                        metrics: [
+                                            { id: 'metric-4-1-2-1', name: 'Dashboard Engagement', current: 45, target: 70, unit: '%', trend: [15, 22, 30, 36, 40, 45] },
+                                            { id: 'metric-4-1-2-2', name: 'Recommendation Acceptance', current: 38, target: 60, unit: '%', trend: [12, 18, 25, 30, 34, 38] }
+                                        ]
+                                    },
+                                    {
+                                        id: 'req-4-1-3',
+                                        title: 'Predictive Cash Flow',
+                                        description: 'Forecast merchant cash flow based on historical patterns.',
+                                        upside: '$40M',
+                                        downside: '$6M',
+                                        metrics: [
+                                            { id: 'metric-4-1-3-1', name: 'Forecast Accuracy', current: 82, target: 92, unit: '%', trend: [65, 70, 74, 77, 80, 82] }
+                                        ]
+                                    }
+                                ]
+                            }
                         ]
                     }
                 ]

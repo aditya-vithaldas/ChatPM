@@ -417,14 +417,20 @@
         <div class="zoom-hint">
             <div class="zoom-hint-inner">
                 <span>&#128269;</span>
-                <span>Double-click a requirement to <strong>Zoom In</strong> for Details</span>
+                <span>Double-click a requirement to <strong>Zoom In</strong> for Metrics</span>
             </div>
         </div>
     </div>
 
     <script>
-        // Load data
-        const fullData = JSON.parse(localStorage.getItem('strategyMapData')) || { strategies: [] };
+        const CACHE_KEY = 'strategyMapData';
+
+        // Load data - redirect to strategy page only if no data exists
+        const fullData = JSON.parse(localStorage.getItem(CACHE_KEY)) || { strategies: [] };
+        if (!fullData.strategies || fullData.strategies.length === 0) {
+            window.location.href = 'view-strategy.html';
+        }
+
         const selectedStrategyId = sessionStorage.getItem('selectedStrategyId');
         const selectedGoalId = sessionStorage.getItem('selectedGoalId');
 
@@ -529,7 +535,7 @@
             if (card) card.classList.add('drilling');
             document.getElementById('view-container').classList.add('drilling-in');
             setTimeout(() => {
-                window.location.href = 'view-requirement-details.html';
+                window.location.href = 'view-metrics.html';
             }, 500);
         }
 
@@ -544,7 +550,7 @@
                 if (card) card.classList.add('drilling');
                 document.getElementById('view-container').classList.add('drilling-in');
                 setTimeout(() => {
-                    window.location.href = 'view-requirement-details.html';
+                    window.location.href = 'view-metrics.html';
                 }, 500);
             }
         }

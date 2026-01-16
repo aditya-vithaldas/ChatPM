@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setup - Import Data | DecisionOS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #6366f1;
+            --bg-main: #0f172a;
+            --bg-card: #1e293b;
+            --bg-input: #0f172a;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border-color: #334155;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --google-blue: #4285f4;
+            --jira-blue: #0052cc;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-main);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        .header {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 16px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .back-btn:hover {
+            background: var(--bg-card);
+            color: var(--text-primary);
+        }
+
+        .header-title {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .intro {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .intro h2 {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1.8rem;
+            margin-bottom: 12px;
+        }
+
+        .intro p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .import-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 24px;
+        }
+
+        .import-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            padding: 28px;
+            transition: all 0.3s ease;
+        }
+
+        .import-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 8px 40px rgba(99, 102, 241, 0.15);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .card-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+        }
+
+        .card-icon.google {
+            background: linear-gradient(135deg, rgba(66, 133, 244, 0.2), rgba(66, 133, 244, 0.1));
+            color: var(--google-blue);
+        }
+
+        .card-icon.jira {
+            background: linear-gradient(135deg, rgba(0, 82, 204, 0.2), rgba(0, 82, 204, 0.1));
+            color: var(--jira-blue);
+        }
+
+        .card-title-group h3 {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .card-title-group p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: var(--text-muted);
+        }
+
+        .form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .form-hint {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 6px;
+        }
+
+        .form-hint a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .form-hint a:hover {
+            text-decoration: underline;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), #8b5cf6);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-google {
+            background: var(--google-blue);
+            color: white;
+        }
+
+        .btn-jira {
+            background: var(--jira-blue);
+            color: white;
+        }
+
+        .btn-block {
+            width: 100%;
+        }
+
+        .status-message {
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            margin-top: 16px;
+            display: none;
+        }
+
+        .status-message.show {
+            display: block;
+        }
+
+        .status-message.success {
+            background: rgba(34, 197, 94, 0.15);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            color: var(--success);
+        }
+
+        .status-message.error {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: var(--error);
+        }
+
+        .status-message.loading {
+            background: rgba(99, 102, 241, 0.15);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            color: var(--primary);
+        }
+
+        .status-message.warning {
+            background: rgba(245, 158, 11, 0.15);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            color: var(--warning);
+        }
+
+        /* Preview Section */
+        .preview-section {
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+            display: none;
+        }
+
+        .preview-section.show {
+            display: block;
+        }
+
+        .preview-title {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .preview-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .preview-item {
+            background: var(--bg-input);
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            border-left: 3px solid var(--primary);
+        }
+
+        .preview-item-title {
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 4px;
+        }
+
+        .preview-item-meta {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .preview-item.strategy {
+            border-left-color: #8b5cf6;
+        }
+
+        .preview-item.goal {
+            border-left-color: #3b82f6;
+            margin-left: 20px;
+        }
+
+        .preview-item.requirement {
+            border-left-color: #f97316;
+        }
+
+        /* Raw Content Preview */
+        .raw-content-section {
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .raw-content-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            cursor: pointer;
+            padding: 8px 0;
+        }
+
+        .raw-content-toggle:hover {
+            color: var(--text-primary);
+        }
+
+        .raw-content-toggle .arrow {
+            transition: transform 0.2s;
+        }
+
+        .raw-content-toggle.open .arrow {
+            transform: rotate(90deg);
+        }
+
+        .raw-content-box {
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.8rem;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            color: var(--text-secondary);
+            display: none;
+        }
+
+        .raw-content-box.show {
+            display: block;
+        }
+
+        .raw-content-stats {
+            display: flex;
+            gap: 16px;
+            margin-top: 12px;
+            padding: 10px 14px;
+            background: rgba(99, 102, 241, 0.1);
+            border-radius: 8px;
+            font-size: 0.8rem;
+        }
+
+        .raw-content-stats span {
+            color: var(--text-secondary);
+        }
+
+        .raw-content-stats strong {
+            color: var(--primary);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        /* Compact card styles */
+        .import-card.compact {
+            padding: 0;
+        }
+
+        .import-card.compact .card-header {
+            padding: 16px 20px;
+            margin: 0;
+            border-radius: 16px;
+        }
+
+        .import-card.compact .card-header.clickable {
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .import-card.compact .card-header.clickable:hover {
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .expand-icon {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            transition: transform 0.2s;
+        }
+
+        .expand-icon.collapsed {
+            transform: rotate(-90deg);
+        }
+
+        .card-body {
+            padding: 0 20px 20px;
+            transition: all 0.3s ease;
+        }
+
+        .card-body.collapsed {
+            display: none;
+        }
+
+        .hardcoded-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            background: rgba(99, 102, 241, 0.1);
+            border-radius: 8px;
+            margin-bottom: 12px;
+            font-size: 0.85rem;
+        }
+
+        .hardcoded-label {
+            color: var(--text-muted);
+        }
+
+        .hardcoded-value {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .form-group.compact {
+            margin-bottom: 12px;
+        }
+
+        .form-group.compact label {
+            margin-bottom: 4px;
+        }
+
+        .form-group.compact input {
+            padding: 10px 14px;
+        }
+
+        .form-group.compact .form-hint {
+            margin-top: 4px;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .import-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                padding: 0 16px;
+            }
+
+            .header {
+                padding: 16px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-left">
+            <button class="back-btn" onclick="window.location.href='/'">&#8592;</button>
+            <h1 class="header-title">Setup & Import</h1>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="intro">
+            <h2>Import Your Strategy Data</h2>
+            <p>Connect your Google Docs for strategies and Jira for requirements.<br>
+            Your data stays in your browser - nothing is stored on our servers.</p>
+        </div>
+
+        <div class="import-cards">
+            <!-- Google Docs Import -->
+            <div class="import-card compact">
+                <div class="card-header clickable" onclick="toggleCardBody('google')">
+                    <div class="card-icon google">&#128196;</div>
+                    <div class="card-title-group">
+                        <h3>Google Docs</h3>
+                        <p>Strategy document hardcoded</p>
+                    </div>
+                    <span class="expand-icon" id="google-expand">&#9660;</span>
+                </div>
+
+                <div class="card-body" id="google-body">
+                    <div class="hardcoded-info">
+                        <span class="hardcoded-label">Document:</span>
+                        <span class="hardcoded-value">Strategic Focus Areas Doc</span>
+                    </div>
+                    <button type="button" class="btn btn-google btn-block" id="google-import-btn" onclick="importGoogleDoc()">
+                        <span class="btn-text">Import Strategies</span>
+                    </button>
+                </div>
+
+                <div id="google-status" class="status-message"></div>
+
+                <div id="google-preview" class="preview-section">
+                    <div class="raw-content-section">
+                        <button class="raw-content-toggle" onclick="toggleRawContent()">
+                            <span class="arrow">&#9654;</span>
+                            <span>Raw Content</span>
+                        </button>
+                        <div class="raw-content-stats" id="google-raw-stats"></div>
+                        <div class="raw-content-box" id="google-raw-content"></div>
+                    </div>
+
+                    <div class="preview-title">&#128269; Parsed Structure</div>
+                    <div class="preview-list" id="google-preview-list"></div>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" onclick="copyGoogleDataToClipboard()">Copy JSON</button>
+                    </div>
+                    <p class="form-hint" style="margin-top: 8px; text-align: center;">Preview only - does not modify your Strategy Map</p>
+                </div>
+            </div>
+
+            <!-- Jira Import -->
+            <div class="import-card compact">
+                <div class="card-header clickable" onclick="toggleCardBody('jira')">
+                    <div class="card-icon jira">&#128203;</div>
+                    <div class="card-title-group">
+                        <h3>Jira</h3>
+                        <p>KAN project @ aditya-vithaldas.atlassian.net</p>
+                    </div>
+                    <span class="expand-icon" id="jira-expand">&#9660;</span>
+                </div>
+
+                <div class="card-body" id="jira-body">
+                    <div class="hardcoded-info">
+                        <span class="hardcoded-label">Project:</span>
+                        <span class="hardcoded-value">KAN</span>
+                    </div>
+                    <div class="form-group compact">
+                        <label>API Token</label>
+                        <input type="password" id="jira-token" placeholder="Paste your Jira API token" required>
+                        <p class="form-hint"><a href="https://id.atlassian.com/manage-profile/security/api-tokens" target="_blank">Get token</a></p>
+                    </div>
+                    <div class="form-group compact">
+                        <label>Email</label>
+                        <input type="email" id="jira-email" value="aditya.vithaldas@gmail.com" required>
+                    </div>
+                    <button type="button" class="btn btn-jira btn-block" id="jira-import-btn" onclick="importJira()">
+                        <span class="btn-text">Import Requirements</span>
+                    </button>
+                </div>
+
+                <div id="jira-status" class="status-message"></div>
+
+                <div id="jira-preview" class="preview-section">
+                    <div class="preview-title">&#128269; Imported Requirements</div>
+                    <div class="preview-list" id="jira-preview-list"></div>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" onclick="copyJiraDataToClipboard()">Copy JSON</button>
+                    </div>
+                    <p class="form-hint" style="margin-top: 8px; text-align: center;">Preview only - does not modify your data</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Store imported data
+        let importedGoogleData = null;
+        let importedJiraData = null;
+
+        // API base URL
+        const API_BASE = window.location.origin;
+
+        // HARDCODED VALUES
+        const GOOGLE_DOC_URL = 'https://docs.google.com/document/d/1K1Xl3cTrzqzYVeJ5ofRg-uq2B_iTEL1ecH__tQBTLs0/edit';
+        const JIRA_URL = 'aditya-vithaldas.atlassian.net';
+        const JIRA_PROJECT = 'KAN';
+
+        // Toggle card body visibility
+        function toggleCardBody(card) {
+            const body = document.getElementById(`${card}-body`);
+            const icon = document.getElementById(`${card}-expand`);
+            body.classList.toggle('collapsed');
+            icon.classList.toggle('collapsed');
+        }
+
+        // Google Docs Import (hardcoded URL)
+        async function importGoogleDoc() {
+            const btn = document.getElementById('google-import-btn');
+            const status = document.getElementById('google-status');
+
+            setLoading(btn, true, 'Importing...');
+            showStatus(status, 'loading', 'Fetching document...');
+
+            try {
+                const response = await fetch(`${API_BASE}/api/import/google-docs`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ docUrl: GOOGLE_DOC_URL })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Failed to import document');
+                }
+
+                importedGoogleData = data;
+
+                if (!data.rawContent || data.rawContent.trim().length === 0) {
+                    showStatus(status, 'warning', 'Document empty or inaccessible. Make sure it is shared publicly.');
+                    renderGooglePreview(data.parsed, data.rawContent || '(No content)', data.parsed.detectedPattern);
+                } else {
+                    const totalGoals = data.parsed.strategies.reduce((sum, s) => sum + s.goals.length, 0);
+                    const pattern = data.parsed.detectedPattern ? ` [${data.parsed.detectedPattern}]` : '';
+                    showStatus(status, 'success', `${data.parsed.strategies.length} strategies, ${totalGoals} goals${pattern}`);
+                    renderGooglePreview(data.parsed, data.rawContent, data.parsed.detectedPattern);
+                }
+
+            } catch (error) {
+                showStatus(status, 'error', error.message);
+            } finally {
+                setLoading(btn, false, 'Import Strategies');
+            }
+        }
+
+        // Jira Import (hardcoded URL and project)
+        async function importJira() {
+            const email = document.getElementById('jira-email').value.trim();
+            const apiToken = document.getElementById('jira-token').value.trim();
+
+            if (!email || !apiToken) {
+                showStatus(document.getElementById('jira-status'), 'error', 'Please enter your email and API token');
+                return;
+            }
+
+            const btn = document.getElementById('jira-import-btn');
+            const status = document.getElementById('jira-status');
+
+            setLoading(btn, true, 'Importing...');
+            showStatus(status, 'loading', 'Connecting to Jira...');
+
+            try {
+                const response = await fetch(`${API_BASE}/api/import/jira`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        jiraUrl: JIRA_URL,
+                        email: email,
+                        apiToken: apiToken,
+                        projectKey: JIRA_PROJECT,
+                        jqlQuery: `project = "${JIRA_PROJECT}"`
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Failed to import from Jira');
+                }
+
+                importedJiraData = data;
+                showStatus(status, 'success', `${data.retrieved} of ${data.total} issues imported`);
+                renderJiraPreview(data.requirements);
+
+            } catch (error) {
+                showStatus(status, 'error', error.message);
+            } finally {
+                setLoading(btn, false, 'Import Requirements');
+            }
+        }
+
+        // Toggle raw content visibility
+        function toggleRawContent() {
+            const toggle = document.querySelector('.raw-content-toggle');
+            const content = document.getElementById('google-raw-content');
+            toggle.classList.toggle('open');
+            content.classList.toggle('show');
+        }
+
+        // Render Google Docs Preview with raw content
+        function renderGooglePreview(parsed, rawContent, detectedPattern) {
+            const previewSection = document.getElementById('google-preview');
+            const previewList = document.getElementById('google-preview-list');
+            const rawContentBox = document.getElementById('google-raw-content');
+            const rawStats = document.getElementById('google-raw-stats');
+
+            // Show raw content
+            if (rawContent) {
+                rawContentBox.textContent = rawContent;
+
+                // Calculate stats
+                const lines = rawContent.split('\n').length;
+                const words = rawContent.split(/\s+/).filter(w => w).length;
+                const chars = rawContent.length;
+
+                let statsHtml = `
+                    <span><strong>${chars.toLocaleString()}</strong> characters</span>
+                    <span><strong>${words.toLocaleString()}</strong> words</span>
+                    <span><strong>${lines}</strong> lines</span>
+                `;
+
+                if (detectedPattern) {
+                    statsHtml += `<span>Pattern: <strong>${detectedPattern}</strong></span>`;
+                }
+
+                rawStats.innerHTML = statsHtml;
+
+                // Auto-expand to show user the content was fetched
+                const toggle = document.querySelector('.raw-content-toggle');
+                toggle.classList.add('open');
+                rawContentBox.classList.add('show');
+            }
+
+            // Show parsed structure
+            let html = '';
+            parsed.strategies.forEach(strategy => {
+                const descPreview = strategy.description ? strategy.description.substring(0, 100) + '...' : 'No description';
+                html += `
+                    <div class="preview-item strategy">
+                        <div class="preview-item-title">${escapeHtml(strategy.title)}</div>
+                        <div class="preview-item-meta">${strategy.goals.length} goal(s) | ${escapeHtml(descPreview)}</div>
+                    </div>
+                `;
+                strategy.goals.forEach(goal => {
+                    const goalDesc = goal.description ? goal.description.substring(0, 80) + '...' : 'No description';
+                    html += `
+                        <div class="preview-item goal">
+                            <div class="preview-item-title">${escapeHtml(goal.title)}</div>
+                            <div class="preview-item-meta">${escapeHtml(goalDesc)}</div>
+                        </div>
+                    `;
+                });
+            });
+
+            if (parsed.strategies.length === 0) {
+                html = '<p style="color: var(--text-muted); padding: 20px; text-align: center;">No strategies found. The document may be empty or not publicly accessible.</p>';
+            }
+
+            previewList.innerHTML = html;
+            previewSection.classList.add('show');
+        }
+
+        // Escape HTML to prevent XSS
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Render Jira Preview
+        function renderJiraPreview(requirements) {
+            const previewSection = document.getElementById('jira-preview');
+            const previewList = document.getElementById('jira-preview-list');
+
+            let html = '';
+            requirements.slice(0, 20).forEach(req => {
+                html += `
+                    <div class="preview-item requirement">
+                        <div class="preview-item-title">[${req.jiraKey}] ${req.title}</div>
+                        <div class="preview-item-meta">${req.issueType} | ${req.status} | ${req.priority}</div>
+                    </div>
+                `;
+            });
+
+            if (requirements.length > 20) {
+                html += `<p style="color: var(--text-muted); padding: 10px; text-align: center;">+ ${requirements.length - 20} more requirements</p>`;
+            }
+
+            previewList.innerHTML = html;
+            previewSection.classList.add('show');
+        }
+
+        // Copy Google Data to clipboard (doesn't modify strategy map)
+        function copyGoogleDataToClipboard() {
+            if (!importedGoogleData) return;
+
+            const strategies = importedGoogleData.parsed.strategies;
+            const json = JSON.stringify(strategies, null, 2);
+
+            navigator.clipboard.writeText(json).then(() => {
+                showStatus(document.getElementById('google-status'), 'success', 'JSON copied to clipboard!');
+            }).catch(() => {
+                // Fallback - show in alert
+                prompt('Copy this JSON:', json);
+            });
+        }
+
+        // Copy Jira Data to clipboard (doesn't modify data)
+        function copyJiraDataToClipboard() {
+            if (!importedJiraData) return;
+
+            const requirements = importedJiraData.requirements;
+            const json = JSON.stringify(requirements, null, 2);
+
+            navigator.clipboard.writeText(json).then(() => {
+                showStatus(document.getElementById('jira-status'), 'success', 'JSON copied to clipboard!');
+            }).catch(() => {
+                prompt('Copy this JSON:', json);
+            });
+        }
+
+        // Helper functions
+        function setLoading(btn, loading, resetText) {
+            const btnText = btn.querySelector('.btn-text');
+            if (loading) {
+                btn.disabled = true;
+                btnText.innerHTML = '<span class="spinner"></span> ' + (resetText || 'Importing...');
+            } else {
+                btn.disabled = false;
+                btnText.textContent = resetText || 'Import';
+            }
+        }
+
+        function showStatus(element, type, message) {
+            element.className = `status-message show ${type}`;
+            element.textContent = message;
+        }
+
+    </script>
+</body>
+</html>
