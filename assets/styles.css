@@ -160,3 +160,9 @@ h1 { font-size: clamp(3.9rem, 6.7vw, 6.9rem); line-height: 1.01; letter-spacing:
 @media (max-width: 760px) { .about { grid-template-columns: 1fr; gap: 32px; padding: 45px 0; }.site-header nav { justify-content: flex-start; gap: 10px 18px; }.site-header nav .contact-button { margin-left: auto; }.principle-strip p { max-width: 300px; } }
 
 .service-art { display: block; width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: contain; background: var(--surface); border-radius: var(--radius-card); margin-bottom: 4px; }
+
+.about-proof { display: flex; align-items: center; gap: 24px; margin-top: 28px; }
+.about-portrait { display: block; width: 46%; max-width: 250px; height: auto; aspect-ratio: 1; object-fit: contain; border-radius: var(--radius-card); background: white; }
+.about-proof .experience-mark { flex-direction: column; align-items: flex-start; gap: 14px; margin-top: 0; }
+.about-proof .experience-mark strong { font-size: 4rem; }
+@media (max-width: 760px) { .about-proof { gap: 18px; }.about-portrait { width: 43%; }.about-proof .experience-mark strong { font-size: 3.5rem; }.about-proof .experience-mark span { font-size: .8rem; } }

@@ -92,3 +92,9 @@ Lead with “Fractional Product Building” and “Get to market in weeks.” Fr
 Show exactly three illustrated service pieces side by side on desktop, stacked on mobile. Use the customer-conversation drawing for consumer insights, a builder assembling a product for MVP delivery, and a concept-to-cloud drawing for end-to-end ownership. Do not repeat the consumer proposition in a separate introductory panel.
 
 Service illustration assets `assets/service-mvp.png` and `assets/service-ownership.png` were generated with the built-in image-generation tool. Briefs: a builder assembling a product interface on a laptop for fast MVP delivery; a builder at a laptop joined by a continuous line from a lightbulb to cloud hosting for ownership. Both use the shared 3:2, thick dry-crayon, ink/cobalt/white style with generous white space and no text.
+
+## About portrait
+
+The user supplied a face photograph and requested a matching illustrated portrait. Use it beside the About experience summary while keeping decisionos firm branding. Preserve the likeness and use the shared ink/cobalt/white crayon treatment. Asset: `assets/about-portrait.png`, generated with the built-in image-generation tool from the user-supplied photo and the existing customer-conversation illustration as a style-only reference.
+
+Portrait refinement prompt: make the portrait a clearly hand-drawn editorial caricature with an oversized rounded bald head, smaller shoulders, bold eyebrows, dot eyes, a simple friendly nose and a curved smile. Remove realistic eye anatomy, wrinkles and shading. Use only loose thick black crayon lines, a white face/background and a cobalt shirt with a few white plaid strokes. Preserve recognizable identity. The first realistic draft is not used on the site.
