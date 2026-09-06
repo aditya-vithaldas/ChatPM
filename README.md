@@ -1,4 +1,4 @@
-# Aditya Vithaldas — Portfolio foundation
+# decisionos — Portfolio foundation
 
 Start with `design-system.html`: a living reference for the five-tone palette, strong typography, layout, elements and restrained motion. `index.html` is the initial portfolio landing page using that system.
 
