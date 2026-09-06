@@ -4,11 +4,11 @@ Version 0.1. The living reference is `design-system.html`; shared implementation
 
 ## Positioning
 
-Aditya Vithaldas is a full stack builder with 15 years across design, development, and product management, able to own initiatives end to end. This experience statement comes directly from Aditya. Company history, project outcomes, metrics, and availability are intentionally left for the next content discussion.
+Aditya Vithaldas is a Fractional Product Builder with 15 years across design, development, and product management. The promise: go to market quickly, with less fuss. Connect business transformation goals to a focused MVP through end-to-end ownership from strategy to launch. This experience statement comes directly from Aditya. Company history, project outcomes, metrics, and availability are intentionally left for the next content discussion.
 
 ## Visual thesis
 
-Contemporary editorial simplicity: strong sans-serif typography, five core tones, generous negative space, fine rules, and a layered product/design/engineering diagram. Emphasize clarity and ownership rather than decoration.
+Contemporary editorial simplicity: strong sans-serif typography, five core tones, generous negative space, fine rules, and a softly flowing particle swarm. Emphasize clarity and ownership rather than decoration.
 
 ## Palette
 
@@ -34,9 +34,12 @@ Spacing steps: 8, 16, 24, 32, 48, 64, 96, 128px. Canvas maximum: 1440px. Desktop
 
 - Entrance: once, 650ms, 14px rise, ease-out; adjacent elements stagger by 100–180ms.
 - Hover: 180ms, at most 2px translation for controls.
-- Pointer: desktop fine pointers only, bounded ±16px layer movement, eased via requestAnimationFrame. Stop frames when settled. Reset on pointer exit or window blur.
-- Touch: static diagram, all content and actions remain available.
-- Reduced motion: disable animation, smooth scrolling, hover translation and pointer response. Listen for preference changes during the session.
+- Pointer: desktop fine pointers only, bounded ±28px horizontal and ±18px vertical influence on the swarm, eased via requestAnimationFrame. Release pointer influence on exit or window blur.
+- Ambient swarm: slow continuous flow, 144 particles on desktop and 60 on mobile. A loose shared current, restrained cobalt/slate opacity, no flashing or long trails. Fine pointers gently displace the field.
+- Performance: cap canvas pixel ratio at 2 and drawing at 30 fps. Pause when offscreen or the document is hidden.
+- Controls: accessible pause/resume buttons control all swarm instances on the page.
+- Touch: fewer particles and no pointer attraction; all content and actions remain available.
+- Reduced motion: show a still swarm and disable animation, smooth scrolling, hover translation and pointer response. Listen for preference changes during the session.
 
 ## Content and next steps
 
