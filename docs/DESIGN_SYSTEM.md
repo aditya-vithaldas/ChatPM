@@ -98,3 +98,11 @@ Service illustration assets `assets/service-mvp.png` and `assets/service-ownersh
 The user supplied a face photograph and requested a matching illustrated portrait. Use it beside the About experience summary while keeping decisionos firm branding. Preserve the likeness and use the shared ink/cobalt/white crayon treatment. Asset: `assets/about-portrait.png`, generated with the built-in image-generation tool from the user-supplied photo and the existing customer-conversation illustration as a style-only reference.
 
 Portrait refinement prompt: make the portrait a clearly hand-drawn editorial caricature with an oversized rounded bald head, smaller shoulders, bold eyebrows, dot eyes, a simple friendly nose and a curved smile. Remove realistic eye anatomy, wrinkles and shading. Use only loose thick black crayon lines, a white face/background and a cobalt shirt with a few white plaid strokes. Preserve recognizable identity. The first realistic draft is not used on the site.
+
+## Alignment animation (supersedes the random swarm)
+
+Three labeled streams for product, design, and engineering start independently with gentle irregularity and converge into a shared smooth current. Fine continuous paths maintain the story when still; traveling marks communicate progress. Color and separation gradually resolve toward cobalt alignment. Pointer influence is bounded. Keep 30fps cap, offscreen/hidden suspension, mobile simplification, pause controls, and reduced-motion support. The landing headline is reduced by approximately 15% from the original scale.
+
+## Work and case-study pattern
+
+Provide a dedicated Our work index and a detail page for each project: question, why/what/how, interactive concept, design rationale, and what to validate. Initial content is explicitly a draft hypothesis with scripted sample interactions; no fabricated client outcomes. Reuse shared typography, colors, and responsive layouts. Keep the About grid columns shrinkable and cap the portrait width to protect the adjacent text.

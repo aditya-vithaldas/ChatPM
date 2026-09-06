@@ -36,3 +36,7 @@ gcloud builds triggers run fffac18f-e3de-491f-b7ce-e720daca5705 --project=striki
 ```
 
 Wait for the build and rollout to succeed, then verify the public domain. A manual branch deployment does not change which branch the automatic trigger watches.
+
+## Our work and case studies
+
+`work.html` is the expandable project index. Case studies live in `projects/commerce.html`, `projects/paralegal.html`, and `projects/employee.html`; their local scripted interactions use `assets/concepts.js`. Each page separates draft hypotheses from eventual research evidence and outcomes. Add a new case-study page and link it from the work index as more projects are supplied. The build versions CSS and JavaScript URLs to avoid stale layouts after publication.

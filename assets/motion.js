@@ -8,39 +8,70 @@ const fields = [...document.querySelectorAll('.swarm-canvas')].map(canvas => {
   const context = canvas.getContext('2d');
   if (!context) return null;
   const field = { canvas, context, width: 0, height: 0, time: 0, frame: 0, last: null, visible: true, x: 0, y: 0, aimX: 0, aimY: 0 };
-  // Deterministic sampling prevents a reshuffle when resized or paused.
-  field.particles = Array.from({ length: 144 }, (_, i) => ({
-    phase: i * 2.39996323,
-    radius: Math.sqrt((i + .5) / 144),
-    speed: .075 + (i % 7) * .003,
-    size: 1.1 + (i % 4) * .3,
-    slate: i % 5 === 0,
-  }));
+  // Three disciplines begin independently, then converge into one smooth current.
+  const laneColors = [[32, 77, 255], [95, 101, 114], [23, 25, 31]];
+  const names = ['Product', 'Design', 'Engineering'];
+  const smooth = u => { const v = Math.max(0, Math.min(1, u)); return v * v * (3 - 2 * v); };
+  function point(u, lane, strand, t) {
+    const merge = smooth((u - .1) / .75);
+    const loose = 1 - merge;
+    const wave = Math.sin(u * 15 + lane * 1.9 + t * .26 + strand * .28)
+      + .42 * Math.sin(u * 29 - t * .18 + lane * 2.3 + strand * .5);
+    const envelope = Math.sin(Math.PI * Math.min(1, u * 1.6));
+    const center = (mobile.matches ? .35 : .43) + Math.sin(u * 4 - t * .13) * .011;
+    return [
+      field.width * (.09 + .82 * u) + field.x * .18 * Math.sin(Math.PI * u),
+      field.height * (center + (lane - 1) * (mobile.matches ? .15 : .185) * loose
+        + wave * (mobile.matches ? .035 : .055) * loose * envelope + strand * .005 * loose)
+        + field.y * .32 * Math.sin(Math.PI * u),
+    ];
+  }
   function draw() {
     const { width: w, height: h, time: t, context: ctx } = field;
     ctx.clearRect(0, 0, w, h);
-    const stride = mobile.matches ? 2.4 : 1;
-    const count = mobile.matches ? 60 : 144;
-    for (let i = 0; i < count; i++) {
-      const p = field.particles[Math.floor(i * stride)];
-      const a = p.phase + t * p.speed;
-      const breathing = 1 + .055 * Math.sin(t * .16 + p.radius * 3);
-      const depth = (Math.sin(a + p.radius * 2) + 1) / 2;
-      const spread = p.radius * breathing;
-      const dx = Math.cos(a) * spread * .37 + Math.sin(a * 2 + t * .09) * .045;
-      const dy = Math.sin(a) * spread * .265 + Math.sin(a * 1.5 + t * .13) * .065;
-      const px = w * (.5 + dx) + field.x * (.25 + depth * .75);
-      const py = h * (.46 + dy) + field.y * (.25 + depth * .75);
-      const opacity = .25 + depth * .38;
-      ctx.strokeStyle = p.slate ? `rgba(95,101,114,${opacity})` : `rgba(32,77,255,${opacity})`;
-      ctx.lineWidth = p.size * (.65 + depth * .35);
-      ctx.lineCap = 'round';
-      // Short tangent strokes give the field a flowing, swarm-like texture.
-      ctx.beginPath();
-      ctx.moveTo(px, py);
-      ctx.lineTo(px - Math.sin(a) * (1.8 + depth * 2), py + Math.cos(a) * (1.8 + depth * 2));
-      ctx.stroke();
+    if (!w || !h) return;
+    ctx.lineCap = 'round';
+    const strands = mobile.matches ? 3 : 5;
+    for (let lane = 0; lane < 3; lane++) {
+      const color = laneColors[lane];
+      // Fine continuous paths retain meaning even when motion is paused.
+      for (let strand = 0; strand < strands; strand++) {
+        const offset = strand - (strands - 1) / 2;
+        ctx.beginPath();
+        for (let i = 0; i <= 90; i++) {
+          const [x, y] = point(i / 90, lane, offset, t);
+          if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        }
+        ctx.strokeStyle = `rgba(${color.join(',')},${strand === 0 ? .2 : .095})`;
+        ctx.lineWidth = strand === 0 ? 1.3 : .8;
+        ctx.stroke();
+      }
+      // Traveling marks follow the same paths, never random orbits.
+      const count = mobile.matches ? 14 : 25;
+      for (let i = 0; i < count; i++) {
+        const u = (i / count + t * .036 + lane * .013) % 1;
+        const merge = smooth((u - .1) / .75);
+        const strand = Math.sin(i * 2.4 + lane) * 1.8;
+        const [x, y] = point(u, lane, strand, t);
+        const [nextX, nextY] = point(Math.min(1, u + .009), lane, strand, t);
+        const rgb = color.map((c, j) => Math.round(c + (laneColors[0][j] - c) * merge));
+        const fade = Math.min(1, u * 15, (1 - u) * 15);
+        ctx.strokeStyle = `rgba(${rgb.join(',')},${fade * (.4 + merge * .3)})`;
+        ctx.lineWidth = 1.8;
+        ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(nextX, nextY); ctx.stroke();
+      }
+      const label = point(0, lane, 0, t);
+      ctx.font = `${mobile.matches ? 11 : 12}px Helvetica, Arial, sans-serif`;
+      ctx.fillStyle = '#5f6572';
+      ctx.fillText(names[lane], label[0], label[1] - 17);
     }
+    // A soft, stable destination signals alignment without a flashy pulse.
+    const end = point(.97, 1, 0, t);
+    const glow = ctx.createRadialGradient(end[0], end[1], 0, end[0], end[1], w * .13);
+    glow.addColorStop(0, 'rgba(32,77,255,.09)');
+    glow.addColorStop(1, 'rgba(32,77,255,0)');
+    ctx.fillStyle = glow;
+    ctx.beginPath(); ctx.arc(end[0], end[1], w * .13, 0, Math.PI * 2); ctx.fill();
   }
   function allowed() { return !paused && !reduced.matches && !document.hidden && field.visible; }
   function tick(now) {

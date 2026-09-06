@@ -2,7 +2,8 @@ FROM node:22-alpine AS build
 WORKDIR /app
 COPY package.json ./
 COPY scripts/build.mjs scripts/build.mjs
-COPY index.html design-system.html ./
+COPY index.html design-system.html work.html ./
+COPY projects ./projects
 COPY assets ./assets
 RUN node scripts/build.mjs
 
