@@ -21,4 +21,18 @@ Open `http://127.0.0.1:4173/design-system.html` for the design system or `http:/
 - `archive/chatpm/` — original application and deployment files, preserved unchanged
 - `scripts/` — dependency-free static build and local preview
 
-The build copies only the two portfolio pages and their assets into `dist/`. The archive is excluded. No Sites integration or production deployment is configured. Existing ChatPM deployment scripts now live in the archive and should be run there only if intentionally restoring the old application.
+The build copies only the two portfolio pages and their assets into `dist/`. The archive is excluded. Production uses the existing Google Cloud Run service; no Sites integration is configured. Existing ChatPM deployment scripts now live in the archive and should be run there only if intentionally restoring the old application.
+
+## Production deployment
+
+The existing Cloud Build trigger `fffac18f-e3de-491f-b7ce-e720daca5705` watches `main` in this repository and builds the root Dockerfile. It deploys to service `chatpm`, project `striking-loop-447915-q3`, region `europe-west1`, mapped to `decisionos.me`.
+
+The container serves only `dist/`, listens on Cloud Run's `PORT`, and exposes `/health`. The old application stays in `archive/chatpm` and is excluded from the image.
+
+A specific validated commit can also be deployed through the existing trigger:
+
+```sh
+gcloud builds triggers run fffac18f-e3de-491f-b7ce-e720daca5705 --project=striking-loop-447915-q3 --region=global --sha=COMMIT_SHA
+```
+
+Wait for the build and rollout to succeed, then verify the public domain. A manual branch deployment does not change which branch the automatic trigger watches.

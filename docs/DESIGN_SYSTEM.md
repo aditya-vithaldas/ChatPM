@@ -47,7 +47,7 @@ Keep claims specific and verifiable. The landing page is a preliminary applicati
 
 ## Source and delivery
 
-The original Git-tracked project is preserved byte-for-byte at `archive/chatpm`. It is not copied into the portfolio build. There is no active Sites integration or deployment configuration. Publishing to GitHub is separate from any live deployment.
+The original Git-tracked project is preserved byte-for-byte at `archive/chatpm`. It is not copied into the portfolio build. There is no active Sites integration. The root Dockerfile supports the existing Google Cloud Run deployment. Publishing to GitHub is separate from any live deployment.
 
 ## Illustration language
 
@@ -82,3 +82,13 @@ All three samples use the built-in image-generation tool, landscape 3:2, refined
 ## About positioning
 
 Use “Product thinker. Hands-on builder.” and the throughline “From the why, to the what, and finally the how.” The About profile connects the user's stated 15 years across development, design, and product management with hands-on execution and ownership from concept to hosting. Do not invent employers, accomplishments, education, or dates. The site now speaks as decisionos rather than a personal portfolio. Use firm branding and the shared editorial illustration style.
+
+## Lead proposition
+
+Lead with “Fractional Product Building” and “Get to market in weeks.” Frame the offer as a flexible consulting plan focused on market validation. The hero describes the proposition and customer outcome; experience belongs in About.
+
+## Service composition
+
+Show exactly three illustrated service pieces side by side on desktop, stacked on mobile. Use the customer-conversation drawing for consumer insights, a builder assembling a product for MVP delivery, and a concept-to-cloud drawing for end-to-end ownership. Do not repeat the consumer proposition in a separate introductory panel.
+
+Service illustration assets `assets/service-mvp.png` and `assets/service-ownership.png` were generated with the built-in image-generation tool. Briefs: a builder assembling a product interface on a laptop for fast MVP delivery; a builder at a laptop joined by a continuous line from a lightbulb to cloud hosting for ownership. Both use the shared 3:2, thick dry-crayon, ink/cobalt/white style with generous white space and no text.

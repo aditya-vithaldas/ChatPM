@@ -1,0 +1,10 @@
+*
+!Dockerfile
+!package.json
+!scripts/
+!scripts/build.mjs
+!scripts/serve.mjs
+!index.html
+!design-system.html
+!assets/
+!assets/**
