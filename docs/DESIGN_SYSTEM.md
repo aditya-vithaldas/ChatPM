@@ -106,3 +106,11 @@ Three labeled streams for product, design, and engineering start independently w
 ## Work and case-study pattern
 
 Provide a dedicated Our work index and a detail page for each project: question, why/what/how, interactive concept, design rationale, and what to validate. Initial content is explicitly a draft hypothesis with scripted sample interactions; no fabricated client outcomes. Reuse shared typography, colors, and responsive layouts. Keep the About grid columns shrinkable and cap the portrait width to protect the adjacent text.
+
+## Fluid convergence
+
+Three disciplines drift along layered, non-repeating waves before converging. A softly eased local pointer field bends the paths toward the cursor; influence fades when the cursor leaves. The shared endpoint remains coherent. Motion pauses offscreen, in hidden tabs, or through the Pause control, and reduced-motion preferences render a static view.
+
+## Case-study framing
+
+Stories explain what matters, why it matters, what needs to be done, and how the experience could evolve. Berlin Combat uses embedded storytelling as its central theme, with sourced context on Claude Fable 5.1 and GPT-6 Astra. The playable game is an exploration, not evidence of measured business results.

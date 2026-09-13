@@ -8,6 +8,13 @@
 !design-system.html
 !assets/
 !assets/**
-!work.html
+!case-studies.html
 !projects/
 !projects/**
+
+!package-lock.json
+
+!scripts/build-seo.mjs
+!scripts/seo-pages.json
+
+!thanks.html

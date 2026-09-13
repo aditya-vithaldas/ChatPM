@@ -7,7 +7,7 @@ let paused = false;
 const fields = [...document.querySelectorAll('.swarm-canvas')].map(canvas => {
   const context = canvas.getContext('2d');
   if (!context) return null;
-  const field = { canvas, context, width: 0, height: 0, time: 0, frame: 0, last: null, visible: true, x: 0, y: 0, aimX: 0, aimY: 0 };
+  const field = { canvas, context, width: 0, height: 0, time: 0, frame: 0, last: null, visible: true, x: .5, y: .4, aimX: .5, aimY: .4, influence: 0, aimInfluence: 0 };
   // Three disciplines begin independently, then converge into one smooth current.
   const laneColors = [[32, 77, 255], [95, 101, 114], [23, 25, 31]];
   const names = ['Product', 'Design', 'Engineering'];
@@ -15,16 +15,20 @@ const fields = [...document.querySelectorAll('.swarm-canvas')].map(canvas => {
   function point(u, lane, strand, t) {
     const merge = smooth((u - .1) / .75);
     const loose = 1 - merge;
-    const wave = Math.sin(u * 15 + lane * 1.9 + t * .26 + strand * .28)
-      + .42 * Math.sin(u * 29 - t * .18 + lane * 2.3 + strand * .5);
+    // Incommensurate waves drift without an obvious repeated loop or frame jitter.
+    const phase = lane * 2.37 + strand * .61;
+    const wave = Math.sin(u * (11.7 + lane * 1.3) + phase + t * .43)
+      + .47 * Math.sin(u * 22.3 - t * .31 + phase * 1.73)
+      + .24 * Math.sin(u * 7.1 + t * .67 + phase * 2.19);
     const envelope = Math.sin(Math.PI * Math.min(1, u * 1.6));
-    const center = (mobile.matches ? .35 : .43) + Math.sin(u * 4 - t * .13) * .011;
-    return [
-      field.width * (.09 + .82 * u) + field.x * .18 * Math.sin(Math.PI * u),
-      field.height * (center + (lane - 1) * (mobile.matches ? .15 : .185) * loose
-        + wave * (mobile.matches ? .035 : .055) * loose * envelope + strand * .005 * loose)
-        + field.y * .32 * Math.sin(Math.PI * u),
-    ];
+    const center = (mobile.matches ? .35 : .40) + Math.sin(u * 4 - t * .22) * .017;
+    const x = .09 + .82 * u + Math.sin(u * 9 + phase + t * .37) * .007 * loose * envelope;
+    const y = center + (lane - 1) * (mobile.matches ? .14 : .16) * loose
+      + wave * (mobile.matches ? .028 : .045) * loose * envelope + strand * .005 * loose;
+    const distance = ((x - field.x) / .3) ** 2 + ((y - field.y) / .35) ** 2;
+    const pull = Math.exp(-distance) * field.influence * Math.sin(Math.PI * u) * .48;
+    return [field.width * (x + (field.x - x) * pull * .35),
+      field.height * (y + (field.y - y) * pull)];
   }
   function draw() {
     const { width: w, height: h, time: t, context: ctx } = field;
@@ -49,7 +53,7 @@ const fields = [...document.querySelectorAll('.swarm-canvas')].map(canvas => {
       // Traveling marks follow the same paths, never random orbits.
       const count = mobile.matches ? 14 : 25;
       for (let i = 0; i < count; i++) {
-        const u = (i / count + t * .036 + lane * .013) % 1;
+        const u = (i / count + Math.sin(i * 13.7 + lane) * .009 + t * (.03 + lane * .002) + lane * .013 + 1) % 1;
         const merge = smooth((u - .1) / .75);
         const strand = Math.sin(i * 2.4 + lane) * 1.8;
         const [x, y] = point(u, lane, strand, t);
@@ -84,6 +88,7 @@ const fields = [...document.querySelectorAll('.swarm-canvas')].map(canvas => {
       field.last = now;
       field.x += (field.aimX - field.x) * .075;
       field.y += (field.aimY - field.y) * .075;
+      field.influence += (field.aimInfluence - field.influence) * .065;
       draw();
     }
     field.frame = requestAnimationFrame(tick);
@@ -92,7 +97,7 @@ const fields = [...document.querySelectorAll('.swarm-canvas')].map(canvas => {
     cancelAnimationFrame(field.frame);
     field.frame = 0;
     field.last = null;
-    if (reduced.matches) { field.x = field.y = field.aimX = field.aimY = 0; }
+    if (reduced.matches) { field.influence = field.aimInfluence = 0; }
     draw();
     if (allowed()) field.frame = requestAnimationFrame(tick);
   };
@@ -126,11 +131,14 @@ buttons.forEach(button => button.addEventListener('click', () => { paused = !pau
 document.addEventListener('pointermove', event => {
   if (!finePointer.matches || reduced.matches || paused || mobile.matches) return;
   fields.forEach(field => {
-    field.aimX = (Math.min(1, Math.max(0, event.clientX / innerWidth)) * 2 - 1) * 28;
-    field.aimY = (Math.min(1, Math.max(0, event.clientY / innerHeight)) * 2 - 1) * 18;
+    const rect = field.canvas.getBoundingClientRect();
+    const x = (event.clientX - rect.left) / rect.width;
+    const y = (event.clientY - rect.top) / rect.height;
+    field.aimInfluence = x >= 0 && x <= 1 && y >= 0 && y <= 1 ? 1 : 0;
+    if (field.aimInfluence) { field.aimX = x; field.aimY = y; }
   });
 }, { passive: true });
-function release() { fields.forEach(field => { field.aimX = field.aimY = 0; }); }
+function release() { fields.forEach(field => { field.aimInfluence = 0; }); }
 document.documentElement.addEventListener('pointerleave', release);
 window.addEventListener('blur', release);
 document.addEventListener('visibilitychange', syncAll);

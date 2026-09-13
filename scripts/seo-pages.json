@@ -1,0 +1,40 @@
+[
+  {
+    "file": "index.html",
+    "path": "/",
+    "title": "decisionos — Fractional Product Building",
+    "description": "Get to market in weeks with flexible consulting focused on market validation. Product, design, and engineering connected from concept to launch.",
+    "image": "assets/consumer-to-mvp-crayon.png",
+    "type": "WebPage"
+  },
+  {
+    "file": "case-studies.html",
+    "path": "/case-studies.html",
+    "title": "Case studies — decisionos",
+    "description": "Three commerce concepts from DecisionOS: voice-first discovery, photo-first selling, and an interface that follows each question.",
+    "image": "assets/commerce-live-home.png",
+    "type": "CollectionPage"
+  },
+  {
+    "file": "projects/commerce.html",
+    "path": "/projects/commerce.html",
+    "title": "eCommerce Discovery Live Concept — decisionos",
+    "description": "How voice-first shopping can turn a broad need into a useful shortlist. Explore the concept, see real demo screenshots, and try the live experience.",
+    "image": "assets/commerce-live-home.png",
+    "type": "Article"
+  },
+  {
+    "file": "projects/shelf-to-sell.html",
+    "path": "/projects/shelf-to-sell.html",
+    "title": "“What’s my wardrobe worth?” — The Missed Opportunity of C2C Selling — decisionos",
+    "description": "Reflections from eBay on C2C supply, the cost of cataloging, and making selling easier with bulk photos, AI, and experiences where customers already are.",
+    "type": "Article"
+  },
+  {
+    "file": "projects/surface.html",
+    "path": "/projects/surface.html",
+    "title": "Defining a New Commerce Surface — decisionos",
+    "description": "A voice-controlled shopping demo that shows products, reviews, attributes and comparisons in response to customer questions.",
+    "type": "Article"
+  }
+]

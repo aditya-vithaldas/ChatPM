@@ -2,8 +2,14 @@ import { cp, mkdir, rm, readdir, readFile, writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 await rm('dist', { recursive: true, force: true });
 await mkdir('dist', { recursive: true });
-for (const path of ['index.html', 'design-system.html', 'work.html', 'projects', 'assets']) {
+for (const path of ['index.html', 'design-system.html', 'case-studies.html', 'thanks.html', 'assets']) {
   await cp(path, `dist/${path}`, { recursive: true });
+}
+// Only registered case studies are published; other source pages stay available for later.
+const pages = JSON.parse(await readFile('scripts/seo-pages.json', 'utf8'));
+await mkdir('dist/projects', { recursive: true });
+for (const page of pages.filter(page => page.file.startsWith('projects/'))) {
+  await cp(page.file, `dist/${page.file}`);
 }
 const versions = {};
 for (const name of ['styles.css', 'motion.js', 'concepts.js']) {
