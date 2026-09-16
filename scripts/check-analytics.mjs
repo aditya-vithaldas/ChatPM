@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';
+import {transitionScreen,interpretQuestion,days,totalSales,totalTraffic,totalOrders} from '../lib/analytics.ts';
+let s={view:'sales',details:[]};
+s=transitionScreen(s,interpretQuestion('more details',s));assert.equal(s.view,'sales');assert.deepEqual(s.details,['daily']);
+s=transitionScreen(s,interpretQuestion('compare previous week',s));assert.deepEqual(s.details,['daily','comparison']);
+s=transitionScreen(s,{mode:'append',detail:'daily'});assert.equal(s.details.length,2);
+assert.throws(()=>transitionScreen(s,{mode:'append',view:'traffic'}));assert.equal(s.view,'sales');
+s=transitionScreen(s,interpretQuestion('show traffic',s));assert.equal(s.view,'traffic');assert.deepEqual(s.details,[]);
+s=transitionScreen(s,interpretQuestion('show conversion details',s));assert.deepEqual(s.details,['conversion']);
+assert.throws(()=>transitionScreen(s,{mode:'append',detail:'comparison'}));
+s=transitionScreen(s,interpretQuestion('show top users',s));assert.equal(s.view,'customers');assert.deepEqual(s.details,[]);
+assert.throws(()=>transitionScreen(s,{mode:'replace',view:'invented'}));
+assert.equal(days.length,7);assert.equal(totalSales,171360);assert.equal(totalTraffic,74750);assert.equal(totalOrders,2142);
+console.log('Analytics state, follow-up retention, topic replacement, and dataset checks passed.');
