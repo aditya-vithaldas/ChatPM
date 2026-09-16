@@ -6,8 +6,9 @@ export class GeminiLive {
  constructor(public model:LiveModel,private hooks:Hooks){}
  send(v:unknown){if(this.socket?.readyState===WebSocket.OPEN)this.socket.send(JSON.stringify(v));}
  async connect(media:MediaStream){
- const r=await fetch('/api/gemini',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:this.model})});const data=await r.json() as {token:string;error?:string};if(!r.ok)throw Error(data.error||'Gemini unavailable');if(this.closed)return;
- this.ctx=new AudioContext();await this.ctx.resume();await this.ctx.audioWorklet.addModule('/live-capture.js');if(this.closed)return;
+ const base=location.pathname.startsWith('/analytics')?'/analytics':'';
+ const r=await fetch(base+'/api/gemini',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:this.model})});const data=await r.json() as {token:string;error?:string};if(!r.ok)throw Error(data.error||'Gemini unavailable');if(this.closed)return;
+ this.ctx=new AudioContext();await this.ctx.resume();await this.ctx.audioWorklet.addModule(base+'/live-capture.js');if(this.closed)return;
  this.gain=this.ctx.createGain();this.gain.connect(this.ctx.destination);const monitor=this.ctx.createMediaStreamDestination();this.gain.connect(monitor);this.hooks.outputStream(monitor.stream);this.inputSource=this.ctx.createMediaStreamSource(media);this.capture=new AudioWorkletNode(this.ctx,'live-capture');this.inputSource.connect(this.capture);const silence=this.ctx.createGain();silence.gain.value=0;this.capture.connect(silence).connect(this.ctx.destination);
  this.capture.port.onmessage=e=>{if(!this.ready)return;const bytes=new Uint8Array(e.data);let binary='';for(const b of bytes)binary+=String.fromCharCode(b);this.send({realtimeInput:{audio:{data:btoa(binary),mimeType:'audio/pcm;rate=16000'}}});};
  const socket=new WebSocket('wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContentConstrained?access_token='+encodeURIComponent(data.token));this.socket=socket;
