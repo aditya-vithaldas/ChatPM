@@ -6,11 +6,11 @@ Standalone e-commerce analytics study. The fixed September 9–15, 2026 dataset 
 
 One shared `show_analytics` capability drives voice tool calls, deterministic offline text intents, and experimental on-page WebMCP. Browsers with `navigator.modelContext.registerTool` or `document.modelContext.registerTool` register it automatically. Other browsers retain the exact same page capability through voice and UI; they do not claim WebMCP registration.
 
-- `replace`: select sales, traffic, customers, or sample questions; clear prior details.
-- `append`: retain the current topic and chart; add deduplicated daily, comparison, conversion, or breakdown information.
-- Invalid arguments or cross-topic append requests return errors without altering the screen.
+- Every data request replaces the primary widget: number, chart, table, customers, or an availability explanation.
+- Follow-up settings can inherit metric/date context, but never append panels.
+- Typed requests render immediately; voice calls use the same tool with transcript fallback at turn completion.
 
-Suggested study: show sales → ask for more detail → compare previous week → switch to traffic → ask for conversion → switch to top users. Observe whether context preservation makes follow-ups easier to interpret. Sales charts remain mounted during detail additions. New topics animate in. Reduced-motion preferences suppress motion.
+Suggested study: total sales → traffic line chart → daily detail table → top users → average order value. Each answer replaces the primary widget. Reduced-motion preferences suppress transitions.
 
 Top customers are ranked by demo-week spend. Traffic means sessions; conversion is orders / sessions. Only sales includes a previous-week baseline. No causal explanations are invented. Offline typed exploration supports these intents; open-ended spoken interpretation requires a successful Gemini Live session.
 
@@ -20,4 +20,4 @@ Top customers are ranked by demo-week spend. Traffic means sessions; conversion 
 
 ## Dynamic charts
 
-The screen tool accepts `metrics` (up to two of sales, traffic, orders, conversion, aov, growth), `kind` (area, line, bar), `start` and `end` (September day numbers 9–15), and `previous` (sales baseline). `update` changes the current graph without clearing supporting details. `replace` starts a new topic; `append` keeps the graph and adds supporting data. Tool results and visible totals are recomputed for the selected range. Comparisons use separately labeled axes. The text parser supports the same bounded requests without a live session. Unsupported metrics or dates return an explanation and preserve the current chart.
+The screen tool accepts `metrics` (up to two of sales, traffic, orders, conversion, aov, growth), `kind` (area, line, bar), `start` and `end` (September day numbers 9–15), and `previous` (sales baseline). `update` inherits current settings; `replace` starts a new topic. Both replace the primary visual. `display` selects number, chart, or table. Unsupported data uses `notice` in the primary widget. Tool results and visible totals are recomputed for selected dates.

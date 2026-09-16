@@ -1,6 +1,6 @@
 import {modelLabel,type LiveModel} from './live-models';
 export type LiveProfile={instructions:string;tool:{name:string;description:string;parameters:Record<string,unknown>};context:()=>unknown;greeting:string};
-type Hooks={profile:LiveProfile;execute:(name:string,args:unknown,source:string)=>Promise<unknown>;status:(s:'listening'|'thinking'|'speaking')=>void;input:(s:string)=>void;output:(s:string)=>void;error:(s:string)=>void;ready:()=>void;muted:()=>boolean;outputStream:(media:MediaStream)=>void;};
+type Hooks={complete?:()=>void;profile:LiveProfile;execute:(name:string,args:unknown,source:string)=>Promise<unknown>;status:(s:'listening'|'thinking'|'speaking')=>void;input:(s:string)=>void;output:(s:string)=>void;error:(s:string)=>void;ready:()=>void;muted:()=>boolean;outputStream:(media:MediaStream)=>void;};
 export class GeminiLive {
  socket:WebSocket|null=null;ctx:AudioContext|null=null;capture:AudioWorkletNode|null=null;closed=false;ready=false;nextAudio=0;sources=new Set<AudioBufferSourceNode>();gain:GainNode|null=null;inputSource:MediaStreamAudioSourceNode|null=null;
  constructor(public model:LiveModel,private hooks:Hooks){}
@@ -22,7 +22,7 @@ export class GeminiLive {
  if(sc?.outputTranscription?.text){this.hooks.output(sc.outputTranscription.text);}
  for(const part of sc?.modelTurn?.parts||[])if(part.inlineData?.data)this.play(part.inlineData.data,Number(/rate=(\d+)/.exec(part.inlineData.mimeType)?.[1])||24000);
  for(const call of message.toolCall?.functionCalls||[]){let result;try{result=await this.hooks.execute(call.name,call.args,'gemini');}catch(err){result={error:err instanceof Error?err.message:'Tool failed'};}if(!this.closed)this.send({toolResponse:{functionResponses:[{id:call.id,name:call.name,response:{output:result},scheduling:'WHEN_IDLE'}]}});}
- const interaction=message.interactionStatus||sc?.interactionStatus;if(interaction==='IN_PROGRESS')this.hooks.status('thinking');if(interaction==='IDLE'||(!this.model.endsWith('thinking')&&sc?.turnComplete)){this.hooks.status('listening');}
+ const interaction=message.interactionStatus||sc?.interactionStatus;if(interaction==='IN_PROGRESS')this.hooks.status('thinking');if(interaction==='IDLE'||(!this.model.endsWith('thinking')&&sc?.turnComplete)){this.hooks.status('listening');this.hooks.complete?.();}
  }catch(err){this.hooks.error(err instanceof Error?err.message:'Gemini event failed');}};
  socket.onerror=()=>{clearTimeout(timeout);reject(Error('Gemini connection failed'));};socket.onclose=()=>{clearTimeout(timeout);if(!this.closed){reject(Error('Gemini disconnected'));this.hooks.error('Gemini disconnected. Tap the orb to reconnect.');}};
  });
