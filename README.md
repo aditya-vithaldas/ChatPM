@@ -25,17 +25,9 @@ The build copies only the two portfolio pages and their assets into `dist/`. The
 
 ## Production deployment
 
-The existing Cloud Build trigger `fffac18f-e3de-491f-b7ce-e720daca5705` watches `main` in this repository and builds the root Dockerfile. It deploys to service `chatpm`, project `striking-loop-447915-q3`, region `europe-west1`, mapped to `decisionos.me`.
+The root Dockerfile builds the current portfolio and Toptal presentation together. The production deployment follows the main branch. Verify the homepage, all three case studies, and both presentation routes after publication.
 
-The container serves only `dist/`, listens on Cloud Run's `PORT`, and exposes `/health`. The old application stays in `archive/chatpm` and is excluded from the image.
-
-A specific validated commit can also be deployed through the existing trigger:
-
-```sh
-gcloud builds triggers run fffac18f-e3de-491f-b7ce-e720daca5705 --project=striking-loop-447915-q3 --region=global --sha=COMMIT_SHA
-```
-
-Wait for the build and rollout to succeed, then verify the public domain. A manual branch deployment does not change which branch the automatic trigger watches.
+Deploy only this root source. Never deploy the archived application or an older frontend checkout over the portfolio.
 
 ## Our work and case studies
 
@@ -59,7 +51,7 @@ The case-study index publishes three articles: Loop (`projects/commerce.html`), 
 
 ## Contact enquiries
 
-All published Contact Us links lead to `/#contact`. The form has three required visible fields: name, email, and message. It posts directly over HTTPS to FormSubmit for delivery to `aditya@decisionos.me`; a one-time email activation is required. FormSubmit's default reCAPTCHA remains enabled, a hidden honeypot helps filter bots, and the subject is `New enquiry from decisionos.me`. The `email` field supplies Reply-To. Successful submissions redirect to `/thanks.html`, which is marked noindex. No email API credentials are stored in this repository.
+All published Contact Us links lead to `/#contact`. The form has three required visible fields: name, email, and message. It posts directly over HTTPS to FormSubmit for delivery to the site owner; a one-time email activation is required. FormSubmit's default reCAPTCHA remains enabled, a hidden honeypot helps filter bots, and the subject is `New enquiry from decisionos.me`. The `email` field supplies Reply-To. Successful submissions redirect to `/thanks.html`, which is marked noindex. No email API credentials are stored in this repository.
 
 ## Unified production source
 

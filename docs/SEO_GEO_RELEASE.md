@@ -45,6 +45,5 @@ Use a verified Search Console property to submit https://decisionos.me/sitemap.x
 
 ## Published release
 
-Cloud Build `de2ea849-593d-4872-bd8e-21eecbac094d` succeeded. Cloud Run revision `chatpm-00112-42c` serves 100% of traffic using image digest `sha256:0ac9d5c26e14cd445526793b4dfa50ea60e88b3690bfe8e162739739873b2cfc`.
 
 Post-deploy checks against https://decisionos.me verified HTTP 200, intended descriptions, canonical URLs and parsed structured data on all nine pages. robots.txt, sitemap.xml (nine entries), llms.txt and the noindex thank-you page also passed public checks.
