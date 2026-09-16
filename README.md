@@ -17,3 +17,7 @@ Top customers are ranked by demo-week spend. Traffic means sessions; conversion 
 ## Validation
 
 `node --experimental-strip-types scripts/check-analytics.mjs`, `npx tsc --noEmit`, and `npm run build`.
+
+## Dynamic charts
+
+The screen tool accepts `metrics` (up to two of sales, traffic, orders, conversion, aov, growth), `kind` (area, line, bar), `start` and `end` (September day numbers 9–15), and `previous` (sales baseline). `update` changes the current graph without clearing supporting details. `replace` starts a new topic; `append` keeps the graph and adds supporting data. Tool results and visible totals are recomputed for the selected range. Comparisons use separately labeled axes. The text parser supports the same bounded requests without a live session. Unsupported metrics or dates return an explanation and preserve the current chart.
