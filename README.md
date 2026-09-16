@@ -1,58 +1,11 @@
-# decisionos — Portfolio foundation
+# Portfolio and presentation
 
-Start with `design-system.html`: a living reference for the five-tone palette, strong typography, layout, elements and restrained motion. `index.html` is the initial portfolio landing page using that system.
+This repository contains the current portfolio homepage, case studies, service pages, and the Toptal presentation.
 
-## Local preview
+Run `npm run build` to generate the static site. Run `npm run dev` to preview it locally.
 
-Requires Node.js 18 or newer; no dependency installation is needed.
+The root Dockerfile packages the current site and presentation together. Publish from the main branch after checking the homepage, case studies, presentation, and referenced assets. Do not publish an older checkout or the archived application as the current site.
 
-```sh
-npm run build
-npm run dev
-```
+The presentation is available at `/toptal-application.html`; `/toptal-application` redirects to it. The original application remains under `archive/` for reference and is excluded from the production build.
 
-Open `http://127.0.0.1:4173/design-system.html` for the design system or `http://127.0.0.1:4173/` for the landing page. Re-run the build after source changes, then refresh.
-
-## Structure
-
-- `assets/styles.css` — shared design tokens and responsive components
-- `assets/motion.js` — optional, reduced-motion-aware desktop pointer response
-- `docs/DESIGN_SYSTEM.md` — durable design rules and content direction
-- `archive/chatpm/` — original application and deployment files, preserved unchanged
-- `scripts/` — dependency-free static build and local preview
-
-The build copies only the two portfolio pages and their assets into `dist/`. The archive is excluded. Production uses the existing Google Cloud Run service; no Sites integration is configured. Existing ChatPM deployment scripts now live in the archive and should be run there only if intentionally restoring the old application.
-
-## Production deployment
-
-The root Dockerfile builds the current portfolio and Toptal presentation together. The production deployment follows the main branch. Verify the homepage, all three case studies, and both presentation routes after publication.
-
-Deploy only this root source. Never deploy the archived application or an older frontend checkout over the portfolio.
-
-## Our work and case studies
-
-`case-studies.html` is the expandable project index. Case studies live in `projects/commerce.html`, `projects/paralegal.html`, and `projects/employee.html`; their local scripted interactions use `assets/concepts.js`. Each page separates draft hypotheses from eventual research evidence and outcomes. Add a new case-study page and link it from the work index as more projects are supplied. The build versions CSS and JavaScript URLs to avoid stale layouts after publication.
-
-## Berlin Combat
-
-The case study keeps its static character image. The executable game, model files, audio, build dependencies, and runtime have been removed from this site. Former game URLs return HTTP 410. The original separate game project is unaffected.
-
-## Search and sharing
-
-The build uses `scripts/seo-pages.json` to generate canonical URLs, unique descriptions, Open Graph/Twitter tags, Article/CollectionPage structured data, breadcrumbs, `sitemap.xml`, `robots.txt`, and `llms.txt`. Add new case studies to this registry. `/work.html` redirects permanently to `/case-studies.html`; `/llm.txt` redirects to `/llms.txt`. The design-system reference is marked noindex. Archived source is never served.
-
-Hashed scripts and styles use immutable caching. Text responses support gzip. `llms.txt` is an informational guide, not an indexing guarantee. Search Console ownership verification and sitemap submission are separate account actions and have not been performed.
-
-## Current published case studies
-
-The case-study index publishes three articles: Loop (`projects/commerce.html`), Shelf to Sell (`projects/shelf-to-sell.html`), and Surface (`projects/surface.html`). Each links to its public demo. Surface includes the author-supplied 2002 Amazon screenshot and three mobile screenshots of results, a selected product, and reviews. Demo screens were selected through the catalog tools; these screenshots do not represent recorded voice sessions.
-
-`build.mjs` publishes only project pages listed in `scripts/seo-pages.json`. Other case-study source pages are retained but excluded from the deployed site, sitemap, and index. To restore one, add it to that registry and the visible project list.
-
-## Contact enquiries
-
-All published Contact Us links lead to `/#contact`. The form has three required visible fields: name, email, and message. It posts directly over HTTPS to FormSubmit for delivery to the site owner; a one-time email activation is required. FormSubmit's default reCAPTCHA remains enabled, a hidden honeypot helps filter bots, and the subject is `New enquiry from decisionos.me`. The `email` field supplies Reply-To. Successful submissions redirect to `/thanks.html`, which is marked noindex. No email API credentials are stored in this repository.
-
-## Unified production source
-
-The root portfolio and `/toptal-application.html` ship together from this repository. `/toptal-application` redirects to the presentation. Deploy only the root Dockerfile; never deploy `archive/chatpm` or an old frontend checkout to the production `chatpm` service. The legacy app is preserved as source only, outside the published build.
+Published pages are registered in `scripts/seo-pages.json`. The build generates page metadata, structured data, a sitemap, and crawler guidance. Contact submissions use the existing configured form provider.
