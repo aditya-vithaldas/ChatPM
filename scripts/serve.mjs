@@ -1,3 +1,4 @@
+import { analyticsSession } from './analytics-api.mjs';
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { extname, resolve, sep } from 'node:path';
@@ -10,13 +11,15 @@ Object.assign(types, { '.txt': 'text/plain; charset=utf-8', '.xml': 'application
 const redirects = { '/toptal-application': '/toptal-application.html', '/work.html': '/case-studies.html', '/index.html': '/', '/llm.txt': '/llms.txt' };
 createServer(async (req, res) => {
   try {
+    if (new URL(req.url, 'http://localhost').pathname === '/analytics/api/gemini') { await analyticsSession(req,res); return; }
     if (!['GET', 'HEAD'].includes(req.method)) { res.writeHead(405, { Allow: 'GET, HEAD' }).end(); return; }
     const url = new URL(req.url, 'http://localhost');
     const decodedPath = decodeURIComponent(url.pathname);
     if (decodedPath === '/games/berlin-combat' || decodedPath.startsWith('/games/berlin-combat/')) { res.writeHead(410, { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex' }).end(req.method === 'HEAD' ? undefined : 'This game is no longer available.'); return; }
     if (redirects[url.pathname]) { res.writeHead(301, { Location: redirects[url.pathname] + url.search }).end(); return; }
     if (url.pathname === '/health') { res.writeHead(200, { 'Content-Type': 'text/plain' }).end(req.method === 'HEAD' ? '' : 'ok'); return; }
-    const path = resolve(root, '.' + decodeURIComponent(url.pathname.endsWith('/') ? url.pathname + 'index.html' : url.pathname));
+    const pathname = url.pathname === '/analytics' ? '/analytics/index.html' : url.pathname;
+    const path = resolve(root, '.' + decodeURIComponent(pathname.endsWith('/') ? pathname + 'index.html' : pathname));
     if (!path.startsWith(root + sep)) { res.writeHead(403).end(); return; }
     let body = await readFile(path);
     const type = types[extname(path)] || 'application/octet-stream';

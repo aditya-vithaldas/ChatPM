@@ -6,6 +6,7 @@ COPY index.html design-system.html case-studies.html thanks.html ./
 COPY projects ./projects
 COPY services ./services
 COPY assets ./assets
+COPY analytics ./analytics
 COPY images ./images
 COPY toptal-application.html toptal-application.css toptal-application.js ./
 RUN npm run build
@@ -15,7 +16,7 @@ WORKDIR /app
 ENV NODE_ENV=production HOST=0.0.0.0 PORT=8080
 COPY --from=build --chown=node:node /app/dist ./dist
 COPY --chown=node:node package.json ./
-COPY --chown=node:node scripts/serve.mjs ./scripts/serve.mjs
+COPY --chown=node:node scripts/serve.mjs scripts/analytics-api.mjs ./scripts/
 USER node
 EXPOSE 8080
 CMD ["node", "scripts/serve.mjs"]

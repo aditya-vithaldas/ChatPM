@@ -10,15 +10,15 @@
   {
     "file": "case-studies.html",
     "path": "/case-studies.html",
-    "title": "Case studies — decisionos",
-    "description": "Three commerce concepts from DecisionOS: voice-first discovery, photo-first selling, and an interface that follows each question.",
+    "title": "Case studies \u2014 decisionos",
+    "description": "Explore working commerce and analytics concepts: voice-first discovery, photo-first selling, focused shopping screens, and an analyst in the conversation.",
     "image": "assets/commerce-live-home.png",
     "type": "CollectionPage"
   },
   {
     "file": "projects/commerce.html",
     "path": "/projects/commerce.html",
-    "title": "eCommerce Discovery Live Concept — decisionos",
+    "title": "eCommerce Discovery Live Concept \u2014 decisionos",
     "description": "How voice-first shopping can turn a broad need into a useful shortlist. Explore the concept, see real demo screenshots, and try the live experience.",
     "image": "assets/commerce-live-home.png",
     "type": "Article"
@@ -26,14 +26,14 @@
   {
     "file": "projects/shelf-to-sell.html",
     "path": "/projects/shelf-to-sell.html",
-    "title": "“What’s my wardrobe worth?” — The Missed Opportunity of C2C Selling — decisionos",
+    "title": "\u201cWhat\u2019s my wardrobe worth?\u201d \u2014 The Missed Opportunity of C2C Selling \u2014 decisionos",
     "description": "Reflections from eBay on C2C supply, the cost of cataloging, and making selling easier with bulk photos, AI, and experiences where customers already are.",
     "type": "Article"
   },
   {
     "file": "projects/surface.html",
     "path": "/projects/surface.html",
-    "title": "Defining a New Commerce Surface — decisionos",
+    "title": "Defining a New Commerce Surface \u2014 decisionos",
     "description": "A voice-controlled shopping demo that shows products, reviews, attributes and comparisons in response to customer questions.",
     "type": "Article"
   },
@@ -72,5 +72,20 @@
     "image": "assets/consumer-to-mvp-crayon.png",
     "type": "WebPage",
     "service": "Full-stack product builder"
+  },
+  {
+    "file": "projects/analytics.html",
+    "path": "/projects/analytics.html",
+    "title": "What if your analyst could join the call? \u2014 decisionos",
+    "description": "A live analytics concept that answers follow-up questions without losing the graph, and a product direction for an analyst that can participate in business calls.",
+    "image": "assets/analytics-sales.svg",
+    "type": "Article"
+  },
+  {
+    "file": "analytics/index.html",
+    "path": "/analytics",
+    "title": "Meridian \u2014 Live analytics | decisionos",
+    "description": "Explore demo sales, traffic, and top customers. Add supporting detail without losing the graph, or switch topics with a question.",
+    "type": "WebPage"
   }
 ]
