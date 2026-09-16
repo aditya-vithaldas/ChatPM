@@ -18,3 +18,12 @@
 !scripts/seo-pages.json
 
 !thanks.html
+
+!services/
+!services/**
+
+!images/
+!images/**
+!toptal-application.html
+!toptal-application.css
+!toptal-application.js

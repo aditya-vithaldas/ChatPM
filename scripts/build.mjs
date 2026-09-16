@@ -1,14 +1,16 @@
 import { cp, mkdir, rm, readdir, readFile, writeFile } from 'node:fs/promises';
+import { dirname } from 'node:path';
 import { createHash } from 'node:crypto';
 await rm('dist', { recursive: true, force: true });
 await mkdir('dist', { recursive: true });
-for (const path of ['index.html', 'design-system.html', 'case-studies.html', 'thanks.html', 'assets']) {
+for (const path of ['index.html', 'design-system.html', 'case-studies.html', 'thanks.html', 'assets', 'toptal-application.html', 'toptal-application.css', 'toptal-application.js', 'images']) {
   await cp(path, `dist/${path}`, { recursive: true });
 }
-// Only registered case studies are published; other source pages stay available for later.
+// Publish registered detail pages; unlisted source pages stay available for later.
 const pages = JSON.parse(await readFile('scripts/seo-pages.json', 'utf8'));
 await mkdir('dist/projects', { recursive: true });
-for (const page of pages.filter(page => page.file.startsWith('projects/'))) {
+for (const page of pages.filter(page => page.file.startsWith('projects/') || page.file.startsWith('services/'))) {
+  await mkdir(dirname(`dist/${page.file}`), { recursive: true });
   await cp(page.file, `dist/${page.file}`);
 }
 const versions = {};

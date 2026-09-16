@@ -60,3 +60,7 @@ The case-study index publishes three articles: Loop (`projects/commerce.html`), 
 ## Contact enquiries
 
 All published Contact Us links lead to `/#contact`. The form has three required visible fields: name, email, and message. It posts directly over HTTPS to FormSubmit for delivery to `aditya@decisionos.me`; a one-time email activation is required. FormSubmit's default reCAPTCHA remains enabled, a hidden honeypot helps filter bots, and the subject is `New enquiry from decisionos.me`. The `email` field supplies Reply-To. Successful submissions redirect to `/thanks.html`, which is marked noindex. No email API credentials are stored in this repository.
+
+## Unified production source
+
+The root portfolio and `/toptal-application.html` ship together from this repository. `/toptal-application` redirects to the presentation. Deploy only the root Dockerfile; never deploy `archive/chatpm` or an old frontend checkout to the production `chatpm` service. The legacy app is preserved as source only, outside the published build.

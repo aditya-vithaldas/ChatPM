@@ -2,16 +2,31 @@ import { readFile, writeFile } from 'node:fs/promises';
 const origin = 'https://decisionos.me';
 const pages = JSON.parse(await readFile(new URL('./seo-pages.json', import.meta.url), 'utf8'));
 const escape = value => value.replaceAll('&', '&amp;').replaceAll('"', '&quot;').replaceAll('<', '&lt;');
-const organization = { '@type': 'Organization', '@id': `${origin}/#organization`, name: 'decisionos', url: `${origin}/`, email: 'aditya@decisionos.me' };
+const person = { '@type': 'Person', '@id': `${origin}/#aditya`, name: 'Aditya Vithaldas', url: `${origin}/#about`, jobTitle: 'Product consultant and full-stack product builder' };
+const website = { '@type': 'WebSite', '@id': `${origin}/#website`, url: `${origin}/`, name: 'decisionos', publisher: { '@id': `${origin}/#organization` } };
+const organization = { '@type': 'Organization', '@id': `${origin}/#organization`, name: 'decisionos', url: `${origin}/`, email: 'aditya@decisionos.me', founder: { '@id': person['@id'] }, description: 'eCommerce product consulting, AI-first experiences, executive product direction and full-stack product building.' };
 for (const page of pages) {
   const url = origin + page.path;
   let html = await readFile(`dist/${page.file}`, 'utf8');
   html = html.replace(/<title>.*?<\/title>/s, `<title>${escape(page.title)}</title>`)
     .replace(/<meta name="description" content="[^"]*">/, `<meta name="description" content="${escape(page.description)}">`);
   const entity = { '@type': page.type, '@id': url + '#page', url, name: page.title, description: page.description, inLanguage: 'en', ...(page.image ? { image: origin + '/' + page.image } : {}), publisher: { '@id': organization['@id'] } };
-  const graph = [organization, entity];
+  const graph = [organization, person, website, entity];
+  if (page.type !== 'Article') entity.isPartOf = { '@id': website['@id'] };
+  if (page.path === '/') {
+    entity.about = { '@id': person['@id'] };
+    organization.hasOfferCatalog = { '@type': 'OfferCatalog', name: 'Product consulting and building services', itemListElement: pages.filter(p => p.service).map(p => ({ '@type': 'Offer', itemOffered: { '@type': 'Service', '@id': origin + p.path + '#service', name: p.service, url: origin + p.path } })) };
+  }
+  if (page.service) {
+    const service = { '@type': 'Service', '@id': url + '#service', name: page.service, serviceType: page.service, description: page.description, url, provider: { '@id': organization['@id'] }, mainEntityOfPage: { '@id': entity['@id'] } };
+    entity.mainEntity = { '@id': service['@id'] };
+    graph.push(service, { '@type': 'BreadcrumbList', itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'decisionos', item: origin + '/' },
+      { '@type': 'ListItem', position: 2, name: page.service, item: url }
+    ] });
+  }
   if (page.type === 'Article') {
-    Object.assign(entity, { headline: page.title, author: { '@id': organization['@id'] }, mainEntityOfPage: url });
+    Object.assign(entity, { headline: page.title, author: { '@id': person['@id'] }, mainEntityOfPage: url });
     graph.push({ '@type': 'BreadcrumbList', itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'decisionos', item: origin + '/' },
       { '@type': 'ListItem', position: 2, name: 'Case studies', item: origin + '/case-studies.html' },
@@ -39,5 +54,5 @@ const design = await readFile('dist/design-system.html', 'utf8');
 await writeFile('dist/design-system.html', design.replace('</head>', '<meta name="robots" content="noindex,follow"></head>'));
 await writeFile('dist/robots.txt', `User-agent: *\nAllow: /\nDisallow: /archive/\n\nSitemap: ${origin}/sitemap.xml\n`);
 await writeFile('dist/sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${pages.map(p => `  <url><loc>${origin}${p.path}</loc></url>`).join('\n')}\n</urlset>\n`);
-await writeFile('dist/llms.txt', `# decisionos\n\n> Fractional product building: market validation, product management, design, and development from concept to launch.\n\n## Case studies\n\nThe published case studies explore voice-first ecommerce discovery with Loop, photo-first resale shortlisting with Shelf to Sell, and focused conversational shopping screens with Surface. Catalog content and resale estimates are illustrative. Neither concept processes purchases or publishes seller listings.\n\n${pages.map(p => `- [${p.title}](${origin}${p.path}): ${p.description}`).join('\n')}\n\n## Contact\n\nEmail: aditya@decisionos.me\n`);
+await writeFile('dist/llms.txt', `# decisionos\n\n> decisionos is the product consulting and building practice of Aditya Vithaldas. Services include eCommerce product consulting, AI-first experiences, executive product direction and full-stack MVP building. Product strategy, design and development connect from concept to launch.\n\n## Services and concepts\n\nThe published case studies explore voice-first ecommerce discovery with Loop, photo-first resale shortlisting with Shelf to Sell, and focused conversational shopping screens with Surface. Catalog content and resale estimates are illustrative. These demos do not process purchases or publish seller listings.\n\n${pages.map(p => `- [${p.title}](${origin}${p.path}): ${p.description}`).join('\n')}\n\n## Contact\n\nEmail: aditya@decisionos.me\n`);
 console.log(`SEO metadata, structured data, sitemap, robots.txt, and llms.txt generated for ${pages.length} pages.`);

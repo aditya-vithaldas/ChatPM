@@ -2,8 +2,8 @@
   {
     "file": "index.html",
     "path": "/",
-    "title": "decisionos — Fractional Product Building",
-    "description": "Get to market in weeks with flexible consulting focused on market validation. Product, design, and engineering connected from concept to launch.",
+    "title": "eCommerce & AI Product Consulting | decisionos",
+    "description": "eCommerce product consulting, AI-first experiences, executive product direction and full-stack MVP building with Aditya Vithaldas. From strategy to launch.",
     "image": "assets/consumer-to-mvp-crayon.png",
     "type": "WebPage"
   },
@@ -36,5 +36,41 @@
     "title": "Defining a New Commerce Surface — decisionos",
     "description": "A voice-controlled shopping demo that shows products, reviews, attributes and comparisons in response to customer questions.",
     "type": "Article"
+  },
+  {
+    "file": "services/ecommerce-product-consulting.html",
+    "path": "/services/ecommerce-product-consulting.html",
+    "title": "eCommerce product consulting | decisionos",
+    "description": "eCommerce product consulting that connects customer insight, product strategy and hands-on delivery across discovery, buying and selling experiences.",
+    "image": "assets/consumer-to-mvp-crayon.png",
+    "type": "WebPage",
+    "service": "eCommerce product consulting"
+  },
+  {
+    "file": "services/ai-first-experiences.html",
+    "path": "/services/ai-first-experiences.html",
+    "title": "AI-first experiences | decisionos",
+    "description": "Design and build AI-first product experiences: voice commerce, conversational discovery and interfaces that respond to what customers need.",
+    "image": "assets/consumer-to-mvp-crayon.png",
+    "type": "WebPage",
+    "service": "AI-first experiences"
+  },
+  {
+    "file": "services/executive-product-direction.html",
+    "path": "/services/executive-product-direction.html",
+    "title": "Executive product direction | decisionos",
+    "description": "Fractional product leadership and executive product direction: clarify the proposition, align priorities and connect product strategy with execution.",
+    "image": "assets/consumer-to-mvp-crayon.png",
+    "type": "WebPage",
+    "service": "Executive product direction"
+  },
+  {
+    "file": "services/full-stack-product-builder.html",
+    "path": "/services/full-stack-product-builder.html",
+    "title": "Full-stack product builder | decisionos",
+    "description": "A hands-on full-stack product builder connecting product strategy, experience design, frontend, backend and deployment to take your MVP from concept to launch.",
+    "image": "assets/consumer-to-mvp-crayon.png",
+    "type": "WebPage",
+    "service": "Full-stack product builder"
   }
 ]
