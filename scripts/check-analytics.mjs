@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {transitionScreen,interpretQuestion,chartData,chartSummary,days,totalSales,totalTraffic,totalOrders} from '../lib/analytics.ts';
+import {transitionScreen,interpretQuestion,chartData,chartSummary,days,totalSales,totalTraffic,totalOrders,categoryTotals,categoryRows,funnelData} from '../lib/analytics.ts';
 let s={view:'sales',details:[]};
 const ask=q=>s=transitionScreen(s,interpretQuestion(q,s));
 ask('more details');assert.deepEqual(s.details,[]);
@@ -21,3 +21,8 @@ assert.equal(days.length,7);assert.equal(totalSales,171360);assert.equal(totalTr
 console.log('Dynamic metric, chart, date range, weighted aggregation, retention, replacement, and invalid request checks passed.');
 
 ask('What were total sales for the last seven days?');assert.equal(s.display,'number');assert.equal(chartSummary(s).sales,171360);ask('show traffic as a line chart');assert.equal(s.display,'chart');assert.deepEqual(s.chart.metrics,['traffic']);ask('more details');assert.equal(s.display,'table');ask('show top customers');assert.equal(s.view,'customers');ask('show average order value');assert.equal(s.display,'number');assert.equal(chartSummary(s).aov,80);s=transitionScreen(s,{mode:'replace',display:'table',notice:'Unavailable'});assert.equal(s.notice,'Unavailable');assert.equal(s.chart,undefined);ask('show sales');assert.equal(s.notice,undefined);console.log('Primary widget replacement and number/chart/table transitions passed');
+
+for(const [q,kind] of [['sales by category as a pie chart','pie'],['make it a donut','donut'],['stacked bars','stacked'],['horizontal bars','horizontal'],['heatmap of sales','heatmap'],['scatter sales and traffic','scatter'],['shopping funnel','funnel']]){ask(q);assert.equal(s.chart.kind,kind);assert.equal(s.display,'chart');}
+ask('sales by category as a pie chart for the last three days');assert.equal(categoryTotals(s).reduce((n,c)=>n+c.value,0),chartSummary(s).sales);assert.equal(categoryRows(s).length,3);const funnel=funnelData(s);assert.ok(funnel.every((d,i)=>!i||d.value<=funnel[i-1].value));console.log('Pie, donut, stacked, horizontal, scatter, funnel, heatmap and consistent category totals passed');
+
+ask('sales histogram');assert.equal(s.chart.kind,'histogram');ask('sales radar chart');assert.equal(s.chart.kind,'radar');

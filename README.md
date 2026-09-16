@@ -21,3 +21,5 @@ Top customers are ranked by demo-week spend. Traffic means sessions; conversion 
 ## Dynamic charts
 
 The screen tool accepts `metrics` (up to two of sales, traffic, orders, conversion, aov, growth), `kind` (area, line, bar), `start` and `end` (September day numbers 9–15), and `previous` (sales baseline). `update` inherits current settings; `replace` starts a new topic. Both replace the primary visual. `display` selects number, chart, or table. Unsupported data uses `notice` in the primary widget. Tool results and visible totals are recomputed for selected dates.
+
+Supported charts: area, line, vertical bar, horizontal bar, stacked bar, pie, donut, scatter, funnel, heatmap, histogram and radar. Categories use consistent illustrative allocations of actual demo sales totals. Funnel cart/checkout stages are illustrative estimates; sessions/orders remain dataset-backed. Histograms count daily metric values, not individual transactions.
