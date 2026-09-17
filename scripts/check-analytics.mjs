@@ -8,3 +8,8 @@ s=transitionScreen(s,{mode:'update',display:'chart',kind:'pie'});assert.deepEqua
 for(const invalid of [{...data,points:[]},{...data,points:[{label:'bad',value:NaN}]},{...data,kind:'invalid'}])assert.throws(()=>validateGenerated(invalid));
 assert.throws(()=>transitionScreen(s,{mode:'replace',display:'chart',notice:'Unavailable'}));
 console.log('Generated data validation, screen replacement and chart-only preservation passed');
+
+const {widgetAction}=await import('../lib/query-progress.ts');
+const response={type:'result',mode:'replace',display:'number',generated:{...data,unit:'USD',aggregation:'sum',kind:'line',points:[{label:'Yesterday',value:1200}]},sql:'SELECT ...',metrics:{sqlMs:3},dataset:{rows:10000000}};
+const scalar=transitionScreen(s,widgetAction(response));assert.equal(scalar.display,'number');assert.equal(scalar.generated.points[0].value,1200);
+console.log('Streamed database response metadata cannot leak into widget settings');
