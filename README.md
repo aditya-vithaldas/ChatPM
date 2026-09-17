@@ -1,27 +1,37 @@
-# Meridian — Live analytics
+# LiveAnalyst / Meridian
 
-Standalone e-commerce analytics study. The fixed September 9–15, 2026 dataset is illustrative. Gemini 3.8 Live uses a server-issued one-use token; no permanent key is sent to the browser. Set `GEMINI_API_KEY` in ignored `.dev.vars` locally and as a Sites secret for hosting.
+Conversational analytics with Gemini 3.8 Live, an on-page `show_analytics` tool, CSV/Excel uploads, and a cloud-hosted DuckDB e-commerce demo.
 
-## Interaction study
+## Experience
 
-One shared `show_analytics` capability drives voice tool calls, deterministic offline text intents, and experimental on-page WebMCP. Browsers with `navigator.modelContext.registerTool` or `document.modelContext.registerTool` register it automatically. Other browsers retain the exact same page capability through voice and UI; they do not claim WebMCP registration.
+- Blank initial canvas; each question replaces it with the answer.
+- Neutral gray/white theme, voice orb, and optional example questions.
+- Time-series charts by default; a specific date produces a large numeric widget unless a breakdown is requested.
+- Multiple CSV, XLSX, XLS files or a folder. **10 MB maximum total**, checked before reading. Over-limit batches are rejected, never truncated or compressed.
+- Uploaded rows stay in browser memory for the session. Gemini receives schemas and query context; a constrained query plan is evaluated against all local rows. Arbitrary joins and calculated-column expressions are not currently supported for uploads.
+- Demo mode uses a persistent synthetic 2025 database, not newly invented model answers. 10 tables, 10,000,000 rows, 150,000 customers. The UI reports the actual hosted database size.
+- Charts: line, area, bar, horizontal/stacked bar, pie, donut, scatter, funnel, heatmap, histogram, radar. SQL result shape: `label`, `value`, optional `secondary`.
 
-- Every data request replaces the primary widget: number, chart, table, customers, or an availability explanation.
-- Follow-up settings can inherit metric/date context, but never append panels.
-- Typed requests render immediately; voice calls use the same tool with transcript fallback at turn completion.
+## Local development
 
-Suggested study: total sales → traffic line chart → daily detail table → top users → average order value. Each answer replaces the primary widget. Reduced-motion preferences suppress transitions.
+Node 22+. `npm ci`, then configure `GEMINI_API_KEY` in ignored `.dev.vars` for the Sites runtime. Never put it in browser code. `npm run dev` starts the website. The portfolio build uses `npx vite build --config vite.portfolio.config.ts` and base `/analytics/`.
 
-Top customers are ranked by demo-week spend. Traffic means sessions; conversion is orders / sessions. Only sales includes a previous-week baseline. No causal explanations are invented. Offline typed exploration supports these intents; open-ended spoken interpretation requires a successful Gemini Live session.
+The demo backend is separate: `node server/build-demo.mjs` creates `data/ecommerce.duckdb` and `data/schema.json`; run `node server/api.mjs` for the private SQL service. Database files are ignored by Git. `server/Dockerfile` reproducibly builds the dataset and serves it read-only on Cloud Run. The website gateway uses the existing server-side Gemini Secret Manager reference. The private DuckDB service has no Gemini key and requires Cloud Run IAM authentication. `server/gateway.mjs` is the gateway handler integrated into the existing website server.
 
-## Validation
+## Schema and query contract
 
-`node --experimental-strip-types scripts/check-analytics.mjs`, `npx tsc --noEmit`, and `npm run build`.
+See [docs/demo-schema.json](docs/demo-schema.json), [docs/AGENT_SCHEMA.md](docs/AGENT_SCHEMA.md), and the live `/schema` endpoint. The website gateway includes the complete schema and semantic rules in the model prompt, gets SQL, validates a single SELECT statement, and executes DuckDB with external access and extension loading disabled. Query execution is capped at 8 seconds; results above 1,000 groups require a narrower query and are not silently truncated.
 
-## Dynamic charts
+The service keeps a small query-plan cache; it still executes SQL on every request. The response identifies cache hits. Each cloud instance has its own immutable database copy baked into the versioned image, avoiding a remote-file scan on every query.
 
-The screen tool accepts `metrics` (up to two of sales, traffic, orders, conversion, aov, growth), `kind` (area, line, bar), `start` and `end` (September day numbers 9–15), and `previous` (sales baseline). `update` inherits current settings; `replace` starts a new topic. Both replace the primary visual. `display` selects number, chart, or table. Unsupported data uses `notice` in the primary widget. Tool results and visible totals are recomputed for selected dates.
+## Measurements
 
-Supported charts: area, line, vertical bar, horizontal bar, stacked bar, pie, donut, scatter, funnel, heatmap, histogram and radar. Categories use consistent illustrative allocations of actual demo sales totals. Funnel cart/checkout stages are illustrative estimates; sessions/orders remain dataset-backed. Histograms count daily metric values, not individual transactions.
+The same five browser-observed metrics as the shopping demo: first audio, first action, tool RTT, visible action, and barge-in. Voice baselines use local VAD; typed requests use submission time. Unobserved metrics remain blank. SQL and AI planning are shown separately. The 1–2 second goal applies to database queries; AI planning and network time can make total response time longer. See benchmark reports in `docs/` for measured values and environment.
 
-New requests can supply validated synthetic data through the shared show_analytics tool. Live voice generates requested dimensions, metrics, and periods; text mode requests a fresh dataset from Gemini 3.8 Flash on the server. Generated answers retain values on chart-only follow-ups. The UI keeps its Demo data label, without dataset-unavailable messages.
+## Checks
+
+- `npx tsc --noEmit`
+- `node --experimental-strip-types scripts/check-analytics.mjs`
+- `node --experimental-strip-types scripts/check-uploads.mjs`
+- `node scripts/benchmark-demo.mjs`
+- `npm run build`

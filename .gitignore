@@ -49,3 +49,6 @@ next-env.d.ts
 *.tsbuildinfo
 
 /dist-portfolio/
+/data/
+*.duckdb
+*.duckdb.wal
