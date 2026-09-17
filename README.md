@@ -14,7 +14,7 @@ Conversational analytics with Gemini 3.8 Live, an on-page `show_analytics` tool,
 
 ## Local development
 
-Node 22+. `npm ci`, then configure `GEMINI_API_KEY` in ignored `.dev.vars` for the Sites runtime. Never put it in browser code. `npm run dev` starts the website. The portfolio build uses `npx vite build --config vite.portfolio.config.ts` and base `/analytics/`.
+Node 22+. `npm install`, then configure `GEMINI_API_KEY` in ignored `.dev.vars` for the Sites runtime. Never put it in browser code. `npm run dev` starts the website. The portfolio build uses `npx vite build --config vite.portfolio.config.ts` and base `/analytics/`.
 
 The demo backend is separate: `node server/build-demo.mjs` creates `data/ecommerce.duckdb` and `data/schema.json`; run `node server/api.mjs` for the private SQL service. Database files are ignored by Git. `server/Dockerfile` reproducibly builds the dataset and serves it read-only on Cloud Run. The website gateway uses the existing server-side Gemini Secret Manager reference. The private DuckDB service has no Gemini key and requires Cloud Run IAM authentication. `server/gateway.mjs` is the gateway handler integrated into the existing website server.
 
@@ -35,3 +35,14 @@ The same five browser-observed metrics as the shopping demo: first audio, first 
 - `node --experimental-strip-types scripts/check-uploads.mjs`
 - `node scripts/benchmark-demo.mjs`
 - `npm run build`
+
+## Contributing
+
+This project is open to contributions. See [CONTRIBUTING.md](CONTRIBUTING.md) for
+setup, checks, and the pull-request process. [Aditya Vithaldas](https://github.com/aditya-vithaldas)
+is the maintainer and code owner for all contributions.
+
+## License
+
+[MIT](LICENSE) — Copyright (c) 2026 Aditya Vithaldas. Third-party dependencies
+and vendored components retain their own license notices.
