@@ -1,4 +1,4 @@
-export type GeneratedData={title:string;period:string;label:string;unit:'USD'|'%'|'count';aggregation:'sum'|'average';kind:string;secondaryLabel?:string;explanation?:string;points:{label:string;value:number;secondary?:number}[]};
+export type GeneratedData={title:string;period:string;label:string;unit:'USD'|'%'|'count';aggregation:'sum'|'average';kind:string;axisType?:'time'|'category';secondaryLabel?:string;explanation?:string;points:{label:string;value:number;secondary?:number}[]};
 const kinds=['area','line','bar','horizontal','stacked','pie','donut','scatter','funnel','heatmap','histogram','radar'];
 export function validateGenerated(value:unknown):GeneratedData{
  const d=value as GeneratedData;if(!d||typeof d!=='object')throw Error('Expected chart data');
@@ -8,5 +8,5 @@ export function validateGenerated(value:unknown):GeneratedData{
  if(d.explanation!==undefined&&(typeof d.explanation!=='string'||d.explanation.length>2000))throw Error('Invalid explanation');
  if(d.secondaryLabel!==undefined&&(typeof d.secondaryLabel!=='string'||d.secondaryLabel.length>100))throw Error('Invalid secondary label');
  if(['pie','donut','funnel'].includes(d.kind)&&d.points.some(p=>p.value<0))throw Error('This chart requires non-negative values');
- return {title:d.title,period:d.period,label:d.label,unit:d.unit,aggregation:d.aggregation,kind:d.kind,secondaryLabel:d.secondaryLabel,explanation:d.explanation,points:d.points.map(p=>({label:p.label,value:p.value,...(p.secondary!==undefined?{secondary:p.secondary}:{})}))};
+ return {title:d.title,period:d.period,label:d.label,unit:d.unit,aggregation:d.aggregation,kind:d.kind,axisType:d.axisType==='time'||d.axisType==='category'?d.axisType:undefined,secondaryLabel:d.secondaryLabel,explanation:d.explanation,points:d.points.map(p=>({label:p.label,value:p.value,...(p.secondary!==undefined?{secondary:p.secondary}:{})}))};
 }

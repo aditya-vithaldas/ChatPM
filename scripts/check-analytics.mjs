@@ -20,3 +20,9 @@ const explanation=explainResults({unit:'USD',analysis:'contribution'},[{label:'S
 assert.match(explanation,/Bags: \$50, down \$30/);assert.match(explanation,/Shoes: \$120, up \$20/);assert.match(explanation,/not proof of cause/);
 assert.equal(validateGenerated({...data,explanation}).explanation,explanation);
 console.log('Query-only voice contract and calculated contribution explanations passed');
+const {chartGroups}=await import('../lib/chart-groups.ts');
+const many={...data,unit:'USD',aggregation:'sum',points:Array.from({length:40},(_,i)=>({label:`Category ${i}`,value:i+1,secondary:2*(i+1)}))};
+const compact=chartGroups(many,'chart');assert.equal(compact.data.points.length,6);assert.equal(compact.data.points[5].label,'Everything else');assert.equal(compact.data.points.reduce((n,p)=>n+p.value,0),820);assert.equal(compact.data.points.reduce((n,p)=>n+p.secondary,0),1640);assert.equal(many.points.length,40);
+assert.equal(chartGroups(many,'table').data.points.length,40);
+const time={...many,axisType:'time',kind:'bar'};assert.equal(chartGroups(time,'chart').data.points.length,40);
+console.log('Top-five grouping preserves primary and comparison totals, source rows and time series');
