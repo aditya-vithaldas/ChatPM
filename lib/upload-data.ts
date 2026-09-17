@@ -1,5 +1,5 @@
 import type {GeneratedData} from './generated-data';
-export const MAX_UPLOAD_BYTES=10*1024*1024;
+export const MAX_UPLOAD_BYTES=10_000_000;
 export type DataTable={id:string;file:string;sheet:string;columns:string[];rows:Record<string,string|number|boolean|null>[]};
 export type UploadSet={bytes:number;files:string[];tables:DataTable[]};
 export function checkUploadLimit(files:{size:number}[],existing=0){if(existing+files.reduce((n,f)=>n+f.size,0)>MAX_UPLOAD_BYTES)throw Error('This is a demo and supports a maximum of 10 MB of data in total. Please choose smaller files.');}

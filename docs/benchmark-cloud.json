@@ -1,0 +1,116 @@
+{
+  "measuredAt": "2026-09-17T08:17:08.899Z",
+  "endpoint": "https://decisionos.me/analytics/api/demo/query",
+  "results": [
+    {
+      "question": "Show daily sales for the last seven days",
+      "repeat": false,
+      "clientRoundTripMs": 2117.687125,
+      "planningMs": 1774.5545960000018,
+      "sqlMs": 36.240853999974206,
+      "serverMs": 1853.788791999992,
+      "planCacheHit": false,
+      "rows": 7,
+      "display": "chart"
+    },
+    {
+      "question": "Show daily sales for the last seven days",
+      "repeat": true,
+      "clientRoundTripMs": 107.22837500000014,
+      "planningMs": 0,
+      "sqlMs": 5.389549000014085,
+      "serverMs": 20.557679999998072,
+      "planCacheHit": true,
+      "rows": 7,
+      "display": "chart"
+    },
+    {
+      "question": "Show sales by region as a pie chart",
+      "repeat": false,
+      "clientRoundTripMs": 5660.2510839999995,
+      "planningMs": 5393.599985000008,
+      "sqlMs": 154.46176899998682,
+      "serverMs": 5568.160367999997,
+      "planCacheHit": false,
+      "rows": 10,
+      "display": "chart"
+    },
+    {
+      "question": "Show sales by region as a pie chart",
+      "repeat": true,
+      "clientRoundTripMs": 199.13733400000092,
+      "planningMs": 0,
+      "sqlMs": 55.48102199996356,
+      "serverMs": 73.55679200000304,
+      "planCacheHit": true,
+      "rows": 10,
+      "display": "chart"
+    },
+    {
+      "question": "Show monthly traffic for 2025",
+      "repeat": false,
+      "clientRoundTripMs": 2418.945458,
+      "planningMs": 2041.7925489999907,
+      "sqlMs": 226.00712799996836,
+      "serverMs": 2282.5265539999964,
+      "planCacheHit": false,
+      "rows": 12,
+      "display": "chart"
+    },
+    {
+      "question": "Show monthly traffic for 2025",
+      "repeat": true,
+      "clientRoundTripMs": 154.9472079999996,
+      "planningMs": 0,
+      "sqlMs": 54.982703000016045,
+      "serverMs": 67.42229299999599,
+      "planCacheHit": true,
+      "rows": 12,
+      "display": "chart"
+    },
+    {
+      "question": "Show the top 10 customers by sales",
+      "repeat": false,
+      "clientRoundTripMs": 4009.511834000001,
+      "planningMs": 3769.1903659999953,
+      "sqlMs": 119.36769000004278,
+      "serverMs": 3901.644094000003,
+      "planCacheHit": false,
+      "rows": 10,
+      "display": "table"
+    },
+    {
+      "question": "Show the top 10 customers by sales",
+      "repeat": true,
+      "clientRoundTripMs": 239.11929100000089,
+      "planningMs": 0,
+      "sqlMs": 131.61921400000574,
+      "serverMs": 143.88846399998874,
+      "planCacheHit": true,
+      "rows": 10,
+      "display": "table"
+    },
+    {
+      "question": "Show sales for December 15, 2025",
+      "repeat": false,
+      "clientRoundTripMs": 3088.2272919999996,
+      "planningMs": 2977.693597999998,
+      "sqlMs": 2.712530000018887,
+      "serverMs": 2996.32998699999,
+      "planCacheHit": false,
+      "rows": 1,
+      "display": "number"
+    },
+    {
+      "question": "Show sales for December 15, 2025",
+      "repeat": true,
+      "clientRoundTripMs": 114.54533399999855,
+      "planningMs": 0,
+      "sqlMs": 2.591110000037588,
+      "serverMs": 17.239799000002677,
+      "planCacheHit": true,
+      "rows": 1,
+      "display": "number"
+    }
+  ]
+}
