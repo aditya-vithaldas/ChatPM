@@ -24,4 +24,4 @@ The screen tool accepts `metrics` (up to two of sales, traffic, orders, conversi
 
 Supported charts: area, line, vertical bar, horizontal bar, stacked bar, pie, donut, scatter, funnel, heatmap, histogram and radar. Categories use consistent illustrative allocations of actual demo sales totals. Funnel cart/checkout stages are illustrative estimates; sessions/orders remain dataset-backed. Histograms count daily metric values, not individual transactions.
 
-New requests can supply validated synthetic data through the shared show_analytics tool. Live voice generates requested dimensions, metrics, and periods; text mode has a deterministic local generator. Generated answers retain values on chart-only follow-ups. The UI keeps its Demo data label, without dataset-unavailable messages.
+New requests can supply validated synthetic data through the shared show_analytics tool. Live voice generates requested dimensions, metrics, and periods; text mode requests a fresh dataset from Gemini 3.8 Flash on the server. Generated answers retain values on chart-only follow-ups. The UI keeps its Demo data label, without dataset-unavailable messages.
