@@ -16,7 +16,7 @@ WORKDIR /app
 ENV NODE_ENV=production HOST=0.0.0.0 PORT=8080
 COPY --from=build --chown=node:node /app/dist ./dist
 COPY --chown=node:node package.json ./
-COPY --chown=node:node scripts/serve.mjs scripts/analytics-api.mjs ./scripts/
+COPY --chown=node:node scripts/serve.mjs scripts/analytics-api.mjs scripts/generate-analytics.mjs ./scripts/
 USER node
 EXPOSE 8080
 CMD ["node", "scripts/serve.mjs"]

@@ -31,3 +31,5 @@
 !analytics/
 !analytics/**
 !scripts/analytics-api.mjs
+
+!scripts/generate-analytics.mjs
