@@ -12,7 +12,7 @@ ask('September 11 to 13');assert.equal(chartData(s).length,3);assert.equal(chart
 ask('show average order value');assert.deepEqual(s.chart.metrics,['aov']);assert.equal(chartSummary(s).aov,80);
 ask('show daily sales growth');assert.deepEqual(s.chart.metrics,['growth']);assert.equal(chartData(s)[0].growth,null);assert.equal(chartData(s)[2].growth,-3.125);
 const previous=s;for(const args of [{mode:'update',start:8},{mode:'update',end:20},{mode:'update',start:14,end:12},{mode:'update',metrics:['profit']},{mode:'update',metrics:['sales','sales']},{mode:'update',display:'number',metrics:['sales','traffic']},{mode:'update',kind:'pie'}])assert.throws(()=>transitionScreen(s,args));assert.equal(s,previous);
-assert.throws(()=>interpretQuestion('show last 30 days',s));assert.throws(()=>interpretQuestion('show profits',s));
+assert.ok(interpretQuestion('show last 30 days',s).generated);assert.ok(interpretQuestion('show profits',s).generated);
 ask('show traffic');assert.equal(s.view,'traffic');assert.deepEqual(s.details,[]);
 ask('more details');assert.deepEqual(s.details,[]);
 ask('show top users');assert.equal(s.view,'customers');assert.deepEqual(s.details,[]);
@@ -20,9 +20,13 @@ assert.throws(()=>transitionScreen(s,{mode:'update',start:12}));
 assert.equal(days.length,7);assert.equal(totalSales,171360);assert.equal(totalTraffic,74750);assert.equal(totalOrders,2142);
 console.log('Dynamic metric, chart, date range, weighted aggregation, retention, replacement, and invalid request checks passed.');
 
-ask('What were total sales for the last seven days?');assert.equal(s.display,'number');assert.equal(chartSummary(s).sales,171360);ask('show traffic as a line chart');assert.equal(s.display,'chart');assert.deepEqual(s.chart.metrics,['traffic']);ask('more details');assert.equal(s.display,'table');ask('show top customers');assert.equal(s.view,'customers');ask('show average order value');assert.equal(s.display,'number');assert.equal(chartSummary(s).aov,80);s=transitionScreen(s,{mode:'replace',display:'table',notice:'Unavailable'});assert.equal(s.notice,'Unavailable');assert.equal(s.chart,undefined);ask('show sales');assert.equal(s.notice,undefined);console.log('Primary widget replacement and number/chart/table transitions passed');
+ask('What were total sales for the last seven days?');assert.equal(s.display,'number');assert.equal(chartSummary(s).sales,171360);ask('show traffic as a line chart');assert.equal(s.display,'chart');assert.deepEqual(s.chart.metrics,['traffic']);ask('more details');assert.equal(s.display,'table');ask('show top customers');assert.equal(s.view,'customers');ask('show average order value');assert.equal(s.display,'number');assert.equal(chartSummary(s).aov,80);s=transitionScreen(s,{mode:'replace',display:'table',notice:'Unavailable'});assert.ok(s.generated);assert.equal(s.notice,undefined);assert.equal(s.chart,undefined);ask('show sales');assert.equal(s.notice,undefined);console.log('Primary widget replacement and number/chart/table transitions passed');
 
 for(const [q,kind] of [['sales by category as a pie chart','pie'],['make it a donut','donut'],['stacked bars','stacked'],['horizontal bars','horizontal'],['heatmap of sales','heatmap'],['scatter sales and traffic','scatter'],['shopping funnel','funnel']]){ask(q);assert.equal(s.chart.kind,kind);assert.equal(s.display,'chart');}
 ask('sales by category as a pie chart for the last three days');assert.equal(categoryTotals(s).reduce((n,c)=>n+c.value,0),chartSummary(s).sales);assert.equal(categoryRows(s).length,3);const funnel=funnelData(s);assert.ok(funnel.every((d,i)=>!i||d.value<=funnel[i-1].value));console.log('Pie, donut, stacked, horizontal, scatter, funnel, heatmap and consistent category totals passed');
 
 ask('sales histogram');assert.equal(s.chart.kind,'histogram');ask('sales radar chart');assert.equal(s.chart.kind,'radar');
+
+ask('Show sales by region as a pie chart');assert.equal(s.generated.kind,'pie');assert.equal(s.generated.points.length,5);assert.equal(s.generated.points.reduce((a,p)=>a+p.value,0),171360);const regional=structuredClone(s.generated.points);ask('Make that a bar chart');assert.deepEqual(s.generated.points,regional);assert.equal(s.generated.kind,'bar');ask('show profit for last 30 days');assert.equal(s.generated.points.length,30);assert.equal(s.generated.label,'Profit');ask('show traffic by channel');assert.equal(s.generated.points[0].label,'Organic search');
+for(const generated of [{...s.generated,points:[{label:'Bad',value:NaN}]},{...s.generated,points:[]},{...s.generated,kind:'invalid'}])assert.throws(()=>transitionScreen(s,{mode:'replace',display:'chart',generated}));
+console.log('Generated regions, new metrics, extended dates, channels, stable follow-ups and payload validation passed');
