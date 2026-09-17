@@ -26,3 +26,6 @@ ORDER BY order_date
 ## Upload mode
 
 User files are separate from the demo database. The model receives file/sheet schemas and returns a constrained grouping/filter/aggregation plan. All selected rows are evaluated locally. Never fill missing uploaded fields with demo or invented data. The 10 MB total limit applies to user-selected source files; no row sampling or silent truncation is used.
+
+## Display names
+Use `categories.category_name`, `products.product_name`, and `customers.customer_name` in displayed results. These are fictional retail categories, branded products and person names. Group by both ID and name for entity rankings because display names can repeat. Do not display raw IDs as category or product labels. The schema JSON includes the exact category catalog for natural-language filtering.
