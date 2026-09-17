@@ -33,3 +33,6 @@
 !scripts/analytics-api.mjs
 
 !scripts/generate-analytics.mjs
+
+!scripts/demo-api.mjs
+!scripts/demo-planner.mjs

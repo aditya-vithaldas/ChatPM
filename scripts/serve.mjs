@@ -1,3 +1,4 @@
+import {demoAPI} from './demo-api.mjs';
 import { analyticsSession } from './analytics-api.mjs';
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
@@ -11,6 +12,7 @@ Object.assign(types, { '.txt': 'text/plain; charset=utf-8', '.xml': 'application
 const redirects = { '/toptal-application': '/toptal-application.html', '/work.html': '/case-studies.html', '/index.html': '/', '/llm.txt': '/llms.txt' };
 createServer(async (req, res) => {
   try {
+    if (new URL(req.url, 'http://localhost').pathname.startsWith('/analytics/api/demo/')) { await demoAPI(req,res); return; }
     if (new URL(req.url, 'http://localhost').pathname === '/analytics/api/analytics') { await analyticsSession(req,res,true); return; }
     if (new URL(req.url, 'http://localhost').pathname === '/analytics/api/gemini') { await analyticsSession(req,res); return; }
     if (!['GET', 'HEAD'].includes(req.method)) { res.writeHead(405, { Allow: 'GET, HEAD' }).end(); return; }
