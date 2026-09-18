@@ -27,5 +27,11 @@ export function evaluateQuery(data:UploadSet,plan:QueryPlan):{mode:'replace';dis
  if(!groups.size)throw Error('No matching rows. Try a different date or filter.');
  const points=[...groups].map(([label,values])=>({label,value:plan.aggregation==='average'?values.reduce((a,b)=>a+b,0)/values.length:plan.aggregation==='min'?values.reduce((a,b)=>Math.min(a,b),Infinity):plan.aggregation==='max'?values.reduce((a,b)=>Math.max(a,b),-Infinity):values.reduce((a,b)=>a+b,0)})).sort((a,b)=>a.label.localeCompare(b.label,undefined,{numeric:true}));
  if(points.length>1000)throw Error('This query returns more than 1,000 groups. Ask for a broader time interval or a narrower filter. Your source data has not been changed.');
- return {mode:'replace',display:plan.display,generated:{title:plan.title,label:plan.metric||'Row count',period:'Uploaded data',unit:plan.unit,aggregation:plan.aggregation==='average'?'average':'sum',kind:plan.kind,points}};
+ return {mode:'replace',display:plan.display,generated:{title:plan.title,label:plan.metric||'Row count',period:'Uploaded data',unit:plan.unit,aggregation:plan.aggregation==='average'?'average':'sum',kind:plan.display==='number'?'bar':plan.kind,points}};
+}
+
+export function reconcileUpload(data:UploadSet,plan:QueryPlan,points:GeneratedData['points']){
+ if(!['sum','count'].includes(plan.aggregation)||!plan.groupBy)return;
+ const control=evaluateQuery(data,{...plan,groupBy:undefined,grain:undefined,display:'number'}).generated.points[0].value;
+ const total=points.reduce((n,p)=>n+p.value,0);if(Math.abs(control-total)>Math.max(.01,Math.abs(control)*1e-9))throw Error('Low confidence: the uploaded breakdown does not reconcile to its total.');
 }

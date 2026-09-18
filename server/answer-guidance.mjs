@@ -4,6 +4,7 @@ export function answerGuidance(plan,points,context){
  if(guidance.investigation){const options=guidance.investigation.options;if(!Array.isArray(options)||options.length!==3||options.some(o=>typeof o?.label!=='string'||!o.label.trim()||o.label.length>80))throw Error('Invalid investigation options');guidance.investigation={options:options.map(o=>({label:o.label,question:`Investigate ${o.label} contributions to ${plan.title||'the selected metric'} (${plan.period||'the selected periods'}). Compare the current and previous periods from the baseline; report the measured direction of change.`}))};}
  if(guidance.clarification)for(const key of ['assumption','continuityNote'])guidance[key]=guidance[key].replaceAll(guidance.clarification,'').trim();
  const previous=context?.current;
+ if(previous?.datasetVersion&&plan.datasetVersion&&previous.datasetVersion!==plan.datasetVersion){guidance.continuityNote='The dataset changed since the previous answer; the values are not directly comparable.';return guidance;}
  if(previous?.metricKey===plan.metricKey&&plan.metricKey&&previous.scopeKey===plan.scopeKey&&plan.scopeKey){
   const old=previous.result?.points;
   const changed=Array.isArray(old)?points.find(p=>old.some(o=>o.label===p.label&&Number.isFinite(o.value)&&Math.abs(o.value-p.value)>Math.max(.01,Math.abs(o.value)*1e-9))):null;

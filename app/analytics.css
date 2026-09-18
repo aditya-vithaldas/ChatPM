@@ -38,3 +38,5 @@
 .an-group-note{font-size:12px;line-height:1.4;color:#89919d;margin:8px 0 0;flex:none}
 
 .an-guidance{flex:0 0 auto;font-size:12px;line-height:1.4;color:#606976;margin-top:10px;max-height:160px;overflow:auto}.an-guidance p{margin:4px 0}.an-confidence{display:inline-block;border:1px solid #d8c9a8;border-radius:20px;padding:3px 8px;color:#805e26;background:#faf7ef}.an-investigation{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:8px 0}.an-investigation button{text-align:left;border:1px solid #dce1e8;border-radius:12px;background:#f7f8facc;padding:10px;display:grid;gap:4px;color:#354153;cursor:pointer}.an-investigation button:hover{background:#edf1f6}.an-investigation button:focus-visible{outline:2px solid #526988;outline-offset:2px}.an-investigation small{font-size:9px;letter-spacing:.12em;color:#8992a0}.an-investigation span{font-size:12px}@media(max-width:600px){.an-investigation{grid-template-columns:1fr}.an-guidance{max-height:220px}}
+
+.an-grounding{font-size:10px;color:#728075;margin-top:8px;flex:0 0 auto}

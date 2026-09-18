@@ -1,5 +1,7 @@
 # Scaling the insights dataset
 
+Current deployment: restored to **10,000,000 rows**, 92,286,976 bytes, using scale 1. The 50-million-row results below are retained as a historical benchmark. The default cloud build now uses scale 1 and validates 10 million rows.
+
 The private DuckDB service builds a deterministic 2025 e-commerce database with exactly 50,000,000 rows. The browser downloads aggregated chart results (at most 1,000 groups), not the database. Uploads retain the existing 10 MB demo limit; this change scales the hosted demo dataset.
 
 | Table | Rows |

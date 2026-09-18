@@ -1,7 +1,7 @@
 {
   "name": "Demo e-commerce",
-  "version": "2025-v3-named-50m",
-  "scale": 5,
+  "version": "2025-v3-named-10m",
+  "scale": 1,
   "storage": {
     "sortedBy": {
       "orders": [
@@ -26,8 +26,8 @@
   },
   "synthetic": true,
   "currency": "USD",
-  "totalRows": 50000000,
-  "databaseBytes": 415510528,
+  "totalRows": 10000000,
+  "databaseBytes": 92286976,
   "tables": [
     {
       "name": "regions",
@@ -63,7 +63,7 @@
     },
     {
       "name": "products",
-      "rows": 250000,
+      "rows": 50000,
       "columns": [
         {
           "name": "product_id",
@@ -89,7 +89,7 @@
     },
     {
       "name": "customers",
-      "rows": 750000,
+      "rows": 150000,
       "columns": [
         {
           "name": "customer_id",
@@ -149,7 +149,7 @@
     },
     {
       "name": "order_items",
-      "rows": 15000000,
+      "rows": 3000000,
       "columns": [
         {
           "name": "order_item_id",
@@ -183,7 +183,7 @@
     },
     {
       "name": "orders",
-      "rows": 5000000,
+      "rows": 1000000,
       "columns": [
         {
           "name": "order_id",
@@ -221,7 +221,7 @@
     },
     {
       "name": "payments",
-      "rows": 5000000,
+      "rows": 1000000,
       "columns": [
         {
           "name": "payment_id",
@@ -251,7 +251,7 @@
     },
     {
       "name": "shipments",
-      "rows": 4250000,
+      "rows": 850000,
       "columns": [
         {
           "name": "shipment_id",
@@ -281,7 +281,7 @@
     },
     {
       "name": "sessions",
-      "rows": 19749585,
+      "rows": 3949585,
       "columns": [
         {
           "name": "session_id",
@@ -519,7 +519,7 @@
   "rules": [
     "Category, product and customer names are fictional human-readable demo labels. Always display their name columns, not numeric IDs or invented aliases. Names are not guaranteed unique: group by the entity ID and name for rankings, and use IDs for joins. Category names and departments are listed in categoryCatalog.",
     "All records are synthetic, reproducible demo data for calendar year 2025; all monetary amounts are USD.",
-    "Table grains: orders/payments one row per order; order_items exactly three rows per order; shipments one row for each of 4250000 orders; sessions one row per session.",
+    "Table grains: orders/payments one row per order; order_items exactly three rows per order; shipments one row for each of 850000 orders; sessions one row per session.",
     "Sales/revenue means SUM(orders.net_amount) WHERE orders.status='completed'. Excludes tax/shipping and cancelled/returned orders. Gross booked sales includes all statuses only if explicitly requested.",
     "Orders count means COUNT(*) FROM orders, qualified by status when requested. AOV = completed revenue / completed order count.",
     "Customers.customer_id links orders.customer_id and sessions.customer_id. customers.region_id links regions.region_id. order_items.order_id, payments.order_id and shipments.order_id link orders.order_id. products.product_id links order_items.product_id; products.category_id links categories.category_id.",
@@ -530,5 +530,5 @@
     "Date filters on orders use order_date; sessions use session_date. Latest demo date is 2025-12-31. Relative last-7-days means 2025-12-25 through 2025-12-31 inclusive.",
     "Read-only SELECT/CTE queries only. Return columns label (text), value (numeric), optional secondary (numeric). Charts <= 1000 groups. No external files, extensions, system tables, or network operations."
   ],
-  "generatedSeconds": 20
+  "generatedSeconds": 7
 }

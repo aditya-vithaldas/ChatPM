@@ -13,6 +13,7 @@ assert.equal(resolveInvestigation('step two',context).message,options[1].questio
 assert.equal(resolveInvestigation(options[2].question,context).context.selectedInvestigation.label,'Time');
 assert.equal(resolveInvestigation('Show sales',context).message,'Show sales');
 assert.throws(()=>validateGuidance({investigation:{options:options.slice(0,2)}}));
+validateGuidance({assumption:null,clarification:null,continuityNote:null,metricKey:null,scopeKey:null});
 let calls=0;globalThis.fetch=async(_url,init)=>{calls++;const body=JSON.parse(init.body);assert.ok(body.systemInstruction.parts[0].text.includes(principles));return {ok:true,json:async()=>({candidates:[{content:{parts:[{text:JSON.stringify({sql:'SELECT 1 AS "value"',title:'Orders',display:'number',unit:'count',confidence:'low',assumption:'Interpreting this as orders.',clarification:'Did you mean order items instead?'})}]}}]})};};
 await planQuery('How many?',old,{version:'one'});await planQuery('How many?',old,{version:'one'});assert.equal(calls,1);await planQuery('How many?',old,{version:'two'});assert.equal(calls,2);
 assert.equal(answerGuidance({assumption:'Counting line items. Did you mean orders instead?',clarification:'Did you mean orders instead?'},[],null).assumption,'Counting line items.');
