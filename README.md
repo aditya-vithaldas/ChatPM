@@ -9,14 +9,14 @@ Conversational analytics with Gemini 3.8 Live, an on-page `show_analytics` tool,
 - Time-series charts by default; a specific date produces a large numeric widget unless a breakdown is requested.
 - Multiple CSV, XLSX, XLS files or a folder. **10 MB maximum total**, checked before reading. Over-limit batches are rejected, never truncated or compressed.
 - Uploaded rows stay in browser memory for the session. Gemini receives schemas and query context; a constrained query plan is evaluated against all local rows. Arbitrary joins and calculated-column expressions are not currently supported for uploads.
-- Demo mode uses a persistent synthetic 2025 database, not newly invented model answers. 10 tables, 10,000,000 rows, 150,000 customers. The UI reports the actual hosted database size.
+- Demo mode uses a persistent synthetic 2025 database, not newly invented model answers. 10 tables, 50,000,000 rows, 750,000 customers. The UI reports the actual hosted database size.
 - Charts: line, area, bar, horizontal/stacked bar, pie, donut, scatter, funnel, heatmap, histogram, radar. SQL result shape: `label`, `value`, optional `secondary`.
 
 ## Local development
 
 Node 22+. `npm install`, then configure `GEMINI_API_KEY` in ignored `.dev.vars` for the Sites runtime. Never put it in browser code. `npm run dev` starts the website. The portfolio build uses `npx vite build --config vite.portfolio.config.ts` and base `/analytics/`.
 
-The demo backend is separate: `node server/build-demo.mjs` creates `data/ecommerce.duckdb` and `data/schema.json`; run `node server/api.mjs` for the private SQL service. Database files are ignored by Git. `server/Dockerfile` reproducibly builds the dataset and serves it read-only on Cloud Run. The website gateway uses the existing server-side Gemini Secret Manager reference. The private DuckDB service has no Gemini key and requires Cloud Run IAM authentication. `server/gateway.mjs` is the gateway handler integrated into the existing website server.
+The demo backend is separate: `DEMO_SCALE=5 node server/build-demo.mjs` creates `data/ecommerce.duckdb` and `data/schema.json`; run `node server/api.mjs` for the private SQL service. Database files are ignored by Git. `server/Dockerfile` reproducibly builds the dataset and serves it read-only on Cloud Run. The website gateway uses the existing server-side Gemini Secret Manager reference. The private DuckDB service has no Gemini key and requires Cloud Run IAM authentication. `server/gateway.mjs` is the gateway handler integrated into the existing website server.
 
 ## Schema and query contract
 
@@ -46,3 +46,5 @@ is the maintainer and code owner for all contributions.
 
 [MIT](LICENSE) — Copyright (c) 2026 Aditya Vithaldas. Third-party dependencies
 and vendored components retain their own license notices.
+
+See [the 50-million-row deployment notes](docs/SCALING.md) for capacity, indexing, validation, and rollback.

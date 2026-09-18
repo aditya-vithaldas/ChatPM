@@ -2,7 +2,7 @@ import {DuckDBInstance,StatementType} from '@duckdb/node-api';
 import {readFile} from 'node:fs/promises';
 const directory=process.env.DATA_DIR||'data';
 export const schema=JSON.parse(await readFile(`${directory}/schema.json`,'utf8'));
-const instance=await DuckDBInstance.create(`${directory}/ecommerce.duckdb`,{access_mode:'READ_ONLY',threads:'2',memory_limit:'512MB',enable_external_access:'false',allow_community_extensions:'false',autoinstall_known_extensions:'false',autoload_known_extensions:'false'});
+const instance=await DuckDBInstance.create(`${directory}/ecommerce.duckdb`,{access_mode:'READ_ONLY',threads:process.env.DUCKDB_THREADS||'2',memory_limit:process.env.DUCKDB_MEMORY_LIMIT||'1GB',enable_external_access:'false',allow_community_extensions:'false',autoinstall_known_extensions:'false',autoload_known_extensions:'false'});
 const configuration=await instance.connect();await configuration.run('SET lock_configuration=true');configuration.closeSync();
 export async function queryDatabase(sql){
  if(typeof sql!=='string'||sql.length>12000||!/^\s*(select|with)\b/i.test(sql))throw Error('A read-only SELECT query is required.');
