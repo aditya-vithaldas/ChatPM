@@ -57,4 +57,4 @@ The dedicated `liveanalyst-query` gateway isolates future query-policy deploymen
 
 Checks: `node scripts/check-principles.mjs`, `node scripts/check-analytics.mjs`, `npx tsc --noEmit`, and the normal site build.
 
-See [grounding controls](docs/GROUNDING.md) for the independent intent review, supported definitions, result reconciliation and limitations. The hosted demo has returned to 10 million rows (92.3 MB including indexes).
+See [grounding controls](docs/GROUNDING.md) for single-call planning, local schema checks, supported definitions and limitations. The hosted demo has returned to 10 million rows (92.3 MB including indexes).
