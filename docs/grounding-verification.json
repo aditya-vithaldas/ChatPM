@@ -1,6 +1,6 @@
 {
   "datasetRows": 10000000,
-  "status": "Private gateway acceptance tests passed; public rollout pending approval",
+  "status": "Acceptance tests passed; query gateway and Sites version 13 published with owner approval on 2026-09-18",
   "checks": [
     "Real DuckDB fixture tests",
     "Order/item continuity and three-to-one count",

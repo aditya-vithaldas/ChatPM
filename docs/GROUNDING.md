@@ -28,6 +28,6 @@ Intent interpretation still uses an LLM and can be mistaken. These checks preven
 
 The existing five-question page history supplies continuity. No history from unrelated browser sessions is claimed. Failed checks retain the previous chart and surface a low-confidence status. Timing separates planning, independent validation, SQL and reconciliation.
 
-The dedicated gateway remains private pending explicit approval of public endpoint access. The live database reduction is independent of publishing the new interface. Neither change requires a homepage deployment.
+The dedicated query gateway and Sites interface version 13 were published with owner approval on September 18, 2026. DuckDB remains private behind the gateway. The 10-million-row dataset is live; the homepage and other subtrees were not redeployed.
 
 Validation: `node scripts/check-grounding.mjs`, `node scripts/check-principles.mjs`, `node scripts/check-analytics.mjs`, `node scripts/check-uploads.mjs`, TypeScript and the Sites build. SQL compiler tests execute real DuckDB fixtures for counts versus quantities, fan-out, comparisons, AOV, conversion, safe filters, rejected definitions, and tampered totals.

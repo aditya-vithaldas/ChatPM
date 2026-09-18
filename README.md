@@ -53,7 +53,7 @@ See [the 50-million-row deployment notes](docs/SCALING.md) for capacity, indexin
 
 [principles.md](principles.md) is the shared policy for SQL planning, uploaded-data planning, and live voice. It defines ten concise rules and six driver families. Follow-ups preserve the selected answer and five-question history. Ambiguity is answered with a short assumption/clarification; same-scope numeric conflicts are flagged as low confidence. Open-ended why questions compute a baseline and offer three selectable investigations, retaining the existing graph until a driver is chosen.
 
-The dedicated `liveanalyst-query` gateway isolates future query-policy deployments from the homepage. `server/Gateway.Dockerfile` and `server/gateway-cloudbuild.yaml` build it without rebuilding the DuckDB dataset. It uses the existing Secret Manager reference, never a key in source. At this revision the gateway is deployed privately for validation; public rollout and the corresponding Sites interface release are pending approval. The currently published Insights site is unchanged.
+The dedicated `liveanalyst-query` gateway isolates future query-policy deployments from the homepage. `server/Gateway.Dockerfile` and `server/gateway-cloudbuild.yaml` build it without rebuilding the DuckDB dataset. It uses the existing Secret Manager reference, never a key in source. The gateway and Sites interface version 13 were published on September 18, 2026. The DuckDB service remains private. Only Insights was released; the homepage and other subtrees were not redeployed.
 
 Checks: `node scripts/check-principles.mjs`, `node scripts/check-analytics.mjs`, `npx tsc --noEmit`, and the normal site build.
 
