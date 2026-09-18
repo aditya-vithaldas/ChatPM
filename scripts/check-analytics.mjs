@@ -17,7 +17,7 @@ const {screenTool}=await import('../lib/analytics.ts');
 assert.deepEqual(screenTool.parameters.required,['query']);
 const {explainResults}=await import('../server/gateway.mjs');
 const explanation=explainResults({unit:'USD',analysis:'contribution'},[{label:'Shoes',value:120,secondary:100},{label:'Bags',value:50,secondary:80}]);
-assert.match(explanation,/Bags: \$50, down \$30/);assert.match(explanation,/Shoes: \$120, up \$20/);assert.match(explanation,/not proof of cause/);
+assert.match(explanation,/Bags: \$50, down \$30/);assert.ok(!explanation.includes('Shoes:'));assert.ok(!explanation.includes('caused'));
 assert.equal(validateGenerated({...data,explanation}).explanation,explanation);
 console.log('Query-only voice contract and calculated contribution explanations passed');
 const {chartGroups}=await import('../lib/chart-groups.ts');

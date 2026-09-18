@@ -29,3 +29,7 @@ User files are separate from the demo database. The model receives file/sheet sc
 
 ## Display names
 Use `categories.category_name`, `products.product_name`, and `customers.customer_name` in displayed results. These are fictional retail categories, branded products and person names. Group by both ID and name for entity rankings because display names can repeat. Do not display raw IDs as category or product labels. The schema JSON includes the exact category catalog for natural-language filtering.
+
+## Continuity and investigation policy
+
+Read [../principles.md](../principles.md) on every query through the shared prompt integration. Preserve metric grain, aggregation, dates and filters from the selected answer; use history only when referenced. Never equate orders, line items and units. Use brief assumptions, clarification and low-confidence markers where necessary. An open-ended why question requires a measured baseline plus exactly three investigation choices; a selected choice runs directly. The runtime compares matching metric/scope/label values against the selected answer and flags discrepancies without altering computed results.
