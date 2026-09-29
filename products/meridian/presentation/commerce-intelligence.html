@@ -62,22 +62,24 @@ html,body{margin:0;width:1920px;height:1080px;overflow:hidden;background:#FFFCF7
 .arc .seg.done .lbl{color:#8b8b93}
 
 /* app: the visual is the hero; left column explains it */
-.lc{position:absolute;left:96px;top:170px;width:540px;display:flex;flex-direction:column;gap:26px}
-.spk{background:rgba(255,255,255,.94);border:1px solid var(--line);border-radius:26px;padding:22px 26px;display:flex;flex-direction:column;gap:12px;box-shadow:0 22px 50px -38px rgba(34,67,115,.34)}
+.lc{position:absolute;left:96px;top:170px;width:540px;display:flex;flex-direction:column;gap:20px}
+.spk{position:relative;background:rgba(255,255,255,.96);border:1px solid var(--line);border-radius:26px;padding:24px 26px;display:flex;flex-direction:column;gap:12px;box-shadow:0 24px 56px -36px rgba(34,67,115,.42)}
+.spk::before{content:'';position:absolute;left:0;top:24px;bottom:24px;width:5px;border-radius:0 5px 5px 0;background:var(--grad)}
 .spk .hd{display:flex;align-items:center;gap:14px;font-weight:700;font-size:19px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2)}
 .spk .av{width:48px;height:48px;border-width:2px}
 .spk .mer{width:48px;height:48px;border-radius:50%;background:var(--grad);display:grid;place-items:center;flex:none}
 .spk .mer svg{width:22px;height:22px}
-.spk .tx{font-weight:700;font-size:34px;line-height:1.2;letter-spacing:-0.015em;min-height:82px}
+.spk .tx{font-weight:800;font-size:36px;line-height:1.16;letter-spacing:-0.025em;min-height:82px}
 .caret{display:inline-block;width:3px;height:34px;background:var(--coral);vertical-align:-6px;margin-left:3px}
 .eyebrow{font-weight:700;font-size:18px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2)}
-.how{display:flex;flex-direction:column;gap:14px}
-.how ol{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:14px}
-.how li{display:flex;gap:16px;align-items:baseline;font-weight:600;font-size:28px;line-height:1.3}
-.how li i{font-style:normal;font-family:Mono;font-size:20px;color:#0b1020;background:var(--grad);border-radius:999px;min-width:34px;height:34px;display:grid;place-items:center;flex:none;transform:translateY(4px)}
-.why{border-radius:22px;padding:22px 24px;background:rgba(255,201,74,.10);border:1px solid rgba(255,201,74,.35);display:flex;flex-direction:column;gap:10px}
+.how{display:flex;flex-direction:column;gap:10px;opacity:.76}
+.how .eyebrow{font-size:15px;letter-spacing:.12em}
+.how ol{position:relative;height:48px;margin:0;padding:0;list-style:none}
+.how li{position:absolute;inset:0;display:flex;gap:12px;align-items:center;font-weight:500;font-size:21px;line-height:1.25;color:var(--ink-2);opacity:0}
+.how li i{font-style:normal;font-family:Mono;font-size:14px;color:#243049;background:#EDF1F7;border:1px solid #DDE4ED;border-radius:999px;min-width:27px;height:27px;display:grid;place-items:center;flex:none}
+.why{border-radius:22px;padding:24px 26px;background:rgba(255,201,74,.13);border:1px solid rgba(255,201,74,.42);display:flex;flex-direction:column;gap:10px;box-shadow:0 18px 42px -38px rgba(246,198,91,.8)}
 .why .eyebrow{color:var(--sun)}
-.why p{margin:0;font-weight:700;font-size:30px;line-height:1.28}
+.why p{margin:0;font-weight:800;font-size:31px;line-height:1.22;letter-spacing:-.018em}
 .reply{align-self:flex-start;display:flex;gap:14px;align-items:center;background:#fff;color:#1d1d22;border-radius:24px;padding:10px 22px 10px 10px;font-size:28px;font-weight:600}
 .reply .av{width:46px;height:46px;border-width:2px}
 .reply b{color:var(--coral);font-weight:800}
@@ -165,6 +167,9 @@ const lines=arr=>arr.map(l=>typeof l==='string'?`<span class="m"><span class="w"
 function revealLines(el,lb,at){const ws=$$('.w',el);ws.forEach((w,i)=>{const e=glide((lb-at-i*0.26)/1.3);w.style.transform=`translateY(${(1-e)*105}%)`;});return at+ws.length*0.26;}
 function rise(el,lb,at,dy=20){if(!el)return 0;const e=glide((lb-at)/1.3);el.style.transform=`translateY(${(1-e)*dy}px)`;el.style.opacity=clamp(e*1.5);return e;}
 function popIn(el,lb,at){const e=pop((lb-at)/1.2);el.style.opacity=clamp((lb-at)/0.4);el.style.transform=`translateY(${(1-e)*30}px) scale(${0.94+0.06*e})`;}
+// Reasoning is a quiet trace, not a second headline. One short step occupies
+// the slot at a time; the next replaces it after roughly 1.4 seconds.
+function cycleTrace(items,lb,at,step=3.1){items.forEach((li,i)=>{const start=at+i*step,next=at+(i+1)*step;const enter=glide((lb-start)/.7),leave=i===items.length-1?1:1-glide((lb-(next-.45))/.45);li.style.opacity=clamp(enter*leave);li.style.transform=`translateY(${(1-enter)*8-(1-leave)*5}px)`;});}
 const typed=(el,text,lb,t0,t1)=>{const p=clamp((lb-t0)/(t1-t0));el.textContent=text.slice(0,Math.round(text.length*p));return p;};
 
 // illustration.md: Maya, Head of Sales (generated with gpt-image-1, see people/)
@@ -182,32 +187,32 @@ function animateSig(el,lb){$$('.sig path',el).forEach((p,i)=>{p.style.strokeDash
 const SC=[
  {t:'gc',b0:0,b1:12,kicker:'meridian noticed',title:'−$1.92M',sub:'November sales fell from October. Signal identified before the review began.',foot:'No prompt required · Evidence ready'},
  {t:'story',b0:12,b1:20,tr:'wipe',expr:'ask',kick:'campaign review',q:['Did Halloween','finish differently','from plan?'],bub:['Meridian','I started with what actually changed.'],bubAt:5.7},
- {t:'app',b0:20,b1:40,tr:'depth',arc:1,who:'meridian',say:'I found the decline and opened three paths to investigate.',type:[0.3,2.8],
+ {t:'app',b0:20,b1:40,tr:'depth',arc:1,who:'meridian',say:'November fell $1.92M. Three paths show where.',type:[0.3,2.8],
    prev:C('home'),load:loads('size'),L:2.8,done:C('size_done'),
-   how:['Detected the November decline','Compared November with October','Sized the gap before interpreting it'],
-   why:'The review starts with a verified signal, not a blank dashboard.',
+   how:['Detected the November decline','Compared with October','Sized the gap'],
+   why:'Start with a verified signal—not a blank dashboard.',
    reply:{at:13.2,text:'Start with regions. Which market explains most of the drop?'},
    cam:[[0,800,450,1],[5.2,800,450,1],[6.8,720,560,1.12]],
    co:[{k:'ptr',at:7.4,pt:[870,590],lab:[1010,510],text:'Down <em>$1.92M</em> vs October'},
        {k:'ptr',at:9.6,pt:[900,766],lab:[1010,690],text:'Three ways to investigate',tap:15}]},
- {t:'app',b0:40,b1:56,tr:'wipe',arc:2,who:'meridian',say:'You chose regions. Western Europe accounts for the largest fall.',type:[0.2,2.9],
+ {t:'app',b0:40,b1:56,tr:'wipe',arc:2,who:'meridian',say:'Western Europe is the largest regional fall.',type:[0.2,2.9],
    prev:C('size_done'),load:loads('locate'),L:0.8,done:C('locate_done'),
-   how:['Split the change by region','Ranked each region by its share of the drop'],
-   why:'One follow-up takes the team from “what changed?” to “where?”.',
+   how:['Split the change by region','Ranked each share of the drop'],
+   why:'Move from what changed to where—in one follow-up.',
    cam:[[0,800,450,1],[3.2,800,450,1],[4.8,700,560,1.12]],
    co:[{k:'pull',at:6.4,box:[131,738,1117,42],lift:[0,-150,1.32],cap:'Biggest regional fall · Western Europe',em:'$4,930,542 · down $328,613'}]},
- {t:'app',b0:56,b1:72,tr:'wipe',arc:3,who:'maya',say:'Which category moved most overall?',type:[0.3,2.5],
+ {t:'app',b0:56,b1:72,tr:'wipe',arc:3,who:'meridian',say:'Fragrance is the largest category fall overall.',type:[0.3,2.5],
    prev:C('locate_done'),load:loads('explain'),L:3.2,done:C('explain_done'),
-   how:['Kept the same two months','Broke the change down by category'],
-   why:'Follow-ups keep the context. Nobody rebuilds the report.',
+   how:['Kept the same two months','Split the change by category'],
+   why:'Ask again without rebuilding the analysis.',
    cam:[[0,800,450,1],[5.6,800,450,1],[7,700,560,1.12]],
    co:[{k:'pull',at:8.6,box:[131,738,1117,42],lift:[0,-150,1.32],cap:'Biggest category fall · Fragrance',em:'$1,199,033 · down $111,173'}]},
  {t:'calc',b0:72,b1:86,tr:'wipe',arc:4},
  {t:'story',b0:86,b1:96,tr:'wipe',expr:'pleased',kick:'choose the action',q:['We saw this before.','Pull in that case—and','watch Western Europe.'],bub:['Meridian','I’ll keep the evidence separate and start the daily watch.'],bubAt:6.2},
  {t:'app',b0:96,b1:112,tr:'depth',arc:5,who:'meridian',say:'The prior case is open. Western Europe is now on a daily watch.',type:[0.3,3.5],
    prev:C('home'),load:null,done:C('act_proactive_full'),H:1350,D:3.4,
-   how:['Joins Zoom with the current evidence ready','Revisits the earlier case separately','Continues in Slack and on a daily watch'],
-   why:'Your analyst joins the call with context—and stays on the problem after it ends.',
+   how:['Joined the call with evidence','Reopened the prior case','Started a daily watch'],
+   why:'Context stays with the team after the call.',
    cam:[[0,800,450,1],[16,800,450,1]],
    co:[{k:'ptr',at:5.8,until:8.4,pt:[1240,603],lab:[1090,535],text:'Checks every morning'},
        {k:'ptr',at:11.2,pt:[1175,610],lab:[1010,540],text:'Watches for sustained declines'}]},
@@ -235,8 +240,8 @@ function build(s){
     const head=s.who==='maya'?`${mayaAv()}<span>${MAYA.name} · ${MAYA.title}</span>`:`${MER}<span>Meridian</span>`;
     el.insertAdjacentHTML('beforeend',`
       <div class="lc"><div class="spk"><div class="hd">${head}</div><div class="tx"><span class="say"></span><span class="caret"></span></div></div>
-        <div class="how"><div class="eyebrow">How Meridian got there</div><ol>${s.how.map((h,i)=>`<li><i>${i+1}</i><span>${h}</span></li>`).join('')}</ol></div>
         <div class="why"><div class="eyebrow">Why it matters</div><p>${s.why}</p></div>
+        <div class="how"><div class="eyebrow">How Meridian got there</div><ol>${s.how.map((h,i)=>`<li><i>${i+1}</i><span>${h}</span></li>`).join('')}</ol></div>
         ${s.reply?`<div class="reply">${mayaAv()}<span><b>${MAYA.name}</b> ${s.reply.text}</span></div>`:''}</div>
       <div class="win"><div class="chrome"><i></i><i></i><i></i><div class="url">decisionos.me/analytics</div></div>
         <div class="vp"><div class="world" style="height:${H}px"><img class="A"><img class="B">
@@ -265,13 +270,13 @@ function build(s){
     el.insertAdjacentHTML('beforeend',sigMarkup());
     const rows=[['Total','−0.5%',0.5,'soft'],['Western Europe','−3.1%',3.1,'hot'],['Fragrance','−5.4%',5.4,'hot']];
     el.insertAdjacentHTML('beforeend',`<div class="lc calc-left">
-        <div class="spk"><div class="hd">${MER}<span>Meridian</span></div><div class="tx">I checked the calendar effect too.</div></div>
+        <div class="spk"><div class="hd">${MER}<span>Meridian</span></div><div class="tx">Daily rates reveal the real declines.</div></div>
+        <div class="why"><div class="eyebrow">Why it matters</div><p>Act on the real problem—not the calendar.</p></div>
         <div class="how"><div class="eyebrow">How Meridian got there</div><ol>
-          <li><i>1</i><span>Kept October and November</span></li>
-          <li><i>2</i><span>Divided revenue by days in each month</span></li>
-          <li><i>3</i><span>Compared the daily rate</span></li>
+          <li><i>1</i><span>Kept the same months</span></li>
+          <li><i>2</i><span>Normalized revenue by days</span></li>
+          <li><i>3</i><span>Compared daily rates</span></li>
         </ol></div>
-        <div class="why"><div class="eyebrow">Why it matters</div><p>Act on the real problem, not the calendar.</p></div>
       </div>
       <div class="calc-vis"><div class="calc-k">like for like</div><div class="hl">${lines(['Change in sales per day'])}</div>
         <div class="bars">${rows.map(([n,v,p,c])=>`<div class="row"><span>${n}</span><div class="track"><div class="fill ${c}" data-w="${p/6*100}"></div></div><b class="${c}">${v}</b></div>`).join('')}</div>
@@ -316,9 +321,9 @@ const R={
    const p=typed($('.say',el),s.say,lb,s.type[0],s.type[1]);
    const D=s.D!=null?s.D:L+2;
    $('.caret',el).style.opacity=lb>=D?0:((p<1||Math.floor(lb*2)%2===0)?1:0);
-   rise($('.how .eyebrow',el),lb,D+0.2,12);
-   $$('.how li',el).forEach((li,i)=>rise(li,lb,D+0.6+i*0.6,18));
-   rise($('.why',el),lb,D+0.9+s.how.length*0.6,20);
+   rise($('.why',el),lb,D+0.25,18);
+   rise($('.how .eyebrow',el),lb,D+1.05,8);
+   cycleTrace($$('.how li',el),lb,D+1.45);
    if(s.reply) popIn($('.reply',el),lb,s.reply.at);
    let dimOn=0;
    for(const c of s.co){
@@ -338,9 +343,9 @@ const R={
    const on=$('.arc .seg.on .bar i',el); if(on) on.style.width=clamp((lb+0.4)/1.6)*100+'%';
    $$('.arc .seg.done .bar i',el).forEach(i=>i.style.width='100%');
    rise($('.spk',el),lb,0,20);
-   rise($('.how .eyebrow',el),lb,0.5,12);
-   $$('.how li',el).forEach((li,i)=>rise(li,lb,0.8+i*0.55,18));
-   rise($('.why',el),lb,2.4,18);
+   rise($('.why',el),lb,0.5,18);
+   rise($('.how .eyebrow',el),lb,1.15,8);
+   cycleTrace($$('.how li',el),lb,1.55);
    rise($('.calc-k',el),lb,0.5,16); const e=revealLines($('.hl',el),lb,0.8);
    $$('.row',el).forEach((r,i)=>{ rise(r,lb,e+0.4+i*0.6,20); const f=$('.fill',r); f.style.width=f.dataset.w+'%'; f.style.transform=`scaleX(${glide((lb-e-0.7-i*0.6)/1.6)})`; });
    rise($('.axis',el),lb,e+2.4,10);

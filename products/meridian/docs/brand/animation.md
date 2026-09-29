@@ -8,6 +8,7 @@ The core set has four documents, and every video in this folder follows all four
 | **animation.md** (this file) | How a video tells its story, and how things move |
 | [illustration.md](illustration.md) | How people are drawn: AI-generated editorial illustrations (gpt-image-1), stored in [people/](people/) |
 | [conversational-guidelines.md](conversational-guidelines.md) | How narration, emotion, voice models, and human-in-the-loop choices work |
+| [video-template.md](video-template.md) | The reusable prompt that carries this hierarchy and timing into new videos |
 
 You can watch the motion options that were considered, looping, in [motion-options.html](motion-options.html).
 
@@ -41,12 +42,21 @@ Every video is a short, real-feeling business conversation, not a feature tour. 
 | Part | Where | What it holds |
 |---|---|---|
 | **The visual** | The app window, which is the biggest thing on screen | The real chart or answer. The camera settles on it, and the callout points into it |
-| **How it got there** | Left column, eyebrow "How Meridian got there" | 2–3 numbered steps, in plain words: what the product compared, split or checked |
+| **How it got there** | Left column, a quiet trace slot under the insight | 2–3 short steps, shown one at a time: what the product compared, split or checked |
 | **Why it matters** | Left column, a sun-tinted card | One buyer-facing line: the benefit to the person watching, such as speed, context or confidence |
 
 - The numbers live in the visual. The left column holds **at most one number**, and never a table of figures.
 - "Why it matters" talks about the buyer's day ("An answer in the meeting, not a ticket for next week"), never about features ("Uses DuckDB").
 - The stat takeover (C7) is optional. Skip it when the story is about reasoning rather than one figure.
+
+### Insight first; reasoning second
+
+- The answer/insight is the headline. Give it the largest type, strongest contrast and most stable position after the product visual.
+- "Why it matters" is the second read. Keep it short, buyer-facing and visually stronger than the reasoning trace.
+- "How Meridian got there" is supporting evidence, not a competing content block: smaller type, quieter color and no large stacked list.
+- Use **one fixed trace slot**. Show one short reasoning step at a time; the next step replaces the previous one in the same place.
+- Keep step arrivals **1–2 seconds apart** (about 2.2–4.4 beats at 132 BPM; default 3.1 beats / 1.4 seconds). Fade the outgoing step, leave a brief clean handoff, then reveal the next. Never let two full steps remain stacked.
+- A trace step should be 2–6 words where possible ("Compared with October", "Split by region", "Normalized by days"). If it needs a sentence, it belongs in the insight or narration instead.
 
 **Rules**
 - Each screen answers the line just before it. If a screen doesn't answer a line of dialogue, cut it.
@@ -107,6 +117,7 @@ Never use more than two chapter breaks in a 90-second video. Everything else is 
 - Headlines and dialogue reveal **line by line through a mask**: each line slides up from `translateY 105%` to 0, on Glide, with line-stagger between lines. There is no blur on text in the house style, so it stays crisp.
 - Chat bubbles (the asker's lines) pop in as a whole bubble (scale 0.94 → 1 on Pop, 30 px rise), then the text inside types out at about 30 characters per second.
 - Supporting lines (eyebrows, table rows, notes) rise 20 px and fade in, with row-stagger.
+- Reasoning traces replace one another in a single reserved slot. They do not accumulate vertically. Use a restrained 0.3–0.5 second crossfade/rise and 1–2 seconds between step arrivals.
 - Typed questions to the analyst type out with a coral caret, which stops blinking once the answer is on screen.
 - Text never scales, spins or bounces.
 
