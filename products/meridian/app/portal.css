@@ -18,4 +18,5 @@
 .mh-hero{align-items:start;padding-top:48px}.mh-copy{padding-top:18px}
 @media(max-width:900px){.mh-hero{padding-top:44px}.mh-copy{padding-top:0}}
 .mh-video-link{display:flex;align-items:center;gap:8px;border:1px solid rgba(21,35,61,.14);background:rgba(255,255,255,.7);color:#4d5d75}
+.mh-video-backdrop{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:24px;background:rgba(10,18,32,.7);backdrop-filter:blur(12px)}.mh-video-player{width:min(1080px,100%);overflow:hidden;border:1px solid rgba(255,255,255,.28);border-radius:24px;background:#08101d;box-shadow:0 36px 120px rgba(4,10,22,.55)}.mh-video-player>header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;background:#fff;color:#263650}.mh-video-player>header>div{display:flex;align-items:center;gap:9px}.mh-video-player>header button{display:grid;place-items:center;width:36px;height:36px;border-radius:50%;color:#66748a;cursor:pointer}.mh-video-player video{display:block;width:100%;max-height:calc(100dvh - 130px);background:#03070d}
 @media(max-width:560px){.mh-video-link{font-size:0!important;padding:10px!important}.mh-video-link svg{width:18px;height:18px}}
