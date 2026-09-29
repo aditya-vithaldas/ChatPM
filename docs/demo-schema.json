@@ -1,6 +1,6 @@
 {
   "name": "Demo e-commerce",
-  "version": "2025-v3-named-10m",
+  "version": "2025-v4-context-10m",
   "scale": 1,
   "storage": {
     "sortedBy": {
@@ -27,7 +27,7 @@
   "synthetic": true,
   "currency": "USD",
   "totalRows": 10000000,
-  "databaseBytes": 92286976,
+  "databaseBytes": 97267712,
   "tables": [
     {
       "name": "regions",
@@ -281,7 +281,7 @@
     },
     {
       "name": "sessions",
-      "rows": 3949585,
+      "rows": 3943737,
       "columns": [
         {
           "name": "session_id",
@@ -310,6 +310,94 @@
         {
           "name": "order_id",
           "type": "INTEGER"
+        }
+      ]
+    },
+    {
+      "name": "business_events",
+      "rows": 8,
+      "columns": [
+        {
+          "name": "event_id",
+          "type": "INTEGER"
+        },
+        {
+          "name": "event_name",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "event_type",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "start_date",
+          "type": "DATE"
+        },
+        {
+          "name": "end_date",
+          "type": "DATE"
+        },
+        {
+          "name": "market",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "scope",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "expected_effect_pct",
+          "type": "DECIMAL(3,1)"
+        },
+        {
+          "name": "summary",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "source_type",
+          "type": "VARCHAR"
+        }
+      ]
+    },
+    {
+      "name": "market_snapshots",
+      "rows": 5840,
+      "columns": [
+        {
+          "name": "snapshot_date",
+          "type": "DATE"
+        },
+        {
+          "name": "market",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "competitor",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "category_group",
+          "type": "VARCHAR"
+        },
+        {
+          "name": "homepage_promotion",
+          "type": "BOOLEAN"
+        },
+        {
+          "name": "sampled_price_index",
+          "type": "DOUBLE"
+        },
+        {
+          "name": "promotion_depth_pct",
+          "type": "DECIMAL(3,1)"
+        },
+        {
+          "name": "products_sampled",
+          "type": "INTEGER"
+        },
+        {
+          "name": "source_type",
+          "type": "VARCHAR"
         }
       ]
     }
@@ -507,7 +595,7 @@
     },
     {
       "category_id": 39,
-      "name": "Children\u2019s Books",
+      "name": "Children’s Books",
       "department": "Books"
     },
     {
@@ -518,8 +606,10 @@
   ],
   "rules": [
     "Category, product and customer names are fictional human-readable demo labels. Always display their name columns, not numeric IDs or invented aliases. Names are not guaranteed unique: group by the entity ID and name for rankings, and use IDs for joins. Category names and departments are listed in categoryCatalog.",
-    "All records are synthetic, reproducible demo data for calendar year 2025; all monetary amounts are USD.",
-    "Table grains: orders/payments one row per order; order_items exactly three rows per order; shipments one row for each of 850000 orders; sessions one row per session.",
+    "All records, business events, and market snapshots are synthetic, reproducible demo data for calendar year 2025; all monetary amounts are USD. Never present synthetic competitor observations as live facts.",
+    "Table grains: orders/payments one row per order; order_items exactly three rows per order; shipments one row for each of 850000 orders; sessions one row per session; business_events one row per deliberately embedded scenario; market_snapshots one row per date, competitor, and category group.",
+    "Business events provide known scenario context, not proof that an external event caused a measured change. Use cautious language such as coincides with or overlaps.",
+    "Market snapshots are synthetic benchmark samples inspired by public European commerce category structures. sampled_price_index is currency-free, promotion_depth_pct is a modeled observation, and products_sampled is the sample size.",
     "Sales/revenue means SUM(orders.net_amount) WHERE orders.status='completed'. Excludes tax/shipping and cancelled/returned orders. Gross booked sales includes all statuses only if explicitly requested.",
     "Orders count means COUNT(*) FROM orders, qualified by status when requested. AOV = completed revenue / completed order count.",
     "Customers.customer_id links orders.customer_id and sessions.customer_id. customers.region_id links regions.region_id. order_items.order_id, payments.order_id and shipments.order_id link orders.order_id. products.product_id links order_items.product_id; products.category_id links categories.category_id.",
@@ -530,5 +620,5 @@
     "Date filters on orders use order_date; sessions use session_date. Latest demo date is 2025-12-31. Relative last-7-days means 2025-12-25 through 2025-12-31 inclusive.",
     "Read-only SELECT/CTE queries only. Return columns label (text), value (numeric), optional secondary (numeric). Charts <= 1000 groups. No external files, extensions, system tables, or network operations."
   ],
-  "generatedSeconds": 7
+  "generatedSeconds": 16
 }

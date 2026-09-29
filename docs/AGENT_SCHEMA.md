@@ -12,6 +12,8 @@ Read `demo-schema.json` (or the backend `/schema`) before composing SQL. It give
 
 Never sum order totals after joining order items: that triples revenue. Category/product revenue uses line-item `net_amount`, joined to completed orders. Payment amount includes tax and shipping and is not sales revenue. Relative dates anchor on December 31, 2025. Do not fabricate missing fields, query system tables, read files, load extensions, or alter the database.
 
+`business_events` contains the eight deliberately embedded commerce scenarios and their date windows. Use it as context for measured changes, not as causal proof. `market_snapshots` contains daily synthetic benchmark samples for Amazon.de, Zalando, OTTO, and ABOUT YOU across four category groups. These observations are modeled demo data, never live competitor facts; use language such as “coincides with” or “overlaps.”
+
 ## Example
 
 ```sql

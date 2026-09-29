@@ -1,2 +1,2 @@
-import Analytics from './experience';
-export default function Page(){return <Analytics/>;}
+import MeridianPortal from './portal';
+export default function Page(){return <MeridianPortal/>;}
