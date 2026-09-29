@@ -31,6 +31,11 @@
 
 !products/
 !products/**
+products/meridian/node_modules/
+products/meridian/dist/
+products/meridian/dist-portfolio/
+products/meridian/.vinext/
+products/meridian/.wrangler/
 !scripts/analytics-api.mjs
 
 !scripts/generate-analytics.mjs
