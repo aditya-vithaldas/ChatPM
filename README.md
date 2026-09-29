@@ -9,7 +9,7 @@ Conversational analytics with Gemini 3.8 Live, an on-page `show_analytics` tool,
 - Time-series charts by default; a specific date produces a large numeric widget unless a breakdown is requested.
 - Multiple CSV, XLSX, XLS files or a folder. **10 MB maximum total**, checked before reading. Over-limit batches are rejected, never truncated or compressed.
 - Uploaded rows stay in browser memory for the session. Gemini receives schemas and query context; a constrained query plan is evaluated against all local rows. Arbitrary joins and calculated-column expressions are not currently supported for uploads.
-- Demo mode uses a persistent synthetic 2025 database, not newly invented model answers. 10 tables, 10,000,000 rows, 150,000 customers. The UI reports the actual hosted database size.
+- Demo mode uses a persistent synthetic rolling-year database through 29 September 2026, not newly invented model answers. It contains 10,000,000 rows and 150,000 customers, with seasonal patterns plus small weekly business events. The UI reports the actual hosted database size.
 - Charts: line, area, bar, horizontal/stacked bar, pie, donut, scatter, funnel, heatmap, histogram, radar. SQL result shape: `label`, `value`, optional `secondary`.
 
 ## Local development

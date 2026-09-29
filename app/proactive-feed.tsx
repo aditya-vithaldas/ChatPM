@@ -1,5 +1,5 @@
 'use client';
-import {AlertTriangle,ArrowUpRight,CalendarDays,Sparkles,TrendingUp} from 'lucide-react';
+import {AlertTriangle,ArrowUpRight,CalendarDays,EyeOff,Pin,TrendingUp} from 'lucide-react';
 import {useState} from 'react';
 
 type Unit={
@@ -17,6 +17,14 @@ const units:Unit[]=[
 
 export default function ProactiveFeed({onInvestigate}:{onInvestigate:(question:string)=>void}){
  const [open,setOpen]=useState<string|null>(null);
+ const [pinned,setPinned]=useState<string[]>([]);
+ const [notImportant,setNotImportant]=useState<string[]>([]);
+ const orderedUnits=[...units].sort((a,b)=>{
+  const group=(unit:Unit)=>pinned.includes(unit.label)?0:notImportant.includes(unit.label)?2:1;
+  return group(a)-group(b)||units.indexOf(a)-units.indexOf(b);
+ });
+ const togglePinned=(label:string)=>{setPinned(current=>current.includes(label)?current.filter(item=>item!==label):[...current,label]);setNotImportant(current=>current.filter(item=>item!==label));};
+ const toggleImportance=(label:string)=>{setNotImportant(current=>current.includes(label)?current.filter(item=>item!==label):[...current,label]);setPinned(current=>current.filter(item=>item!==label));};
  return <div className="pr-app">
   <div className="pr-heading"><div><p className="an-kicker">WORKSPACE INTELLIGENCE</p><h1>What changed while you were away.</h1><p>Meridian watches the priorities it learned from your data. Questions and investigations continuously reshape this feed.</p></div><button><CalendarDays size={15}/> Daily view</button></div>
   <section className="pr-summary" aria-label="Workspace monitoring summary">
@@ -24,15 +32,15 @@ export default function ProactiveFeed({onInvestigate}:{onInvestigate:(question:s
    <div className="is-amber"><small>INSTRUMENTATION GAPS</small><strong>3</strong><span>Funnel, seller, and campaign detail</span></div>
    <div className="is-blue"><small>MODEL UPDATED</small><strong>Today</strong><span>From the latest source profile</span></div>
   </section>
-  <div className="pr-layout"><section className="pr-feed"><div className="pr-section-title"><h2>Initial proactive units</h2><span>Ranked by workspace priority</span></div>
-   <div className="pr-unit-grid">{units.map(unit=><article className={`${unit.state==='ready'?'is-signal':'is-gap'} is-${unit.tone}`} key={unit.label}>
-    <div className="pr-unit-head"><div className="pr-unit-icon">{unit.state==='gap'?<AlertTriangle size={18}/>:<TrendingUp size={18}/>}</div><div><small>{unit.label}</small><h3>{unit.title}</h3><p>{unit.meta}</p></div><button aria-label={`Open ${unit.label}`} onClick={()=>setOpen(value=>value===unit.label?null:unit.label)}><ArrowUpRight size={17}/></button></div>
+  <div className="pr-layout"><section className="pr-feed"><div className="pr-section-title"><h2>Priority feed</h2><span>Pinned first · then workspace priority</span></div>
+   <div className="pr-unit-grid">{orderedUnits.map((unit,index)=><article className={`${unit.state==='ready'?'is-signal':'is-gap'} is-${unit.tone}${pinned.includes(unit.label)?' is-pinned':''}${notImportant.includes(unit.label)?' is-not-important':''}`} key={unit.label}>
+    <div className="pr-unit-head"><span className="pr-priority-index">{String(index+1).padStart(2,'0')}</span><div className="pr-unit-icon">{unit.state==='gap'?<AlertTriangle size={18}/>:<TrendingUp size={18}/>}</div><div><small>{unit.label}</small><h3>{unit.title}</h3><p>{unit.meta}</p></div><div className="pr-unit-actions"><button className="pr-pin" aria-pressed={pinned.includes(unit.label)} onClick={()=>togglePinned(unit.label)}><Pin size={14}/>{pinned.includes(unit.label)?'Pinned':'Pin'}</button><button className="pr-ignore" aria-pressed={notImportant.includes(unit.label)} onClick={()=>toggleImportance(unit.label)}><EyeOff size={14}/>{notImportant.includes(unit.label)?'Restore':'Not important'}</button></div></div>
     {unit.highlight&&<span className="pr-highlight">{unit.highlight}</span>}
     {unit.state==='ready'?<><div className="pr-metric"><strong>{unit.metric}</strong><span>{unit.change}</span></div><MiniChart unit={unit}/><p className="pr-explanation">{unit.explanation}</p><small className="pr-demo-label">Latest commerce source profile</small></>:<div className="pr-gap-visual"><div><span/><span/><span/></div><p>{unit.explanation}</p></div>}
     <button className="pr-deep-dive" aria-expanded={open===unit.label} onClick={()=>setOpen(value=>value===unit.label?null:unit.label)}>Deep dive into drivers <ArrowUpRight size={14}/></button>
     {open===unit.label&&<div className="pr-drivers"><strong>What is driving this</strong><ul>{unit.drivers.map(driver=><li key={driver}>{driver}</li>)}</ul><button onClick={()=>onInvestigate(unit.question)}>Ask Meridian about this <ArrowUpRight size={14}/></button></div>}
    </article>)}</div>
-  </section><aside className="pr-opinion"><p className="an-kicker">CURRENT OPINION</p><h2>What Meridian cares about</h2><ul><li><span>01</span><div><strong>Conversion</strong><small>Highest workspace priority</small></div></li><li><span>02</span><div><strong>Purchase frequency</strong><small>Customer cadence and loyalty</small></div></li><li><span>03</span><div><strong>Seller performance</strong><small>Blocked until seller IDs are available</small></div></li></ul><p className="pr-learning"><Sparkles size={15}/> This opinion evolves automatically from questions, findings, and investigations.</p></aside></div>
+  </section></div>
  </div>;
 }
 
