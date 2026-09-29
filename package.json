@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "node scripts/build.mjs && node scripts/build-seo.mjs",
+    "build": "node scripts/build-meridian.mjs && node scripts/build.mjs && node scripts/build-seo.mjs",
+    "build:meridian": "node scripts/build-meridian.mjs",
     "dev": "node scripts/serve.mjs"
   }
 }

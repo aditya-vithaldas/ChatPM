@@ -10,6 +10,6 @@ The presentation is available at `/toptal-application.html`; `/toptal-applicatio
 
 Published pages are registered in `scripts/seo-pages.json`. The build generates page metadata, structured data, a sitemap, and crawler guidance. Contact submissions use the existing configured form provider.
 
-## Analytics
+## Meridian
 
-The standalone Meridian demo is served at `/analytics` and its case study at `/projects/analytics.html`. The static bundle under `analytics/` is built from the sibling `meridian-analytics` project using `npx vite build --config vite.portfolio.config.ts`. Copy its `dist-portfolio/` output here before rebuilding the portfolio. Live sessions use the same-origin `/analytics/api/gemini` endpoint; `GEMINI_API_KEY` is a runtime secret and is never bundled. The browser demo does not join meeting calls; the article describes that as a product direction.
+Meridian is maintained in this repository under `products/meridian` and served at `/analytics`; its case study remains at `/projects/analytics.html`. `npm run build` now installs the pinned Meridian dependencies, builds the application, and places the generated bundle into `/analytics` before assembling the Decision OS site. Do not edit or commit the generated `/analytics` directory. The DuckDB query service and reproducible demo-data generator live under `products/meridian/server` and deploy separately from the website.

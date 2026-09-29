@@ -3,6 +3,7 @@
 !package.json
 !scripts/
 !scripts/build.mjs
+!scripts/build-meridian.mjs
 !scripts/serve.mjs
 !index.html
 !design-system.html
@@ -28,8 +29,8 @@
 !toptal-application.css
 !toptal-application.js
 
-!analytics/
-!analytics/**
+!products/
+!products/**
 !scripts/analytics-api.mjs
 
 !scripts/generate-analytics.mjs
