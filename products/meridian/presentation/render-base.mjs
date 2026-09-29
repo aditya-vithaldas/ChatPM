@@ -1,4 +1,4 @@
-import { chromium } from '/Users/AdityaWork/.npm/_npx/d71ea5ed3eabc9b3/node_modules/playwright/index.mjs';
+import { chromium } from 'playwright';
 import { spawn } from 'node:child_process';
 import fs from 'node:fs/promises';
 

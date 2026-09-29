@@ -1,4 +1,4 @@
-import { chromium } from '/Users/AdityaWork/.npm/_npx/d71ea5ed3eabc9b3/node_modules/playwright/index.mjs';
+import { chromium } from 'playwright';
 import { spawn } from 'node:child_process';
 import fs from 'node:fs/promises';
 
@@ -33,7 +33,7 @@ const run = (command, args) => new Promise((resolve, reject) => {
 });
 
 if (mode === 'contact') {
-  const beats = [10, 18, 36, 52, 68, 83, 93, 116, 128];
+  const beats = [10, 18, 36, 52, 68, 83, 93, 103, 109, 116, 124, 128];
   for (let i = 0; i < beats.length; i++) {
     await draw(beats[i] * BP);
     await page.screenshot({
@@ -44,7 +44,7 @@ if (mode === 'contact') {
   }
   await run('ffmpeg', [
     '-y', '-v', 'error', '-pattern_type', 'glob', '-i', new URL('./frames/contact_*.jpg', ROOT).pathname,
-    '-vf', 'scale=640:360,tile=3x3', '-frames:v', '1', new URL('./out/commerce-intelligence-contact-sheet.jpg', ROOT).pathname,
+    '-vf', 'scale=480:270,tile=4x3', '-frames:v', '1', new URL('./out/commerce-intelligence-contact-sheet.jpg', ROOT).pathname,
   ]);
   console.log(new URL('./out/commerce-intelligence-contact-sheet.jpg', ROOT).pathname);
 } else if (mode === 'video') {

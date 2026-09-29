@@ -52,3 +52,8 @@ next-env.d.ts
 /data/
 *.duckdb
 *.duckdb.wal
+
+# Deterministic presentation render intermediates. The deployable movie lives
+# in public/ and is updated after the checked render passes review.
+/presentation/frames/
+/presentation/out/
