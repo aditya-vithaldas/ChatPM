@@ -10,3 +10,5 @@ export function validateGuidance(plan){
  if(plan.confidence!==undefined&&!['high','low'].includes(plan.confidence))throw Error('Invalid confidence');
  if(plan.investigation){const options=plan.investigation.options;if(!Array.isArray(options)||options.length!==3||options.some(o=>!o||typeof o.label!=='string'||!o.label.trim()||o.label.length>80||typeof o.question!=='string'||!o.question.trim()||o.question.length>500))throw Error('Invalid investigation plan');}
 }
+
+export {instructionFor};

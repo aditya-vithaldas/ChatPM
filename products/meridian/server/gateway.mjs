@@ -1,7 +1,7 @@
 
 import {compileIntent,GroundingError} from './semantic-guard.mjs';
 import {answerGuidance,resolveInvestigation} from './answer-guidance.mjs';
-import {planQuery} from './planner.mjs';
+import {planQuery} from './planner-rolling.mjs';
 const target='https://liveanalyst-duckdb-648674198172.europe-west1.run.app';
 const origins=new Set(['https://decisionos.me','https://www.decisionos.me','https://meridian-live-analytics.aditya-vithaldas.chatgpt.site','http://localhost:4173','http://localhost:3000']);
 let identity=null,identityUntil=0,metadata=null,metadataUntil=0,active=0;const perIP=new Map();let day='',daily=0;
